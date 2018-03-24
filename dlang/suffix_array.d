@@ -4,11 +4,12 @@ import std.conv;
 import std.format;
 import std.range;
 
-struct SuffixArray {
+class SuffixArray {
   string s;
   int [] O;
-  
-  void counting_sort (int m, int [] c, int [] p, int [] o) const {
+  int n;
+
+  final void counting_sort (int m, int [] c, int [] p, int [] o) const {
     auto cnt = new int[m];
     foreach (i; 0 .. p.length) {
       ++cnt[c[p[i]]];
@@ -22,8 +23,8 @@ struct SuffixArray {
   }
 
   this (string s_) {
-    s = s_;
-    int n = s.length.to!(int);
+    s = s_ ~ 0.to!(char);
+    n = s.length.to!(int);
     auto c = s.map! (to!(int)).array;
     immutable a = 1 + c.reduce! (max);
     auto p = new int[n];
@@ -56,7 +57,49 @@ struct SuffixArray {
       }
       t = c; c = T; T = t;
     }
-    O = p;
+    assert (p[0] == n - 1);
+    O = p[1 .. n];
+    --n;
+  }
+};
+
+class LCPSuffixArray : SuffixArray {
+  int [] R; //reverse permutation
+  int [] LCP;
+  final int lcp (int l, int r) {
+    return (r - l == 1) ? LCP[r] : LCP[n + 1 + ((l + r) >> 1)];
+  }
+  final int lcp_build (int l, int r) {
+    if (r - l == 1) {
+      return LCP[r];
+    }
+    immutable m = (l + r) >> 1;
+    LCP[n + 1 + m] = min (lcp_build (l, m), lcp_build (m, r));
+    return LCP[n + 1 + m];
+  }
+  this (string s) {
+    super (s);
+    LCP = new int [2 * n + 1];
+    R = new int[n];
+    foreach (i; 0 .. n) {
+      R[O[i]] = i;
+    }
+    int l = 0;
+    foreach (j; 0 .. n) {
+      l = max (0, l - 1);
+      immutable i = R[j];
+      if (i > 0) {
+        immutable k = O[i - 1];
+        while ((j + l < n) && (k + l < n) && s[j + l] == s[k + l]) {
+          ++l;
+        }
+      } else {
+        l = 0;
+      }
+      LCP[i] = l;
+    }
+    LCP[n] = 0;
+    lcp_build (-1, n);
   }
 };
 
@@ -75,7 +118,7 @@ import std.stdio;
 
 unittest {
   writeln ("Testing suffix_array.d ...");
-  check ("abacabadaba");  
+  check ("abacabadaba");
   string t = iota(0, 1000).map! (x => (uniform(0, 26) + 97).to!(char)).text;
   check (t);
 }
