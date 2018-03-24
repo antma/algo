@@ -41,7 +41,19 @@ class SegmentTree {
       v >>= 1;
     }
   }
-  final int find_kth (int k) const 
+  final int sum (int v, int l, int r, int a, int b) {
+    if (a > b) {
+      return 0;
+    }
+    if (a == l && b == r) {
+      return t[v];
+    }
+    immutable int m = (l + r) >> 1;
+    v <<= 1;
+    return sum (2, l, m, a, min (b, m)) + sum (v + 1, m + 1, r, max (a, m+1), b);
+  }
+  final int sum (int a, int b) { return sum (1, 0, n - 1, a, b); }
+  final int find_kth (int k) const
   in  {
     assert (k >= 0);
   } body {
@@ -68,4 +80,4 @@ class SegmentTree {
     t = new int[4 * n];
     build (a, 1, 0, n - 1);
   }
-};
+}
