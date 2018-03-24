@@ -15,7 +15,7 @@ class SegmentTree {
   }
   final void build (int [] a, int v, int l, int r) {
     if (l == r) {
-      t[l] = a[l];
+      t[v] = a[l];
     } else {
       immutable m = (l + r) >> 1;
       build (a, v << 1, l, m);
