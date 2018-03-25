@@ -10,7 +10,6 @@ import std.string;
 class SegmentTree(T = int) {
   private T [] t;
   private int n;
-  private T zero_value;
   final void build (T [] a, int v, int l, int r) {
     if (l == r) {
       t[v] = a[l];
@@ -35,48 +34,56 @@ class SegmentTree(T = int) {
     }
     t[v] = new_value;
     while (v > 1) {
-      t[v >> 1] = t[v] + t[v ^ 1];
+      v &= ~1;
+      t[v >> 1] = t[v] + t[v + 1];
       v >>= 1;
     }
   }
   final T reduce (int v, int l, int r, int a, int b) {
-    if (a > b) {
-      return zero_value;
-    }
     if (a == l && b == r) {
       return t[v];
     }
-    immutable int m = (l + r) >> 1;
+    immutable int m = (l + r) >> 1, x = min (b, m), y = max (a, m + 1);
     v <<= 1;
-    return reduce (v, l, m, a, min (b, m)) + reduce (v + 1, m + 1, r, max (a, m+1), b);
+    if (a <= x) {
+      if (y <= b) {
+        return reduce (v, l, m, a, x) + reduce (v + 1, m + 1, r, y, b);
+      } else {
+        return reduce (v, l, m, a, x);
+      }
+    } else {
+      assert (y <= b);
+      return reduce (v + 1, m + 1, r, y, b);
+    }
   }
   final T reduce (int a, int b) { return reduce (1, 0, n - 1, a, b); }
-  final int find_kth (T k) const
-  in  {
-    assert (k >= 0);
-  } body {
-    int l = 0, r = n - 1, v = 1;
-    while (true) {
-      if (k >= t[v]) {
-        return -1;
-      }
-      if (l == r) {
-        return l;
-      }
-      immutable m = (l + r) >> 1;
-      v <<= 1;
-      if (t[v] > k) {
-        r = m;
-      } else {
-        k -= t[v++];
-        l = m + 1;
+  static if (T.stringof == "int") {
+    final int find_kth (T k) const
+    in  {
+      assert (k >= 0);
+    } body {
+      int l = 0, r = n - 1, v = 1;
+      while (true) {
+        if (k >= t[v]) {
+          return -1;
+        }
+        if (l == r) {
+          return l;
+        }
+        immutable m = (l + r) >> 1;
+        v <<= 1;
+        if (t[v] > k) {
+          r = m;
+        } else {
+          k -= t[v++];
+          l = m + 1;
+        }
       }
     }
   }
-  this (T [] a, T zero_value_ = T.init) {
+  this (T [] a) {
     n = a.length.to!(int);
     t = new T[4 * n];
-    zero_value = zero_value_;
     build (a, 1, 0, n - 1);
   }
 }
@@ -97,7 +104,33 @@ struct LongestZeroSegment {
 }
 
 unittest {
+  /*
+  LongestZeroSegment aa = LongestZeroSegment (1, 1, 1, 1);
+  LongestZeroSegment bb = LongestZeroSegment (2, 2, 2, 2);
+  LongestZeroSegment cc = aa + bb;
+  */
   writeln ("Testing segment_tree.d ...");
   auto st = new SegmentTree!long ([1L, 2L]); 
   assert (st.reduce (0, 1) == 3L);
+  auto a = new LongestZeroSegment[5];
+  foreach (i; 0 .. a.length) {
+    a[i].l = 1;
+  }
+  auto st2 = new SegmentTree!LongestZeroSegment (a);
+  st2.update (4, LongestZeroSegment (1, 1, 1, 1));
+  assert (st2.reduce (0, a.length.to!(int) - 1).z == 1);
+  st2.update (3, LongestZeroSegment (1, 1, 1, 1));
+  assert (st2.reduce (0, a.length.to!(int) - 1).z == 2);
+  st2.update (2, LongestZeroSegment (1, 1, 1, 1));
+  foreach (i; 1 .. 5) {
+    foreach (j; 0 .. i + 1) {
+      writeln (j, ' ', i);
+      writeln (st2.reduce (j, i));
+      assert (st2.reduce (j, i).l == (i - j + 1));
+    }
+  }
+  writeln (st2.reduce (0, a.length.to!(int) - 1));
+
+
+  assert (st2.reduce (0, a.length.to!(int) - 1).z == 3);
 }
