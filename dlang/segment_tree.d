@@ -7,23 +7,21 @@ import std.range;
 import std.stdio;
 import std.string;
 
-class SegmentTree {
-  private int [] t;
+class SegmentTree(T = int) {
+  private T [] t;
   private int n;
-  final int func (int x, int y) {
-    return x + y;
-  }
-  final void build (int [] a, int v, int l, int r) {
+  private T zero_value;
+  final void build (T [] a, int v, int l, int r) {
     if (l == r) {
       t[v] = a[l];
     } else {
       immutable m = (l + r) >> 1;
       build (a, v << 1, l, m);
       build (a, (v << 1) + 1, m + 1, r);
-      t[v] = func (t[v << 1], t[(v << 1) + 1]);
+      t[v] = t[v << 1] + t[(v << 1) + 1];
     }
   }
-  final void update (int i, int new_value) {
+  final void update (int i, T new_value) {
     int l = 0, r = n - 1, v = 1;
     while (l < r) {
       immutable m = (l + r) >> 1;
@@ -37,13 +35,13 @@ class SegmentTree {
     }
     t[v] = new_value;
     while (v > 1) {
-      t[v >> 1] = func (t[v], t[v ^ 1]);
+      t[v >> 1] = t[v] + t[v ^ 1];
       v >>= 1;
     }
   }
-  final int reduce (int v, int l, int r, int a, int b) {
+  final T reduce (int v, int l, int r, int a, int b) {
     if (a > b) {
-      return 0;
+      return zero_value;
     }
     if (a == l && b == r) {
       return t[v];
@@ -52,8 +50,8 @@ class SegmentTree {
     v <<= 1;
     return reduce (v, l, m, a, min (b, m)) + reduce (v + 1, m + 1, r, max (a, m+1), b);
   }
-  final int reduce (int a, int b) { return reduce (1, 0, n - 1, a, b); }
-  final int find_kth (int k) const
+  final T reduce (int a, int b) { return reduce (1, 0, n - 1, a, b); }
+  final int find_kth (T k) const
   in  {
     assert (k >= 0);
   } body {
@@ -75,9 +73,31 @@ class SegmentTree {
       }
     }
   }
-  this (int [] a) {
+  this (T [] a, T zero_value_ = T.init) {
     n = a.length.to!(int);
-    t = new int[4 * n];
+    t = new T[4 * n];
+    zero_value = zero_value_;
     build (a, 1, 0, n - 1);
   }
+}
+
+struct LongestZeroSegment {
+  int zp; // zero prefix length
+  int zs; // zero suffix length
+  int z;
+  int l;  // segment length
+
+  LongestZeroSegment opBinary (string op) (in LongestZeroSegment rhs) const {
+    int nl = l + rhs.l;
+    int nzp = (zp < l) ? zp : zp + rhs.zp;
+    int nzs = (rhs.zs < rhs.l) ? rhs.zs : rhs.zs + zs;
+    int nz = max (nzp, nzs, z, rhs.z, zs + rhs.zp);
+    return LongestZeroSegment (nzp, nzs, nz, nl);
+  }
+}
+
+unittest {
+  writeln ("Testing segment_tree.d ...");
+  auto st = new SegmentTree!long ([1L, 2L]); 
+  assert (st.reduce (0, 1) == 3L);
 }
