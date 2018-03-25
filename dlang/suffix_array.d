@@ -105,7 +105,7 @@ class LCPSuffixArray : SuffixArray {
 
 void check (string s) {
   string z = s ~ '$';
-  auto sa = SuffixArray (z);
+  auto sa = new SuffixArray (z);
   foreach (k; 1 .. s.length) {
     int i = sa.O[k-1];
     int j = sa.O[k];

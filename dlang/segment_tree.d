@@ -57,7 +57,7 @@ class SegmentTree(T = int) {
     }
   }
   final T reduce (int a, int b) { return reduce (1, 0, n - 1, a, b); }
-  static if (T.stringof == "int") {
+  static if (is (typeof (T < 0) == bool)) {
     final int find_kth (T k) const
     in  {
       assert (k >= 0);
@@ -104,11 +104,6 @@ struct LongestZeroSegment {
 }
 
 unittest {
-  /*
-  LongestZeroSegment aa = LongestZeroSegment (1, 1, 1, 1);
-  LongestZeroSegment bb = LongestZeroSegment (2, 2, 2, 2);
-  LongestZeroSegment cc = aa + bb;
-  */
   writeln ("Testing segment_tree.d ...");
   auto st = new SegmentTree!long ([1L, 2L]); 
   assert (st.reduce (0, 1) == 3L);
@@ -122,15 +117,5 @@ unittest {
   st2.update (3, LongestZeroSegment (1, 1, 1, 1));
   assert (st2.reduce (0, a.length.to!(int) - 1).z == 2);
   st2.update (2, LongestZeroSegment (1, 1, 1, 1));
-  foreach (i; 1 .. 5) {
-    foreach (j; 0 .. i + 1) {
-      writeln (j, ' ', i);
-      writeln (st2.reduce (j, i));
-      assert (st2.reduce (j, i).l == (i - j + 1));
-    }
-  }
-  writeln (st2.reduce (0, a.length.to!(int) - 1));
-
-
   assert (st2.reduce (0, a.length.to!(int) - 1).z == 3);
 }
