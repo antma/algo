@@ -11,7 +11,7 @@ class SegmentTree(T = int) {
   private:
   T [] t;
   int n;
-  final void build (T [] a, int v, int l, int r) {
+  final void build (const T [] a, int v, int l, int r) {
     if (l == r) {
       t[v] = a[l];
     } else {
@@ -59,7 +59,7 @@ class SegmentTree(T = int) {
     }
   }
   final T reduce (int a, int b) { return reduce (1, 0, n - 1, a, b); }
-  this (T [] a) {
+  this (const T [] a) {
     n = a.length.to!(int);
     t = new T[4 * n];
     build (a, 1, 0, n - 1);
