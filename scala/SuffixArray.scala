@@ -4,33 +4,35 @@ class SuffixArray (_s: String) {
   val s = _s :+ 0.toChar
   val n = _s.length
   val alphabet_size = (_s.fold (0.toChar) ( (x, y) => x.max (y))).toInt + 1
-  
+
   private def counting_sort (m: Int, c: Array[Int], p: Seq[Int], o: Array[Int]): Unit = {
     val cnt:Array[Int] = Array.ofDim (m)
     p.foreach (pi => cnt(c(pi)) = cnt(c(pi)) + 1)
     (1 until m).foreach (i => cnt(i) = cnt(i) + cnt(i-1))
-    p.reverseIterator.foreach (pi => { cnt(c(pi)) = cnt(c(pi)) - 1; o(cnt(c(pi))) = pi; }  )
+    p.reverseIterator.foreach (pi => {
+      cnt(c(pi)) = cnt(c(pi)) - 1
+      o(cnt(c(pi))) = pi
+    })
   }
   private def build ():Array[Int] = {
     val l = s.length
     var p: Array[Int] = Array.ofDim (l)
     var c = s.map (c => c.toInt).toArray
     var q: Array[Int] = Array.ofDim (l)
-    counting_sort (alphabet_size, c, (0 until l), p) 
+    counting_sort (alphabet_size, c, (0 until l), p)
     c(p(0)) = 0
     var m = 0
     for (i <- 1 until l) {
       if (s(p(i)) != s(p(i-1))) {
         m = m + 1
       }
-      c(p(i)) = m;
+      c(p(i)) = m
     }
     m = m + 1
     var step = 1
     while (step < l) {
       counting_sort (m, c, p.map (v => (v + l - step) % l), q)
       val t1 = p; p = q; q = t1
-      
       q(p(0)) = 0
       m = 0
       for (i <- 1 until l) {
@@ -65,7 +67,7 @@ class SuffixArray (_s: String) {
       l = 0.max (l - 1)
       val i = r(j)
       if (i > 0) {
-        val k = o(i - 1);
+        val k = o(i - 1)
         while ((j + l < n) && (k + l < n) && s(j + l) == s(k + l)) {
           l = l + 1
         }
