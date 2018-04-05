@@ -57,3 +57,26 @@ class SegmentTree[T : ClassTag] (_a: Array[T], op: (T, T) => T) {
     }
   }
 }
+
+class SegmentTree2D[T : ClassTag] (_a: Array[T], build_op: (T, T) => T) extends SegmentTree[T] (_a, build_op) {
+  private def reduce2d[U] (v: Int, l: Int, r: Int, a: Int, b: Int, extract_op: (T) => U, reduce_op: (U, U) => U): U =  {
+    if (a == l && b == r) {
+      extract_op (t(v))
+    } else {
+      val m = (l + r) >> 1
+      val x = b.min (m)
+      val y = a.max (m + 1)
+      val w = 2 * v
+      if (a <= x) {
+        if (y <= b) {
+          reduce_op (reduce2d (w, l, m, a, x, extract_op, reduce_op), reduce2d (w + 1, m + 1, r, y, b, extract_op, reduce_op))
+        } else {
+          reduce2d (w, l, m, a, x, extract_op, reduce_op)
+        }
+      } else {
+        reduce2d (w + 1, m + 1, r, y, b, extract_op, reduce_op)
+      }
+    }
+  }
+  def reduce2d[U] (a: Int, b: Int, extract_op: (T) => U, reduce_op: (U, U) => U): U = reduce2d (1, 0, n - 1, a, b, extract_op, reduce_op)
+}
