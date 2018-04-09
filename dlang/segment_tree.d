@@ -7,92 +7,158 @@ import std.range;
 import std.stdio;
 import std.string;
 
-class SegmentTree(T = int) {
+class SegmentTree(T = int, alias fun) {
   private:
   T [] t;
-  int n;
-  final void build (const T [] a, int v, int l, int r) {
-    if (l == r) {
-      t[v] = a[l];
+  T function (const T, const T) op;
+  static T* [24] x, y, z;
+  size_t n;
+  final size_t idx (size_t l, size_t r) const {
+    return (l + 1 == r) ? l : n + ((l + r) >> 1);
+  }
+  //[l, r)
+  final size_t build (size_t l, size_t r) {
+    if (r - l > 1) {
+      immutable m = (l + r) >> 1, a = build (l, m), b = build (m, r), c = n + m;
+      t[c] = fun (t[a], t[b]);
+      return c;
     } else {
-      immutable m = (l + r) >> 1;
-      build (a, v << 1, l, m);
-      build (a, (v << 1) + 1, m + 1, r);
-      t[v] = t[v << 1] + t[(v << 1) + 1];
+      return l;
     }
   }
-  final T reduce (int v, int l, int r, int a, int b) {
-    if (a == l && b == r) {
-      return t[v];
-    }
-    immutable int m = (l + r) >> 1, x = min (b, m), y = max (a, m + 1);
-    v <<= 1;
-    if (a <= x) {
-      if (y <= b) {
-        return reduce (v, l, m, a, x) + reduce (v + 1, m + 1, r, y, b);
-      } else {
-        return reduce (v, l, m, a, x);
-      }
-    } else {
-      assert (y <= b);
-      return reduce (v + 1, m + 1, r, y, b);
-    }
-  }
-  public:
-  final void update (int i, T new_value) {
-    int l = 0, r = n - 1, v = 1;
-    while (l < r) {
+  final const(T) reduce (size_t l, size_t r, size_t a, size_t b) const {
+    while (a != l || b != r) {
       immutable m = (l + r) >> 1;
-      v <<= 1;
-      if (i <= m) {
+      if (m <= a) {
+        l = m;
+      } else if (m >= b) {
         r = m;
       } else {
-        ++v;
-        l = m + 1;
+        return fun (reduce (l, m, a, m), reduce (m, r, m, b));
       }
     }
-    t[v] = new_value;
-    while (v > 1) {
-      v &= ~1;
-      t[v >> 1] = t[v] + t[v + 1];
-      v >>= 1;
+    return t[(l + 1 == r) ? l : n + ((l + r) >> 1)];
+  }
+  public:
+  final void update (size_t i, T value) {
+    int k = 0;
+    size_t l = 0, r = n;
+    auto m = (l + r) >> 1;
+    while (m - l > 2) {
+      x[k] = &t[n + m];
+      immutable m1 = (l + m) >> 1;
+      y[k] = &t[n + m1];
+      immutable m2 = (m + r) >> 1;
+      z[k++] = &t[n + m2];
+      if (i < m) {
+        r = m;
+        m = m1;
+      } else {
+        l = m;
+        m = m2;
+      }
+    }
+    while (m != l) {
+      x[k] = &t[n + m];
+      immutable m1 = (l + m) >> 1;
+      y[k] = &t[m1 + ((l != m1) ? n : 0)];
+      immutable m2 = (m + r) >> 1;
+      z[k++] = &t[m2 + ((m2 != m) ? n : 0)];
+      if (i < m) {
+        r = m;
+        m = m1;
+      } else {
+        l = m;
+        m = m2;
+      }
+    }
+    t[i] = value;
+    while (--k >= 0) {
+      *x[k] = fun (*y[k], *z[k]);
     }
   }
-  final T reduce (int a, int b) { return reduce (1, 0, n - 1, a, b); }
-  this (const T [] a) {
-    n = a.length.to!(int);
-    t = new T[4 * n];
-    build (a, 1, 0, n - 1);
+  final const(T) reduce (size_t a, size_t b) const { return reduce (0, n, a, b); }
+  const(T) opIndex (size_t k) const { return t[k]; }
+  this (T [] a, bool call_build = true) {
+    n = a.length;
+    t = a;
+    t.length = 2 * n;
+    if (call_build) {
+      build (0, n);
+    }
   }
 }
 
 //Use case: found array median
-class FindKthSegmentTree(T) : SegmentTree!T
+class FindKthSegmentTree(T,alias fun) : SegmentTree!(T, fun)
 {
   public:
-  final int find_kth (T k) const
+  final size_t find_kth (T k) const
   in  {
     assert (k >= 0);
   } body {
-    int l = 0, r = n - 1, v = 1;
+    size_t l = 0, r = n;
     while (true) {
-      if (k >= t[v]) {
+      if (k >= t[idx (l, r)]) {
         return -1;
       }
-      if (l == r) {
+      if (l + 1 == r) {
         return l;
       }
       immutable m = (l + r) >> 1;
-      v <<= 1;
-      if (t[v] > k) {
+      immutable v = t[idx (l, m)];
+      if (v > k) {
         r = m;
       } else {
-        k -= t[v++];
-        l = m + 1;
+        k -= v;
+        l = m;
       }
     }
   }
   this (T [] a) { super (a); }
+}
+
+class SegmentTree2D(T, U, alias fun, alias fun_reduce) : SegmentTree!(T, fun) {
+  private:
+  static U delegate(const T) extractor;
+  final U reduce2d (size_t l, size_t r, size_t a, size_t b) const {
+    while (a != l || b != r) {
+      immutable m = (l + r) >> 1;
+      if (m <= a) {
+        l = m;
+      } else if (m >= b) {
+        r = m;
+      } else {
+        return fun_reduce (reduce2d (l, m, a, m), reduce2d (m, r, m, b));
+      }
+    }
+    return extractor (t[(l + 1 == r) ? l : n + ((l + r) >> 1)]);
+  }
+  public:
+  final U reduce2d (size_t a, size_t b, U delegate(const T) extractor_) const
+  in {
+    assert (b <= n);
+    assert (a < b);
+  } body {
+    extractor = extractor_;
+    return reduce2d (0, n, a, b);
+  }
+  final void update (size_t i, void delegate(T) func) {
+    int k = 0;
+    size_t l = 0, r = n;
+    while (l + 1 != r) {
+      immutable m = (l + r) >> 1;
+      x[k++] = &t[n + m];
+      ((i < m) ? r : l) = m;
+    }
+    func (t[i]);
+    while (--k >= 0) {
+      func (*x[k]);
+    }
+  }
+  this (T [] a) {
+    super (a);
+  }
 }
 
 struct LongestZeroSegment {
@@ -161,17 +227,17 @@ class SegmentTreeSliceUpdate(T = int) {
 
 unittest {
   writeln ("Testing segment_tree.d ...");
-  auto st = new SegmentTree!long ([1L, 2L]);
-  assert (st.reduce (0, 1) == 3L);
+  auto st = new SegmentTree!(long,(x, y) => x + y) ([1L, 2L]);
+  assert (st.reduce (0, 2) == 3L);
   auto a = new LongestZeroSegment[5];
   foreach (i; 0 .. a.length) {
     a[i].l = 1;
   }
-  auto st2 = new SegmentTree!LongestZeroSegment (a);
+  auto st2 = new SegmentTree!(LongestZeroSegment, (x, y) => x + y)(a);
   st2.update (4, LongestZeroSegment (1, 1, 1, 1));
-  assert (st2.reduce (0, a.length.to!(int) - 1).z == 1);
+  assert (st2.reduce (0, a.length.to!(int)).z == 1);
   st2.update (3, LongestZeroSegment (1, 1, 1, 1));
-  assert (st2.reduce (0, a.length.to!(int) - 1).z == 2);
+  assert (st2.reduce (0, a.length.to!(int)).z == 2);
   st2.update (2, LongestZeroSegment (1, 1, 1, 1));
-  assert (st2.reduce (0, a.length.to!(int) - 1).z == 3);
+  assert (st2.reduce (0, a.length.to!(int)).z == 3);
 }
