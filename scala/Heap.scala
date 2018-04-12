@@ -37,8 +37,8 @@ class Heap[T : reflect.ClassTag] (_n: Int, value: T, o: Ordering[T]) {
     }
     val i = f (k)
     if (i != k) {
-      h(i) = he;
-      g(he) = i;
+      h(i) = he
+      g(he) = i
     }
   }
   private def insert (i: Int) = {
@@ -74,12 +74,12 @@ class Heap[T : reflect.ClassTag] (_n: Int, value: T, o: Ordering[T]) {
   def extractMin () = {
     assert (size > 0)
     val he = h(1)
-    g(he) = -1;
-    h(1) = h(size);
+    g(he) = -1
+    h(1) = h(size)
     g(h(1)) = 1
     size -= 1
     if (size > 0) {
-      heapifyFront (1);
+      heapifyFront (1)
     }
     he
   }
