@@ -1,6 +1,4 @@
-import scala.reflect.ClassTag
-
-class SegmentTree[T : ClassTag] (_a: Array[T], op: (T, T) => T) {
+class SegmentTree[T : reflect.ClassTag] (_a: Array[T], op: (T, T) => T) {
   val a = _a
   val n = a.length
   val t = Array.ofDim (4 * n)
