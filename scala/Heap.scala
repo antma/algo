@@ -47,6 +47,7 @@ class Heap[T : reflect.ClassTag] (_n: Int, value: T, o: Ordering[T]) {
     g(i) = size
     heapifyBack (size)
   }
+  def contains (k: Int) = g(k) >= 0
   def decreaseKey (k: Int, value: T) = {
     a(k) = value
     val pos = g(k)
