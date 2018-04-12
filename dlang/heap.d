@@ -70,9 +70,9 @@ class Heap(T) {
     assert (size > 0);
     immutable he = h[1];
     g[he] = -1;
-    h[1] = h[size--];
-    g[h[1]] = 1;
-    if (size) {
+    if (--size) {
+      h[1] = h[size+1];
+      g[h[1]] = 1;
       heapify_front (1);
     }
     return he;

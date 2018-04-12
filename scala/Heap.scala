@@ -75,10 +75,10 @@ class Heap[T : reflect.ClassTag] (_n: Int, value: T, o: Ordering[T]) {
     assert (size > 0)
     val he = h(1)
     g(he) = -1
-    h(1) = h(size)
-    g(h(1)) = 1
     size -= 1
     if (size > 0) {
+      h(1) = h(size+1)
+      g(h(1)) = 1
       heapifyFront (1)
     }
     he
