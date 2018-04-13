@@ -10,13 +10,13 @@ class DisjointSet {
     p = iota (0, n).array;
     h = new int[n];
   }
-  int find_set (int x) {
+  int find_set (int x) pure nothrow @nogc {
     if (p[x] == x) {
       return x;
     }
     return p[x] = find_set (p[x]);
   }
-  void merge (int i, int j) {
+  void merge (int i, int j) pure nothrow @nogc {
     i = find_set (i);
     j = find_set (j);
     if (i != j) {
@@ -30,7 +30,7 @@ class DisjointSet {
       }
     }
   }
-  int biggest_set_size () {
+  int biggest_set_size () pure {
     auto c = new int[n];
     foreach (i; 0 .. n) {
       ++c[find_set (i)];

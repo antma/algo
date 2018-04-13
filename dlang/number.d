@@ -1,6 +1,6 @@
 import std.algorithm, std.conv, std.stdio;
 
-T gcd(T) (T a, T b) {
+T gcd(T) (T a, T b) pure nothrow @nogc {
   if (a < b) {
     swap (a, b);
   }
@@ -10,7 +10,7 @@ T gcd(T) (T a, T b) {
   return a;
 }
 
-T gcdext(T) (T a, T b, ref T x, ref T y) {
+T gcdext(T) (T a, T b, ref T x, ref T y) pure nothrow @nogc {
   if (b == 0) {
     x = 1;
     y = 0;
@@ -24,58 +24,58 @@ T gcdext(T) (T a, T b, ref T x, ref T y) {
 struct IntM {
   static immutable q = 1_000_000_007;
   int v;
-  this (int m) {
+  this (int m) pure nothrow @nogc {
     v = m % q;
     if (v < 0) {
       v += q;
     }
   }
-  IntM opAssign (int m) {
+  IntM opAssign (int m) pure nothrow @nogc {
     if (v < 0) {
       v += q;
     }
     v = m % q;
     return this;
   }
-  IntM opUnary (string op)() const if (op == "-") {
+  IntM opUnary (string op)() const pure nothrow @nogc if (op == "-") {
     return IntM ((q - v) % q);
   }
-  ref IntM opUnary (string op)() if (op == "++") {
+  ref IntM opUnary (string op)() pure nothrow @nogc if (op == "++") {
     if (++v >= q) {
       v -= q;
     }
     return this;
   }
-  ref IntM opUnary (string op)() if (op == "--") {
+  ref IntM opUnary (string op)() pure nothrow @nogc if (op == "--") {
     if (--v < 0) {
       v += q;
     }
     return this;
   }
-  ref IntM opOpAssign (string op)(in IntM rhs) if (op == "+") {
+  ref IntM opOpAssign (string op)(in IntM rhs) pure nothrow @nogc if (op == "+") {
     v += rhs.v;
     v %= q;
     return this;
   }
-  ref IntM opOpAssign (string op)(in IntM rhs) if (op == "-") {
+  ref IntM opOpAssign (string op)(in IntM rhs) pure nothrow @nogc if (op == "-") {
     v -= rhs.v;
     v %= q;
     return this;
   }
-  ref IntM opOpAssign (string op)(in IntM rhs) if (op == "*") {
+  ref IntM opOpAssign (string op)(in IntM rhs) pure nothrow @nogc if (op == "*") {
     v = ((v.to!(long)) * rhs.v.to!(long)) % q;
     return this;
   }
-  IntM opBinary (string op)(in IntM rhs) const if (op == "+") {
+  IntM opBinary (string op)(in IntM rhs) const pure nothrow @nogc if (op == "+") {
     return IntM ( (v + rhs.v) % q);
   }
-  IntM opBinary (string op)(in IntM rhs) const if (op == "-") {
+  IntM opBinary (string op)(in IntM rhs) const pure nothrow @nogc if (op == "-") {
     return IntM ( (v - rhs.v) % q);
   }
-  IntM opBinary (string op)(in IntM rhs) const if (op == "*") {
+  IntM opBinary (string op)(in IntM rhs) const pure nothrow @nogc if (op == "*") {
     return IntM (((v.to!(long)) * rhs.v.to!(long)) % q);
   }
-  IntM opBinary (string op)(in int rhs) const if (op == "^^") {
+  IntM opBinary (string op)(in int rhs) const pure nothrow @nogc if (op == "^^") {
     IntM a = 1, b = this;
     int p = rhs;
     while (p > 0) {
@@ -88,11 +88,11 @@ struct IntM {
     }
     return a;
   }
-  IntM opBinary (string op)(in int v) const if (op == "+" || op == "-" || op == "*") {
+  IntM opBinary (string op)(in int v) const pure nothrow @nogc if (op == "+" || op == "-" || op == "*") {
     mixin ("return this " ~ op ~ " IntM(v);");
   }
-  int opCast(T : int)() const { return v; }
-  int opCmp (const IntM rhs) const {
+  int opCast(T : int)() const pure nothrow @nogc { return v; }
+  int opCmp (const IntM rhs) const pure nothrow @nogc {
     if (v < rhs.v) {
       return -1;
     }
@@ -101,7 +101,7 @@ struct IntM {
     }
     return 0;
   }
-  bool opEquals (const IntM rhs) const { return v == rhs.v; }
+  bool opEquals (const IntM rhs) const pure nothrow @nogc { return v == rhs.v; }
 }
 
 unittest {
@@ -114,4 +114,12 @@ unittest {
   int g = gcdext (2, q, x, y);
   assert (2 * x + q * y == g);
   assert ((IntM (2) ^^ (x - 2)).to!(int) == 1);
+  assert (-IntM (1) == IntM (q - 1));
+  auto i = IntM(1);
+  i++;
+  assert (i == IntM(2));
+  i--;
+  assert (i == IntM(1));
+  assert ((i + 1) * (i + 1) == IntM(4));
+  assert (i + i == IntM(2));
 }

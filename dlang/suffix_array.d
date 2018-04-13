@@ -9,7 +9,7 @@ class SuffixArray {
   int [] O;
   int n;
 
-  final void counting_sort (int m, int [] c, int [] p, int [] o) const {
+  final void countingSort (int m, int [] c, int [] p, int [] o) const pure nothrow {
     auto cnt = new int[m];
     foreach (i; 0 .. p.length) {
       ++cnt[c[p[i]]];
@@ -17,18 +17,18 @@ class SuffixArray {
     foreach (i; 1 .. cnt.length) {
       cnt[i] += cnt[i-1];
     }
-    for (int i = p.length.to!(int) - 1; i >= 0; --i) {
+    foreach (i; iota (0, p.length).retro) {
       o[--cnt[c[p[i]]]] = p[i];
     }
   }
 
-  this (string s_) {
+  this (string s_) pure {
     s = s_ ~ 0.to!(char);
     n = s.length.to!(int);
     auto c = s.map! (to!(int)).array;
     immutable a = 1 + c.reduce! (max);
     auto p = new int[n];
-    counting_sort (a, c, iota (0, n).array, p);
+    countingSort (a, c, iota (0, n).array, p);
     c[p[0]] = 0;
     int m = 1;
     foreach (i; 1 .. n) {
@@ -45,7 +45,7 @@ class SuffixArray {
           p[i] += n;
         }
       }
-      counting_sort (m, c, p, T);
+      countingSort (m, c, p, T);
       auto t = p; p = T; T = t;
       T[p[0]] = 0;
       m = 1;
@@ -66,10 +66,10 @@ class SuffixArray {
 class LCPSuffixArray : SuffixArray {
   int [] R; //reverse permutation
   int [] LCP;
-  final int lcp (int l, int r) {
+  final int lcp (int l, int r) const pure nothrow @nogc {
     return (r - l == 1) ? LCP[r] : LCP[n + 1 + ((l + r) >> 1)];
   }
-  final int lcp_build (int l, int r) {
+  final int lcp_build (int l, int r) pure nothrow @nogc {
     if (r - l == 1) {
       return LCP[r];
     }
@@ -77,7 +77,7 @@ class LCPSuffixArray : SuffixArray {
     LCP[n + 1 + m] = min (lcp_build (l, m), lcp_build (m, r));
     return LCP[n + 1 + m];
   }
-  this (string s) {
+  this (string s) pure {
     super (s);
     LCP = new int [2 * n + 1];
     R = new int[n];
@@ -103,20 +103,19 @@ class LCPSuffixArray : SuffixArray {
   }
 };
 
-void check (string s) {
-  string z = s ~ '$';
-  auto sa = new SuffixArray (z);
-  foreach (k; 1 .. s.length) {
-    int i = sa.O[k-1];
-    int j = sa.O[k];
-    assert (s[i .. $] <= s[j .. $]);
-  }
-}
-
 import std.random;
 import std.stdio;
 
 unittest {
+  void check (string s) {
+    string z = s ~ '$';
+    auto sa = new SuffixArray (z);
+    foreach (k; 1 .. s.length) {
+      int i = sa.O[k-1];
+      int j = sa.O[k];
+      assert (s[i .. $] <= s[j .. $]);
+    }
+  }
   writeln ("Testing suffix_array.d ...");
   check ("abacabadaba");
   string t = iota(0, 1000).map! (x => (uniform(0, 26) + 97).to!(char)).text;

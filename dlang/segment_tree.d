@@ -1,23 +1,15 @@
-//segment tree, median, array prefix with given sum
-import std.algorithm;
-import std.array;
-import std.conv;
-import std.math;
-import std.range;
-import std.stdio;
-import std.string;
+import std.algorithm, std.conv;
 
 class SegmentTree(T = int, alias fun) {
   private:
   T [] t;
-  T function (const T, const T) op;
   static T* [24] x, y, z;
   size_t n;
-  final size_t idx (size_t l, size_t r) const {
+  final size_t idx (size_t l, size_t r) const pure nothrow @nogc {
     return (l + 1 == r) ? l : n + ((l + r) >> 1);
   }
   //[l, r)
-  final size_t build (size_t l, size_t r) {
+  final size_t build (size_t l, size_t r) pure nothrow @nogc {
     if (r - l > 1) {
       immutable m = (l + r) >> 1, a = build (l, m), b = build (m, r), c = n + m;
       t[c] = fun (t[a], t[b]);
@@ -26,7 +18,7 @@ class SegmentTree(T = int, alias fun) {
       return l;
     }
   }
-  final const(T) reduce (size_t l, size_t r, size_t a, size_t b) const {
+  final const(T) reduce (size_t l, size_t r, size_t a, size_t b) const pure nothrow @nogc {
     while (a != l || b != r) {
       immutable m = (l + r) >> 1;
       if (m <= a) {
@@ -40,7 +32,7 @@ class SegmentTree(T = int, alias fun) {
     return t[(l + 1 == r) ? l : n + ((l + r) >> 1)];
   }
   public:
-  final void update (size_t i, T value) {
+  final void update (size_t i, T value) nothrow @nogc {
     int k = 0;
     size_t l = 0, r = n;
     auto m = (l + r) >> 1;
@@ -77,9 +69,9 @@ class SegmentTree(T = int, alias fun) {
       *x[k] = fun (*y[k], *z[k]);
     }
   }
-  final const(T) reduce (size_t a, size_t b) const { return reduce (0, n, a, b); }
-  const(T) opIndex (size_t k) const { return t[k]; }
-  this (T [] a, bool call_build = true) {
+  final const(T) reduce (size_t a, size_t b) const pure nothrow @nogc { return reduce (0, n, a, b); }
+  const(T) opIndex (size_t k) const pure nothrow @nogc { return t[k]; }
+  this (T [] a, bool call_build = true) pure nothrow {
     n = a.length;
     t = a;
     t.length = 2 * n;
@@ -93,7 +85,7 @@ class SegmentTree(T = int, alias fun) {
 class FindKthSegmentTree(T,alias fun) : SegmentTree!(T, fun)
 {
   public:
-  final size_t find_kth (T k) const
+  final size_t find_kth (T k) const pure nothrow @nogc
   in  {
     assert (k >= 0);
   } body {
@@ -115,13 +107,13 @@ class FindKthSegmentTree(T,alias fun) : SegmentTree!(T, fun)
       }
     }
   }
-  this (T [] a) { super (a); }
+  this (T [] a) pure nothrow { super (a); }
 }
 
 class SegmentTree2D(T, U, alias fun, alias fun_reduce) : SegmentTree!(T, fun) {
   private:
   static U delegate(const T) extractor;
-  final U reduce2d (size_t l, size_t r, size_t a, size_t b) const {
+  final U reduce2d (size_t l, size_t r, size_t a, size_t b) const pure nothrow @nogc {
     while (a != l || b != r) {
       immutable m = (l + r) >> 1;
       if (m <= a) {
@@ -135,7 +127,7 @@ class SegmentTree2D(T, U, alias fun, alias fun_reduce) : SegmentTree!(T, fun) {
     return extractor (t[(l + 1 == r) ? l : n + ((l + r) >> 1)]);
   }
   public:
-  final U reduce2d (size_t a, size_t b, U delegate(const T) extractor_) const
+  final U reduce2d (size_t a, size_t b, U delegate(const T) extractor_) const pure nothrow @nogc
   in {
     assert (b <= n);
     assert (a < b);
@@ -143,7 +135,7 @@ class SegmentTree2D(T, U, alias fun, alias fun_reduce) : SegmentTree!(T, fun) {
     extractor = extractor_;
     return reduce2d (0, n, a, b);
   }
-  final void update (size_t i, void delegate(T) func) {
+  final void update (size_t i, void delegate(T) func) pure nothrow @nogc {
     int k = 0;
     size_t l = 0, r = n;
     while (l + 1 != r) {
@@ -156,7 +148,7 @@ class SegmentTree2D(T, U, alias fun, alias fun_reduce) : SegmentTree!(T, fun) {
       func (*x[k]);
     }
   }
-  this (T [] a) {
+  this (T [] a) pure nothrow {
     super (a);
   }
 }
@@ -167,7 +159,7 @@ struct LongestZeroSegment {
   int z;
   int l;  // segment length
 
-  LongestZeroSegment opBinary (string op) (in LongestZeroSegment rhs) const {
+  LongestZeroSegment opBinary (string op) (in LongestZeroSegment rhs) const pure nothrow @nogc {
     int nl = l + rhs.l;
     int nzp = (zp < l) ? zp : zp + rhs.zp;
     int nzs = (rhs.zs < rhs.l) ? rhs.zs : rhs.zs + zs;
@@ -180,7 +172,7 @@ class SegmentTreeSliceUpdate(T = int) {
   private:
   T [] t;
   int n;
-  final void build (const T [] a, int v, int l, int r) {
+  final void build (const T [] a, int v, int l, int r) pure nothrow @nogc {
     if (l == r) {
       t[v] = a[l];
     } else {
@@ -189,7 +181,7 @@ class SegmentTreeSliceUpdate(T = int) {
       build (a, (v << 1) + 1, m + 1, r);
     }
   }
-  final private void update (int v, int l, int r, int a, int b, T value) {
+  final private void update (int v, int l, int r, int a, int b, T value) pure nothrow @nogc {
     if (a <= b) {
       if (l == a && r == b) {
         t[v] += value;
@@ -201,7 +193,7 @@ class SegmentTreeSliceUpdate(T = int) {
       }
     }
   }
-  final private T get (int v, size_t l, size_t r, size_t index) const {
+  final private T get (int v, size_t l, size_t r, size_t index) const pure nothrow @nogc {
     if (l == r) {
       return t[v];
     } else {
@@ -212,13 +204,13 @@ class SegmentTreeSliceUpdate(T = int) {
     }
   }
   public:
-  final void update (int a, int b, T value) {
+  final void update (int a, int b, T value) pure nothrow @nogc {
     update (1, 0, n - 1, a, b, value);
   }
-  final inout(T) opIndex (size_t index) inout {
+  final inout(T) opIndex (size_t index) inout pure nothrow @nogc {
     return get (1, 0, n - 1, index);
   }
-  this (const T [] a) {
+  this (const T [] a) pure {
     n = a.length.to!(int);
     t = new T[4 * n];
     build (a, 1, 0, n - 1);
@@ -226,6 +218,8 @@ class SegmentTreeSliceUpdate(T = int) {
 }
 
 unittest {
+  import std.stdio;
+  import std.conv;
   writeln ("Testing segment_tree.d ...");
   auto st = new SegmentTree!(long,(x, y) => x + y) ([1L, 2L]);
   assert (st.reduce (0, 2) == 3L);
@@ -240,4 +234,11 @@ unittest {
   assert (st2.reduce (0, a.length.to!(int)).z == 2);
   st2.update (2, LongestZeroSegment (1, 1, 1, 1));
   assert (st2.reduce (0, a.length.to!(int)).z == 3);
+
+  auto st3 = new SegmentTreeSliceUpdate!(int) ( [0, 0, 0, 0]);
+  st3.update (1, 2, 1);
+  assert (st3[0] == 0);
+  assert (st3[1] == 1);
+  assert (st3[2] == 1);
+  assert (st3[3] == 0);
 }

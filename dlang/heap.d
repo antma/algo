@@ -7,7 +7,7 @@ class Heap(T) {
     int [] g;
     int n;
     int size;
-  final void heapify_front (int k) {
+  final void heapifyFront (int k) pure nothrow @nogc {
     immutable he = h[k];
     int i = k;
     int j = i << 1;
@@ -28,7 +28,7 @@ class Heap(T) {
       g[he] = i;
     }
   }
-  final void heapify_back (int k) {
+  final void heapifyBack (int k) pure nothrow @nogc {
     immutable he = h[k];
     int i = k;
     while (i > 1) {
@@ -45,45 +45,57 @@ class Heap(T) {
       g[he] = i;
     }
   }
-  final void insert (int i) {
+  final void insert (int i) pure nothrow @nogc {
     h[++size] = i;
     g[i] = size;
-    heapify_back (size);
+    heapifyBack (size);
   }
   public:
-  final void update (int k, T value) in {
+  final void decreaseKey (int k, T value) pure nothrow @nogc in {
+    assert (k >= 0 && k < n);
+    assert (value < a[k]);
+  } body {
+    a[k] = value;
+    immutable pos = g[k];
+    if (!pos) {
+      insert (k);
+    } else if (value < a[k]) {
+      heapifyBack (pos);
+    }
+  }
+  final void update (int k, T value) pure nothrow @nogc in {
     assert (k >= 0 && k < n);
   } body {
     immutable pos = g[k];
-    if (pos < 0) {
+    if (!pos) {
       a[k] = value;
       insert (k);
     } else if (value < a[k]) {
       a[k] = value;
-      heapify_back (pos);
+      heapifyBack (pos);
     } else if (value > a[k]) {
       a[k] = value;
-      heapify_front (pos);
+      heapifyFront (pos);
     }
   }
-  final int extract_min () {
+  final int extractMin () pure nothrow @nogc {
     assert (size > 0);
     immutable he = h[1];
-    g[he] = -1;
+    g[he] = 0;
     if (--size) {
       h[1] = h[size+1];
       g[h[1]] = 1;
-      heapify_front (1);
+      heapifyFront (1);
     }
     return he;
   }
 
-  inout(T) opIndex (size_t index) inout {
+  inout(T) opIndex (size_t index) pure nothrow @nogc inout {
     return a[index];
   }
 
   @property
-  bool empty () const { return size == 0; }
+  bool empty () const pure nothrow @nogc { return size == 0; }
 
   this (int n_, T default_value) {
     n = n_;
@@ -92,7 +104,6 @@ class Heap(T) {
     a[] = default_value;
     h = new int[n+1];
     g = new int[n];
-    g[] = -1;
   }
 }
 
@@ -101,14 +112,14 @@ unittest {
   auto h = new Heap!int (5, 239);
   assert (h.empty);
   h.update (0, 10);
-  int i = h.extract_min;
+  int i = h.extractMin;
   assert (i == 0);
   assert (h.empty);
   h.update (4, 8);
   h.update (1, 7);
   h.update (2, 9);
-  i = h.extract_min;
+  i = h.extractMin;
   assert (i == 1);
-  i = h.extract_min;
+  i = h.extractMin;
   assert (i == 4);
 }
