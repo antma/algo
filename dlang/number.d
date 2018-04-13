@@ -22,7 +22,7 @@ T gcdext(T) (T a, T b, ref T x, ref T y) pure nothrow @nogc {
 }
 
 struct IntM {
-  static immutable q = 1_000_000_007;
+  enum q = 1_000_000_007;
   int v;
   this (int m) pure nothrow @nogc {
     v = m % q;
@@ -31,10 +31,10 @@ struct IntM {
     }
   }
   IntM opAssign (int m) pure nothrow @nogc {
+    v = m % q;
     if (v < 0) {
       v += q;
     }
-    v = m % q;
     return this;
   }
   IntM opUnary (string op)() const pure nothrow @nogc if (op == "-") {
