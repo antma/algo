@@ -168,52 +168,44 @@ struct LongestZeroSegment {
   }
 }
 
-class SegmentTreeSliceUpdate(T = int) {
+class SegmentTreeSliceUpdate(T = int, alias fun) {
   private:
   T [] t;
-  int n;
-  final void build (const T [] a, int v, int l, int r) pure nothrow @nogc {
-    if (l == r) {
-      t[v] = a[l];
-    } else {
-      immutable m = (l + r) >> 1;
-      build (a, v << 1, l, m);
-      build (a, (v << 1) + 1, m + 1, r);
-    }
+  size_t n;
+  final size_t idx (size_t l, size_t r) const pure nothrow @nogc {
+    return (l + 1 == r) ? l : n + ((l + r) >> 1);
   }
-  final private void update (int v, int l, int r, int a, int b, T value) pure nothrow @nogc {
-    if (a <= b) {
+  final void update (size_t l, size_t r, size_t a, size_t b, T value) pure nothrow @nogc {
+    if (a < b) {
       if (l == a && r == b) {
-        t[v] += value;
+        size_t k = idx (l, r);
+        t[k] = fun (t[k], value);
       } else {
         immutable m = (l + r) >> 1;
-        immutable w = v << 1;
-        update (w, l, m, a, min (m, b), value);
-        update (w + 1, m + 1, r, max (m + 1, a), b, value);
+        update (l, m, a, min (m, b), value);
+        update (m, r, max (m, a), b, value);
       }
     }
   }
-  final private T get (int v, size_t l, size_t r, size_t index) const pure nothrow @nogc {
-    if (l == r) {
-      return t[v];
-    } else {
+  final T get (size_t l, size_t r, size_t k) const pure nothrow @nogc {
+    if (r - l > 1) {
       immutable m = (l + r) >> 1;
-      T x = t[v];
-      x += (index <= m) ? get ((v << 1), l, m, index) : get ((v << 1) + 1, m + 1, r, index);
-      return x;
+      return fun (t[n + m], (k < m) ? get (l, m, k) : get (m, r, k));
+    } else {
+      return t[l];
     }
   }
   public:
-  final void update (int a, int b, T value) pure nothrow @nogc {
-    update (1, 0, n - 1, a, b, value);
+  final void update (size_t a, size_t b, T value) pure nothrow @nogc {
+    update (0, n, a, b, value);
   }
   final inout(T) opIndex (size_t index) inout pure nothrow @nogc {
-    return get (1, 0, n - 1, index);
+    return get (0, n, index);
   }
-  this (const T [] a) pure {
-    n = a.length.to!(int);
-    t = new T[4 * n];
-    build (a, 1, 0, n - 1);
+  this (const T [] a) pure nothrow {
+    n = a.length;
+    t = new T[2 * n];
+    t[0 .. n] = a[0 .. n];
   }
 }
 
@@ -235,8 +227,8 @@ unittest {
   st2.update (2, LongestZeroSegment (1, 1, 1, 1));
   assert (st2.reduce (0, a.length.to!(int)).z == 3);
 
-  auto st3 = new SegmentTreeSliceUpdate!(int) ( [0, 0, 0, 0]);
-  st3.update (1, 2, 1);
+  auto st3 = new SegmentTreeSliceUpdate!(int, (x, y) => x + y) ( [0, 0, 0, 0]);
+  st3.update (1, 3, 1);
   assert (st3[0] == 0);
   assert (st3[1] == 1);
   assert (st3[2] == 1);
