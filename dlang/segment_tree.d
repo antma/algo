@@ -3,7 +3,6 @@ import std.algorithm, std.conv;
 class SegmentTree(T = int, alias fun) {
   private:
   T [] t;
-  static T* [24] x, y, z;
   size_t n;
   final size_t idx (size_t l, size_t r) const pure nothrow @nogc {
     return (l + 1 == r) ? l : n + ((l + r) >> 1);
@@ -32,7 +31,8 @@ class SegmentTree(T = int, alias fun) {
     return t[(l + 1 == r) ? l : n + ((l + r) >> 1)];
   }
   public:
-  final void update (size_t i, T value) nothrow @nogc {
+  final void update (size_t i, T value) pure nothrow @nogc {
+    T* [32] x = void, y = void, z = void;
     int k = 0;
     size_t l = 0, r = n;
     auto m = (l + r) >> 1;
@@ -136,6 +136,7 @@ class SegmentTree2D(T, U, alias fun, alias fun_reduce) : SegmentTree!(T, fun) {
     return reduce2d (0, n, a, b);
   }
   final void update (size_t i, void delegate(T) func) pure nothrow @nogc {
+    T* [32] x = void;
     int k = 0;
     size_t l = 0, r = n;
     while (l + 1 != r) {
