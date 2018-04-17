@@ -3,7 +3,7 @@ object IntM {
   def fromInt (v: Int) = { val x = v % q; new IntM (if (x < 0) x + q else x) }
 }
 
-class IntM private (private val v: Int) {
+class IntM (val v: Int) {
   def + (rhs: IntM) = new IntM ((v + rhs.v) % IntM.q)
   def - (rhs: IntM) = new IntM ((v - rhs.v + IntM.q) % IntM.q)
   def * (rhs: IntM) = new IntM (((v.toLong * rhs.v.toLong) % IntM.q).toInt)
