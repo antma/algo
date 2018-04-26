@@ -32,8 +32,8 @@ class PrimeTable {
   }
   this (size_t n_) pure {
     n = n_;
-    a.length = n;
     auto m = n >> 1;
+    a.length = max (1, m);
     a[0] = true;
     foreach (i; 1 .. ceil((sqrt (n.to!(double)) - 1.0)).to!(size_t)) {
       if (!a[i]) {
