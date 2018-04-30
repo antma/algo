@@ -1,6 +1,8 @@
 object IntM {
   val q = 1000000007
   def fromInt (v: Int) = { val x = v % q; new IntM (if (x < 0) x + q else x) }
+  val zero = new IntM (0)
+  val one = new IntM (1)
 }
 
 class IntM (val v: Int) {
