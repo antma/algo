@@ -1,3 +1,14 @@
+object Gcd {
+  def gcdext (a: Int, b: Int): (Int, Int, Int) = {
+    if (b == 0) (a, 1, 0)
+    else {
+      val t = a / b
+      val (res, y, x) = gcdext (b, a - t * b);
+      (res, x, y - x * t)
+    }
+  }
+}
+
 object IntM {
   val q = 1000000007
   def fromInt (v: Int) = { val x = v % q; new IntM (if (x < 0) x + q else x) }
@@ -6,20 +17,20 @@ object IntM {
 }
 
 class IntM (val v: Int) {
+  def inverse = Gcd.gcdext (IntM.q, v)._3
   def + (rhs: IntM) = new IntM ((v + rhs.v) % IntM.q)
   def - (rhs: IntM) = new IntM ((v - rhs.v + IntM.q) % IntM.q)
   def * (rhs: IntM) = new IntM (((v.toLong * rhs.v.toLong) % IntM.q).toInt)
   def / (rhs: IntM): IntM = {
     assert (rhs.v > 0)
-    val i = rhs.pow (IntM.q - 2)
-    return this * i
+    return this * rhs.inverse
   }
   def + (rhs: Int): IntM = this + (IntM.fromInt (rhs))
   def - (rhs: Int): IntM = this - (IntM.fromInt (rhs))
   def * (rhs: Int): IntM = this * (IntM.fromInt (rhs))
   def / (rhs: Int): IntM = this / (IntM.fromInt (rhs))
   def pow (exp: Int): IntM = {
-    var a = new IntM (1)
+    var a = IntM.one
     var b = this
     var p = exp
     while (p > 0) {
