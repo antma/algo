@@ -34,7 +34,7 @@ class ArraySet (_a: Array[Int]) {
     }
     new ArraySet (b.slice (0, k))
   }
-  def binsearch (v: Int) = {
+  private def binsearch (v: Int) = {
     var l = -1
     var r = n
     while (r - l > 1) {
@@ -59,4 +59,12 @@ class ArraySet (_a: Array[Int]) {
     else if (l > 0) a (l - 1)
     else Int.MinValue
   }
+  //[from, to]
+  def count (from: Int, to: Int): Int = {
+    var l = binsearch (from)
+    if (l < 0 || a(l) != from) l += 1
+    var r = binsearch (to) + 1
+    r - l
+  }
+  override def toString = a.toList.toString
 }

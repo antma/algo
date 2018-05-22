@@ -136,3 +136,30 @@ class SegmentTreeCommutativeLazyPropagation [T: reflect.ClassTag] (n: Int, add: 
     res
   }
 }
+
+//T - Set (found maximum in rectangle for constant set of Points)
+class SegmentTreeSet [T: reflect.ClassTag] (a: Array[T], combine: (T, T) => T) {
+  private val n = a.size
+  private val t = Array.ofDim (2*n)
+  private def build {
+    for (i <- n - 1 until 0 by - 1) {
+      val k = i << 1
+      t(i) = combine (t(k), t(k+1))
+    }
+  }
+  Array.copy (a, 0, t, n, n)
+  build
+  //op - commutative
+  def reduce[U] (l: Int, r: Int, extract: (T) => U, op: (U, U) => U, empty: U) = {
+    var res = empty
+    @tailrec def loop (i: Int, j: Int) {
+      if (i < j) {
+        if (0 != (i & 1)) res = op (res, extract (t(i)))
+        if (0 != (j & 1)) res = op (extract (t(j-1)), res)
+        loop ((i + 1) >>> 1, j  >>> 1)
+      }
+    }
+    loop (l + n, r + n)
+    res
+  }
+}
