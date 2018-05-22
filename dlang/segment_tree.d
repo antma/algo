@@ -1,3 +1,40 @@
+
+class SegmentTree(T = int, alias op) {
+  private:
+  T [] t;
+  size_t n;
+  final void build () pure nothrow @nogc {
+    foreach_reverse (i; 1 .. n) {
+      immutable k = i << 1;
+      t[i] = op (t[k], t[k+1]);
+    }
+  }
+  public:
+  final void update (size_t p, T v) pure nothrow @nogc {
+    for (t[p += n] = v; p > 1; p >>= 1) {
+      t[p>>1] = op (t[p], t[p ^ 1]);
+    }
+  }
+  final T reduce (size_t l, size_t r) const pure nothrow @nogc {
+    T res;
+    for (l += n, r += n; l < r; l >>= 1, r >>= 1) {
+      if (l & 1) {
+        res = op (res, t[l++]);
+      }
+      if (r & 1) {
+        res = op (t[--r], res);
+      }
+    }
+    return res;
+  }
+  this (const T[] a) pure nothrow {
+    n = a.length;
+    t = new T[n];
+    t ~= a;
+    build ();
+  }
+}
+
 //Modification on semi-interval, single element access
 class SegmentTreeSliceUpdate(T = int) {
   private:
