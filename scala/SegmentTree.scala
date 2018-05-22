@@ -2,8 +2,47 @@
 
 import annotation.tailrec
 
-//cummutative lazy propagation segment tree (increment modifications, queries on mininum/maximum)
-class CLPSegmentTree[T: reflect.ClassTag] (n: Int, add: (T, T) => T, max: (T, T) => T, empty: T, zero: T) {
+//Modification on semi-interval, single element access
+class SegmentTreeSliceUpdate [T: reflect.ClassTag] (n: Int, add: (T, T) => T, zero: T) {
+  private val t = Array.fill (2 * n)(zero)
+  private def push {
+    for (i <- 1 until n) {
+      val k = i << 1
+      val v = t(i)
+      t(k) = add (t(k), v)
+      t(k+1) = add (t(k+1), v)
+      t(i) = zero
+    }
+  }
+  def update (l: Int, r: Int, v: T) {
+    val l0 = l + n
+    val r0 = r + n
+    @tailrec def loop (i: Int, j: Int) {
+      if (i < j) {
+        if (0 != (i & 1)) t(i) = add (t(i), v)
+        if (0 != (j & 1)) t(j-1) = add (t(j-1), v)
+        loop ((i + 1) >>> 1, j  >>> 1)
+      }
+    }
+    loop (l0, r0)
+  }
+  def apply (p: Int): T = {
+    var res = zero
+    var k = p + n
+    while (k > 0) {
+      res = add (res, t(k))
+      k >>= 1
+    }
+    res
+  }
+  def force = {
+    push
+    t.slice (n, 2 * n)
+  }
+}
+
+//commutative lazy propagation segment tree (increment modifications, queries on mininum/maximum)
+class SegmentTreeCommutativeLazyPropagation [T: reflect.ClassTag] (n: Int, add: (T, T) => T, max: (T, T) => T, empty: T, zero: T) {
   private val t = Array.fill (2 * n)(zero)
   private val d = Array.fill (n)(zero)
   private val h = (0 to 30).find (i => n < (1 << i)).head
