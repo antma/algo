@@ -1,80 +1,61 @@
-class SegmentTree[T : reflect.ClassTag] (_a: Array[T], op: (T, T) => T) {
-  val a = _a
-  val n = a.length
-  val t = Array.ofDim (4 * n)
-  private def build (v: Int, l: Int, r: Int): Unit = {
-    if (l == r) {
-      t(v) = a(l)
-    } else {
-      val m = (l + r) >> 1
-      build (v << 1, l, m)
-      build ((v << 1) + 1, m + 1, r)
-      t(v) = op (t(v << 1), t((v << 1) + 1))
-    }
-  }
-  build (1, 0, n - 1)
-  private def reduce (v: Int, l: Int, r: Int, a: Int, b: Int): T =  {
-    if (a == l && b == r) {
-      t(v)
-    } else {
-      val m = (l + r) >> 1
-      val x = b.min (m)
-      val y = a.max (m + 1)
-      val w = 2 * v
-      if (a <= x) {
-        if (y <= b) {
-          op (reduce (w, l, m, a, x), reduce (w + 1, m + 1, r, y, b))
-        } else {
-          reduce (w, l, m, a, x)
-        }
-      } else {
-        reduce (w + 1, m + 1, r, y, b)
-      }
-    }
-  }
-  def reduce (a: Int, b: Int): T = reduce (1, 0, n - 1, a, b)
-  def update (i: Int, new_value: T) = {
-    var l = 0
-    var r = n - 1
-    var v = 1
-    while (l < r) {
-      val m = (l + r) >> 1
-      v <<= 1
-      if (i <= m) {
-        r = m
-      } else {
-        v += 1
-        l = m + 1
-      }
-    }
-    t(v) = new_value
-    while (v > 1) {
-      v &= ~1
-      t(v >> 1) = op (t(v), t(v + 1))
-      v >>= 1
-    }
-  }
-}
+//Origin: http://codeforces.com/blog/entry/18051
 
-class SegmentTree2D[T : ClassTag] (_a: Array[T], build_op: (T, T) => T) extends SegmentTree[T] (_a, build_op) {
-  private def reduce2d[U] (v: Int, l: Int, r: Int, a: Int, b: Int, extract_op: (T) => U, reduce_op: (U, U) => U): U =  {
-    if (a == l && b == r) {
-      extract_op (t(v))
-    } else {
-      val m = (l + r) >> 1
-      val x = b.min (m)
-      val y = a.max (m + 1)
-      val w = 2 * v
-      if (a <= x) {
-        if (y <= b) {
-          reduce_op (reduce2d (w, l, m, a, x, extract_op, reduce_op), reduce2d (w + 1, m + 1, r, y, b, extract_op, reduce_op))
-        } else {
-          reduce2d (w, l, m, a, x, extract_op, reduce_op)
-        }
-      } else {
-        reduce2d (w + 1, m + 1, r, y, b, extract_op, reduce_op)
+import annotation.tailrec
+
+//cummutative lazy propagation segment tree (increment modifications, queries on mininum/maximum)
+class CLPSegmentTree[T: reflect.ClassTag] (n: Int, add: (T, T) => T, max: (T, T) => T, empty: T, zero: T) {
+  private val t = Array.fill (2 * n)(zero)
+  private val d = Array.fill (n)(zero)
+  private val h = (0 to 30).find (i => n < (1 << i)).head
+  private def apply (p: Int, v: T) {
+    t(p) = add (t(p), v)
+    if (p < n) d(p) = add (d(p), v)
+  }
+  @tailrec private def build (p: Int) {
+    if (p > 1) {
+      val q = p >>> 1
+      t(q) = add (max (t(q<<1), t((q<<1) + 1)), d(q))
+      build (q)
+    }
+  }
+  private def push (p: Int) {
+    for (s <- h until 0 by -1) {
+      val i = p >>> s
+      if (d(i) != zero) {
+        apply (i << 1, d(i))
+        apply ((i << 1) + 1, d(i))
+        d(i) = zero
       }
     }
   }
-  def reduce2d[U] (a: Int, b: Int, extract_op: (T) => U, reduce_op: (U, U) => U): U = reduce2d (1, 0, n - 1, a, b, extract_op, reduce_op)
+  def update (l: Int, r: Int, v: T) {
+    @tailrec def loop (i: Int, j: Int) {
+      if (i < j) {
+        if (0 != (i & 1)) apply (i, v)
+        if (0 != (j & 1)) apply (j - 1, v)
+        loop ((i + 1) >>> 1, j >>> 1)
+      }
+    }
+    val l0 = l + n
+    val r0 = r + n
+    loop (l0, r0)
+    build (l0)
+    build (r0 - 1)
+  }
+  def reduce (l:Int, r: Int): T = {
+    val l0 = l + n
+    val r0 = r + n
+    push (l0)
+    push (r0 - 1)
+    var res = empty
+    @tailrec def loop (i: Int, j: Int) {
+      if (i < j) {
+        if (0 != (i & 1)) res = max (res, t(i))
+        if (0 != (j & 1)) res = max (t(j-1), res)
+        loop ((i + 1) >>> 1, j  >>> 1)
+      }
+    }
+    loop (l0, r0)
+    res
+  }
 }
