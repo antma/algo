@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <random>
 #include <cstdint>
+#include <ctime>
 
 using namespace std;
 
@@ -14,7 +15,7 @@ class PolyHash {
   public:
   static uint32_t randomP () {
     static int primes[20] = { 2147483647, 2147483629, 2147483587, 2147483579, 2147483563, 2147483549, 2147483543, 2147483497, 2147483489, 2147483477, 2147483423, 2147483399, 2147483353, 2147483323, 2147483269, 2147483249, 2147483237, 2147483179, 2147483171, 2147483137};
-    mt19937 gen;
+    mt19937 gen (time (0));
     return primes[uniform_int_distribution<int> (0, 19) (gen)];
   }
   PolyHash (const string &s, uint32_t p) :
