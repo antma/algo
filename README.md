@@ -1,3 +1,6 @@
+## FenwickTree
+- [Distant Pairs](https://www.hackerrank.com/challenges/distant-pairs/problem)
+
 ## PolyHash
 - [Shifted Palindrome](https://www.codechef.com/problems/SHIFTPAL)
 

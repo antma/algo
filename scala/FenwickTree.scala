@@ -19,31 +19,35 @@ object FenwickTree {
   }
 }
 
-class FenwickTree[T : reflect.ClassTag] (n: Int, op: (T, T) => T, default_value: T) {
-  val a = Array.fill (n) (default_value)
+class FenwickTree[T : reflect.ClassTag] (n: Int, op: (T, T) => T, zero: T) {
+  val a = Array.fill (n) (zero)
   def add (x: Int, v: T) {
-    for (i <- new FenwickTree.IterA (x, n)) {
+    var i = x
+    while (i < n) {
       a(i) = op (a(i), v)
+      i |= i + 1
     }
   }
   def reduce (x: Int): T = {
-    var r = default_value
-    for (i <- new FenwickTree.IterR (x)) {
+    var r = zero
+    var i = x
+    while (i >= 0) {
       r = op (r, a(i))
+      i = (i & (i + 1)) - 1
     }
     r
   }
 }
 
-class FenwickTree2D[T : reflect.ClassTag] (dx: Int, dy:Int, op: (T, T) => T, default_value: T) {
-  val a = Array.fill (dx, dy) (default_value)
+class FenwickTree2D[T : reflect.ClassTag] (dx: Int, dy:Int, op: (T, T) => T, zero: T) {
+  val a = Array.fill (dx, dy) (zero)
   def add (x: Int, y: Int, v: T) {
     for (i <- new FenwickTree.IterA (x, dx); j <- new FenwickTree.IterA (y, dy)) {
       a(i)(j) = op (a(i)(j), v)
     }
   }
   def reduce (x: Int, y: Int): T = {
-    var r = default_value
+    var r = zero
     for (i <- new FenwickTree.IterR (x); j <- new FenwickTree.IterR (y)) {
       r = op (r, a(i)(j))
     }
