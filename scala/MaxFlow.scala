@@ -1,6 +1,5 @@
-
 //0 - sink, (n - 1) - target
-class Flow (_n: Int) {
+class MaxFlow (_n: Int) {
   type EdgeCost = Int
   val n = _n
   val edges = Array.ofDim[List[Int]] (n)
@@ -36,8 +35,7 @@ class Flow (_n: Int) {
     e(j) += d
   }
   private def lift (i: Int) = {
-    val l = edges(i).filter (j => f(i)(j) < c(i)(j))
-    h(i) = 1 + l.map (j => h(j)).min
+    h(i) = 1 + edges(i).view.filter (j => f(i)(j) < c(i)(j)).map (j => h(j)).min
   }
   private def discharge (i: Int) = {
     while (e(i) > 0) {
@@ -62,7 +60,6 @@ class Flow (_n: Int) {
       next (u) = v
       prev (v) = u
     }
-    def len (i: Int): Int = if (i == 0) 0 else 1 + len (next(i))
     for (i <- 1 to n - 2) {
       next(i) = i + 1
       prev(i) = i - 1
@@ -70,7 +67,6 @@ class Flow (_n: Int) {
     }
     next(0) = 1
     addLink (n - 2, 0)
-    assert (len (next(0)) == n - 2)
     var i = 1
     while (i > 0) {
       val old_height = h(i)
@@ -81,7 +77,6 @@ class Flow (_n: Int) {
         addLink (i, next(0))
         addLink (0, i)
       }
-      assert (len (next(0)) == n - 2)
       i = next(i)
     }
     (1 to n-1).map (i => f(0)(i)).sum
