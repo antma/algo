@@ -1,8 +1,9 @@
 import std.algorithm;
 import std.math;
+import std.complex;
 
 alias Real = real;
-alias CReal = creal;
+alias CReal = Complex!real;
 
 class FFT {
   private size_t[] tbl;
@@ -47,14 +48,16 @@ class FFT {
       immutable m = 1 << t;
       immutable mh = m >> 1;
       immutable Real delta = s * 2.0 * PI / m;
-      immutable CReal w = expi (delta);
-      CReal e = 1.0 + 0.0i;
+      immutable CReal w = std.complex.expi (delta);
+      CReal e = CReal (1.0, 0.0);
       foreach (j; 0 .. mh) {
         r = 0;
         while (r < n) {
-          immutable u = a[r + j], v = a[r + j + mh] * e;
-          a[r + j] = u + v;
-          a[r + j + mh] = u - v;
+          CReal *x = &a[r + j];
+          CReal *y = x + mh;
+          immutable u = *x, v = (*y) * e;
+          *x = u + v;
+          *y = u - v;
           r += m;
         }
         e *= w;
@@ -95,4 +98,3 @@ class FFT {
     tbl[] = size_t.max;
   }
 }
-
