@@ -1,5 +1,6 @@
+import std.traits;
 
-class SegmentTree(T = int, alias op) {
+class SegmentTree(T = int, alias op) if (isSomeFunction!op) {
   private:
   T [] t;
   size_t n;
@@ -35,7 +36,7 @@ class SegmentTree(T = int, alias op) {
   }
 }
 
-class NonCommutativeSegmentTree(T = int, alias op) {
+class NonCommutativeSegmentTree(T = int, alias op) if (isSomeFunction!op) {
   private:
   T [] t;
   size_t n;
@@ -111,5 +112,36 @@ class SegmentTreeSliceUpdate(T = int) {
   this (int _n) pure nothrow {
     n = _n;
     t = new T[2 * n];
+  }
+}
+
+class SetSegmentTree(S, alias combine) if (isSomeFunction!combine) {
+  private:
+  S [] t;
+  size_t n;
+  final void build () {
+    foreach_reverse (i; 1 .. n) {
+      immutable k = i << 1;
+      t[i] = combine (t[k], t[k+1]);
+    }
+  }
+  public:
+  final U reduce(U, U zero) (size_t l, size_t r, U delegate(U, S) op) {
+    U res = zero;
+    for (l += n, r += n; l < r; l >>= 1, r >>= 1) {
+      if (l & 1) {
+        res = op (res, t[l++]);
+      }
+      if (r & 1) {
+        res = op (res, t[--r]);
+      }
+    }
+    return res;
+  }
+  this (S[] a) {
+    n = a.length;
+    t = new S[n];
+    t ~= a;
+    build ();
   }
 }
