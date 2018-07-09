@@ -35,6 +35,33 @@ class Treap(Key, Value, int flags = 3) {
       if (t.left) t.sz += t.left.sz;
       if (t.right) t.sz += t.right.sz;
     }
+    static size_t _countLess (Node t, Key x) {
+      size_t s;
+      while (t) {
+        if (t.x < x) {
+          s += 1 + getSize (t.left);
+          t = t.right;
+        } else {
+          t = t.left;
+        }
+      }
+      return s;
+    }
+    static Node _kthNode (Node t, size_t k) {
+      if (k >= getSize (t)) return null;
+      while (t) {
+        immutable ls = getSize (t.left);
+        if (k >= ls + 1) {
+          k -= ls + 1;
+          t = t.right;
+        } else if (k < ls) {
+          t = t.left;
+        } else {
+          return t;
+        }
+      }
+      assert (false);
+    }
   }
 
   static Node _find (Node t, Key x) {
@@ -129,6 +156,15 @@ class Treap(Key, Value, int flags = 3) {
       right_path ? parent.right : parent.left = p;
     } else {
       root = p;
+    }
+  }
+  static if (flags & 2) {
+    final size_t countLess (Key x) { return _countLess (root, x); }
+    final void kthKey (size_t k, ref Key x) {
+      Node p = _kthNode (root, k);
+      if (p) {
+        x = p.x;
+      }
     }
   }
 }
