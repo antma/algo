@@ -30,10 +30,10 @@ class Treap(Key, Value, int flags = 3) {
     static int getSize (const Node t) {
       return t ? t.sz : 0;
     }
-    static void relax (Node t) {
-      if (t) {
-        t.sz = 1 + getSize (t.left) + getSize (t.right);
-      }
+    static void _relax (Node t) {
+      t.sz = 1;
+      if (t.left) t.sz += t.left.sz;
+      if (t.right) t.sz += t.right.sz;
     }
   }
 
@@ -55,7 +55,7 @@ class Treap(Key, Value, int flags = 3) {
       l = t;
       _split (t.right, x, t.right, r);
     }
-    static if (flags & 2) relax (t);
+    static if (flags & 2) _relax (t);
   }
 
   static Node _insert (Node t, Node p) {
@@ -68,35 +68,44 @@ class Treap(Key, Value, int flags = 3) {
       } else {
         t.right = _insert (t.right, p);
       }
-      static if (flags & 2) relax (t);
+      static if (flags & 2) _relax (t);
       return t;
     }
     _split (t, p.x, p.left, p.right);
-    static if (flags & 2) relax (p);
+    static if (flags & 2) _relax (p);
     return p;
   }
 
   static Node _merge (Node l, Node r) {
-    Node t;
     if (!l) {
-      t = r;
+      return r;
     } else if (!r) {
-      t = l;
+      return l;
     } else if (l.y > r.y) {
       l.right = _merge (l.right, r);
-      t = l;
+      static if (flags & 2) _relax (l);
+      return l;
     } else {
       r.left = _merge (l, r.left);
-      t = r;
+      static if (flags & 2) _relax (r);
+      return r;
     }
-    static if (flags & 2) relax (t);
-    return t;
   }
 
-  static Node _remove (Node t, Key x) {
-    Node r = (t.x == x) ? _merge (t.left, t.right) : _remove (x < t.x ? t.left : t.right, x);
-    static if (flags & 2) relax (t);
-    return r;
+  static Node _remove (Node t, Key x, ref Node parent, ref bool right_path) in {
+    assert (t);
+  } body {
+    if (t.x == x) {
+      return t;
+    }
+    parent = t;
+    static if (flags & 2) --t.sz;
+    if (x < t.x) {
+      right_path = false;
+      return _remove (t.left, x, parent, right_path);
+    }
+    right_path = true;
+    return _remove (t.right, x, parent, right_path);
   }
 
   public:
@@ -111,18 +120,16 @@ class Treap(Key, Value, int flags = 3) {
     }
   }
 
-  final void remove (Key key) {
-    root = _remove (root, key);
-  }
-
-  @property
-  final auto dup () {
-    static if (flags & 1) Node p = new Node (x, y, value);
-    else Node p = new Node (x, y);
-    if (left) p.left = p.left.dup;
-    if (right) p.right = p.right.dup;
-    static if (flags & 2) p.sz = sz;
-    return p;
+  final void remove (Key x) {
+    Node parent;
+    bool right_path;
+    auto t = _remove (root, x, parent, right_path);
+    Node p = _merge (t.left, t.right);
+    if (parent) {
+      right_path ? parent.right : parent.left = p;
+    } else {
+      root = p;
+    }
   }
 }
 
@@ -249,4 +256,11 @@ class ImplicitKeyTreap(Value) {
   final int getSize () const {
     return _getSize (root);
   }
+}
+
+unittest {
+  auto t = new Treap!(int, long, 3);
+  t.insert (1, 2);
+  auto t2 = new Treap!(int, long, 2);
+  t2.insert (1);
 }
