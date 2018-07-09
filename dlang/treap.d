@@ -65,9 +65,10 @@ class Treap(Key, Value, int flags = 3) {
   }
 
   static Node _find (Node t, Key x) {
-    if (!t) return null;
-    if (t.x == x) return t;
-    return (x < t.x) ? _find (t.left, x) : _find (t.right, x);
+    while (t && t.x != x) {
+      t = (x < t.x) ? t.left : t.right;
+    }
+    return t;
   }
 
   static void _split (Node t, Key x, ref Node l, ref Node r) {
