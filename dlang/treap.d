@@ -35,6 +35,18 @@ class Treap(Key, Value, int flags = 3) {
       if (t.left) t.sz += t.left.sz;
       if (t.right) t.sz += t.right.sz;
     }
+    static size_t _countLess (Node *t, Key x) {
+      size_t s;
+      while (t) {
+        if (t.x < x) {
+          s += 1 + _size (t.left);
+          t = t.right;
+        } else {
+          t = t.left;
+        }
+      }
+      return s;
+    }
     static Node *_kthNode (Node *t, size_t k) {
       if (k >= _size (t)) return null;
       while (t) {
@@ -153,6 +165,14 @@ class Treap(Key, Value, int flags = 3) {
       p.x = key;
       p.y = uniform (int.min, int.max);
       root = _insert (root, p);
+    }
+  }
+  static if (flags & 2) {
+    final size_t countLess (Key x) { return _countLess (root, x); }
+    final Key kthKey (size_t k) {
+      Node *p = _kthNode (root, k);
+      assert (p);
+      return p.x;
     }
   }
 
@@ -301,6 +321,9 @@ unittest {
   auto t2 = new Treap!(int, long, 2);
   t2.insert (1);
   assert (t2.contains (1));
+  assert (t2.kthKey (0) == 1);
+  assert (t2.countLess (2) == 1);
+  assert (t2.countLess (1) == 0);
   assert (t2.remove (1));
   assert (!t2.contains (1));
 
