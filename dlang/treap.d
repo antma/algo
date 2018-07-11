@@ -1,3 +1,4 @@
+import std.algorithm, std.conv, std.range;
 import std.random;
 
 //flags: +1 - has value
@@ -190,35 +191,44 @@ class Treap(Key, Value, int flags = 3) {
   final bool contains (Key x) { return _find (root, x) !is null; }
 }
 
-class ImplicitKeyTreap(Value) {
-  Node root;
-  static class Node {
-    Node left, right;
-    immutable Value value;
-    immutable int y;
+class ImplicitKeyTreap(Value, string push_op="", string update_op="") {
+  Node *root;
+  static struct Node {
+    Node *left;
+    Node *right;
+    Value value;
+    int y;
     int sz;
-    this (Value _value) {
-      y = uniform (int.min, int.max);
-      value = _value;
-      sz = 1;
+  }
+  static Node *newNode (Value _value) {
+    Node *p = new Node;
+    p.value = _value;
+    p.y = uniform (int.min, int.max);
+    p.sz = 1;
+    return p;
+  }
+
+  static if (push_op != "") {
+    private static void _push (Node *t) {
+      mixin (push_op);
     }
   }
 
-  private static int _getSize (const Node t) {
+  private static int _size (const Node *t) {
     return t ? t.sz : 0;
   }
 
-  private static void relax (Node t) {
-    if (t) {
-      t.sz = 1 + _getSize (t.left) + _getSize (t.right);
-    }
+  private static void _relax (Node *t) {
+    t.sz = 1 + _size (t.left) + _size (t.right);
   }
-  private static void _split (Node t, ref Node l, ref Node r, int key, int s) {
+
+  private static void _split (Node *t, ref Node *l, ref Node *r, int key, int s) {
     if (!t) {
       l = r = null;
       return;
     }
-    immutable ls = _getSize (t.left);
+    static if (push_op != "") _push (t);
+    immutable ls = _size (t.left);
     if (key <= s + ls) {
       r = t;
       _split (t.left, l, t.left, key, s);
@@ -226,29 +236,36 @@ class ImplicitKeyTreap(Value) {
       l = t;
       _split (t.right, t.right, r, key, s + 1 + ls);
     }
-    relax (t);
+    _relax (t);
   }
 
-  private static Node _merge (Node l, Node r) {
-    Node t;
+  private static Node *_merge (Node *l, Node *r) {
     if (!l) {
-      t = r;
+      static if (push_op != "") if (r) _push (r);
+      return r;
     } else if (!r) {
-      t = l;
-    } else if (l.y > r.y) {
-      t = l;
-      l.right = _merge (l.right, r);
+      static if (push_op != "") _push (l);
+      return l;
     } else {
-      t = r;
-      r.left = _merge (l, r.left);
+      static if (push_op != "") {
+        _push (l);
+        _push (r);
+      }
+      if (l.y > r.y) {
+        l.right = _merge (l.right, r);
+        _relax (l);
+        return l;
+      } else {
+        r.left = _merge (l, r.left);
+        _relax (r);
+        return r;
+      }
     }
-    relax (t);
-    return t;
   }
 
-  private static inout(Node) _get (inout(Node) t, int pos) in {
+  private static inout(Node*) _get (inout(Node*) t, int pos) in {
     assert (pos >= 0);
-    assert (pos < _getSize (t));
+    assert (pos < _size (t));
     assert (t);
   } body {
     if (t.left) {
@@ -263,11 +280,12 @@ class ImplicitKeyTreap(Value) {
     return _get (t.right, pos - 1);
   }
 
-  private static Node _remove (Node t, int pos, ref Node parent, ref bool right_path) in {
+  private static Node *_remove (Node *t, int pos, ref Node *parent, ref bool right_path) in {
     assert (pos >= 0);
-    assert (pos < _getSize (t));
+    assert (pos < _size (t));
     assert (t);
   } body {
+    static if (push_op != "") _push (t);
     if (t.left) {
       if (pos < t.left.sz) {
         parent = t;
@@ -287,16 +305,16 @@ class ImplicitKeyTreap(Value) {
   }
 
   final void insert (int pos, Value value) {
-    Node tl, tr;
+    Node *tl, tr;
     _split (root, tl, tr, pos, 0);
-    root = _merge (_merge (tl, new Node (value)), tr);
+    root = _merge (_merge (tl, newNode (value)), tr);
   }
 
   final void remove (int pos) {
-    Node parent;
+    Node *parent;
     bool right_path;
     auto t = _remove (root, pos, parent, right_path);
-    Node p = _merge (t.left, t.right);
+    Node *p = _merge (t.left, t.right);
     if (parent) {
       right_path ? parent.right : parent.left = p;
     } else {
@@ -305,17 +323,51 @@ class ImplicitKeyTreap(Value) {
   }
 
   final Value get (int pos) const in {
-    assert (pos < getSize ());
+    assert (pos < size ());
   } body {
     return _get (root, pos).value;
   }
 
-  final int getSize () const {
-    return _getSize (root);
+  final int size () const {
+    return _size (root);
+  }
+
+  final Value[] values () {
+    Value[] a = [];
+    a.reserve (_size (root));
+    void rec (Node *t) {
+      static if (push_op != "") _push (t);
+      if (t.left) rec (t.left);
+      a ~= t.value;
+      if (t.right) rec (t.right);
+    }
+    if (root) rec (root);
+    return a;
+  }
+
+  static if (update_op != "") {
+    final void update (size_t l, size_t r) {
+      Node *t1, t2, t, t4;
+      _split (root, t1, t2, l.to!int, 0);
+      _split (t2, t, t4, (r - l).to!int, 0);
+      mixin (update_op);
+      root = _merge (t1, _merge (t, t4));
+    }
   }
 }
 
+alias ReversingTreap = ImplicitKeyTreap!(int, q{
+  if (t.value < 0) {
+    swap (t.left, t.right);
+    if (t.left) t.left.value *= -1;
+    if (t.right) t.right.value *= -1;
+    t.value *= -1;
+  }
+}, "t.value *= -1;");
+
 unittest {
+  import std.range, std.stdio;
+  writeln ("Testing ", __FILE__, " ...");
   auto t = new Treap!(int, long, 3);
   t.insert (1, 2);
   auto t2 = new Treap!(int, long, 2);
@@ -333,4 +385,10 @@ unittest {
   assert (t0.remove (1));
   assert (!t0.contains (1));
 
+  auto tr = new ReversingTreap;
+  foreach (i; iota (1, 11)) tr.insert (i-1, i);
+  tr.update (0, 10);
+  assert (equal (tr.values (), retro (iota (1, 11))));
+  tr.remove (0);
+  assert (equal (tr.values (), retro (iota (1, 10))));
 }
