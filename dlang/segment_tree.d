@@ -1,29 +1,30 @@
+import std.functional;
 import std.traits;
 
-class SegmentTree(T = int, alias op) if (isSomeFunction!op) {
+class SegmentTree(T = int, alias op="a+b", T zero = T.init) {
   private:
   T [] t;
   size_t n;
   final void build () pure nothrow @nogc {
     foreach_reverse (i; 1 .. n) {
       immutable k = i << 1;
-      t[i] = op (t[k], t[k+1]);
+      t[i] = binaryFun!op (t[k], t[k+1]);
     }
   }
   public:
   final void update (size_t p, T v) pure nothrow @nogc {
     for (t[p += n] = v; p > 1; p >>= 1) {
-      t[p>>1] = op (t[p], t[p ^ 1]);
+      t[p>>1] = binaryFun!op (t[p], t[p ^ 1]);
     }
   }
   final T reduce (size_t l, size_t r) const pure nothrow @nogc {
-    T res;
+    T res = zero;
     for (l += n, r += n; l < r; l >>= 1, r >>= 1) {
       if (l & 1) {
-        res = op (res, t[l++]);
+        res = binaryFun!op (res, t[l++]);
       }
       if (r & 1) {
-        res = op (t[--r], res);
+        res = binaryFun!op (t[--r], res);
       }
     }
     return res;
@@ -36,14 +37,14 @@ class SegmentTree(T = int, alias op) if (isSomeFunction!op) {
   }
 }
 
-class NonCommutativeSegmentTree(T = int, alias op) if (isSomeFunction!op) {
+class NonCommutativeSegmentTree(T = int, alias op) {
   private:
   T [] t;
   size_t n;
   final void build () {
     foreach_reverse (i; 1 .. n) {
       immutable k = i << 1;
-      t[i] = op (t[k], t[k+1]);
+      t[i] = binaryFun!op (t[k], t[k+1]);
     }
   }
   public:
@@ -51,20 +52,20 @@ class NonCommutativeSegmentTree(T = int, alias op) if (isSomeFunction!op) {
     for (t[p += n] = v; p > 1; ) {
       p >>= 1;
       immutable k = p << 1;
-      t[p] = op (t[k], t[k+1]);
+      t[p] = binaryFun!op (t[k], t[k+1]);
     }
   }
   final T reduce (size_t l, size_t r) const {
     T res1, res2;
     for (l += n, r += n; l < r; l >>= 1, r >>= 1) {
       if (l & 1) {
-        res1 = op (res1, t[l++]);
+        res1 = binaryFun!op (res1, t[l++]);
       }
       if (r & 1) {
-        res2 = op (t[--r], res2);
+        res2 = binaryFun!op (t[--r], res2);
       }
     }
-    return op (res1, res2);
+    return binaryFun!op (res1, res2);
   }
   this (const T[] a) {
     n = a.length;
@@ -144,4 +145,11 @@ class SetSegmentTree(S, alias combine) if (isSomeFunction!combine) {
     t ~= a;
     build ();
   }
+}
+
+unittest {
+  import std.stdio, std.conv, std.random, std.range;
+  writeln ("Testing ", __FILE__, " ...");
+  auto st = new SegmentTree!(long, "a+b") ([1L, 2L]);
+  assert (st.reduce (0, 2) == 3L);
 }
