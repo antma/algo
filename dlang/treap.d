@@ -191,74 +191,153 @@ class Treap(Key, Value, int flags = 3) {
   final bool contains (Key x) { return _find (root, x) !is null; }
 }
 
-class ImplicitKeyTreap(Value, string push_op="", string update_op="") {
-  Node *root;
-  static struct Node {
-    Node *left;
-    Node *right;
-    Value value;
-    int y;
-    int sz;
-  }
-  static Node *newNode (Value _value) {
-    Node *p = new Node;
-    p.value = _value;
-    p.y = uniform (int.min, int.max);
-    p.sz = 1;
-    return p;
-  }
 
-  static if (push_op != "") {
-    private static void _push (Node *t) {
-      mixin (push_op);
-    }
+struct ImplicitKeyTreapNode(Value, alias Extra="") {
+  enum has_extra = is (Extra == struct);
+  ImplicitKeyTreapNode!(Value, Extra)* left, right;
+  Value value;
+  static if (has_extra) Extra extra;
+  int y;
+  int sz;
+  this (Value _value) {
+    value = _value;
+    y = uniform (int.min, int.max);
+    sz = 1;
   }
+}
+
+class ImplicitKeyTreap(Value, alias Extra="", alias relax_op="", alias push_op="", alias update_op="") {
+  enum has_push = isCallable!push_op;
+  enum has_relax = isCallable!relax_op;
+  enum has_update = isCallable!update_op;
+  static assert (has_push == has_update);
+  alias Node = ImplicitKeyTreapNode!(Value, Extra);
+  Node *root;
 
   private static int _size (const Node *t) {
     return t ? t.sz : 0;
   }
 
-  private static void _relax (Node *t) {
-    t.sz = 1 + _size (t.left) + _size (t.right);
+  private static void _relax_inc (Node *t) {
+    ++t.sz;
+    static if (has_relax) relax_op (t);
+  }
+  
+  private static void _relax_dec (Node *t) {
+    --t.sz;
+    static if (has_relax) relax_op (t);
   }
 
-  private static void _split (Node *t, ref Node *l, ref Node *r, int key, int s) {
+  private static void _relax (Node *t) {
+    t.sz = 1;
+    if (t.left) t.sz += t.left.sz;
+    if (t.right) t.sz += t.right.sz;
+    static if (has_relax) relax_op (t);
+  }
+
+  private static void _split (Node *t, ref Node *l, ref Node *r, int key) {
     if (!t) {
       l = r = null;
       return;
     }
-    static if (push_op != "") _push (t);
-    immutable ls = _size (t.left);
-    if (key <= s + ls) {
+    static if (has_push) push_op (t);
+    int ls;
+    if (t.left) ls = t.left.sz;
+    if (key <= ls) {
+      _split (t.left, l, t.left, key);
       r = t;
-      _split (t.left, l, t.left, key, s);
     } else {
+      _split (t.right, t.right, r, key - ls - 1);
       l = t;
-      _split (t.right, t.right, r, key, s + 1 + ls);
     }
     _relax (t);
   }
-
-  private static Node *_merge (Node *l, Node *r) {
-    if (!l) {
-      static if (push_op != "") if (r) _push (r);
-      return r;
-    } else if (!r) {
-      static if (push_op != "") _push (l);
-      return l;
+  
+  private static void _build (ref Node *t, Value[] v) {
+    if (v.length == 1) {
+      t = new Node (v[0]);
+      static if (has_relax) relax_op (t);
     } else {
-      static if (push_op != "") {
-        _push (l);
-        _push (r);
+      immutable m = v.length >> 1;
+      Node* tl, tr;
+      _build (tl, v[0 .. m]);
+      _build (tr, v[m .. $]);
+      _merge (t, tl, tr);
+    }
+  }
+  
+  private static void _insert (ref Node *t, Node *p, int pos) {
+	if (!t) {
+      static if (has_relax) relax_op (p);
+	  t = p;
+      return;
+    } else if (p.y >= t.y) {
+      _split (t, p.left, p.right, pos);
+      t = p;
+      _relax (t);
+    } else {
+      int ls;
+      if (t.left) ls = t.left.sz;
+      if (pos <= ls) {
+        _insert (t.left, p, pos);
+        _relax_inc (t);
+      } else {
+        _insert (t.right, p, pos - ls - 1);
+        _relax_inc (t);
+      }
+    }
+  } 
+
+  private static void _merge (ref Node *t, Node *l, Node *r) {
+    if (!l) {
+      static if (has_push) if (r) push_op (r);
+      t = r;
+    } else if (!r) {
+      static if (has_push) push_op (l);
+      t = l;
+    } else {
+      static if (has_push) {
+        push_op (l);
+        push_op (r);
       }
       if (l.y > r.y) {
-        l.right = _merge (l.right, r);
+        _merge (l.right, l.right, r);
         _relax (l);
-        return l;
+        t = l;
       } else {
-        r.left = _merge (l, r.left);
+        _merge (r.left, l, r.left);
         _relax (r);
-        return r;
+        t = r;
+      }
+    }
+  }
+  
+  private static _replace (Node *t, int pos, Value value) {
+    static if (has_relax) {
+      Node*[128] path = void;
+      int n;
+    }
+    while (true) {
+      static if (has_push) push_op (t);
+      static if (has_relax) {
+        path[n++] = t;
+      }
+      int ls;
+      if (t.left) ls = t.left.sz;
+      if (pos == ls) {
+        t.value = value;
+        break;
+      }
+      if (pos < ls) {
+        t = t.left;
+      } else {
+        t = t.right;
+        pos -= ls + 1;
+      }
+    }
+    static if (has_relax) {
+      foreach_reverse (i; 0 .. n) {
+        relax_op (path[i]);
       }
     }
   }
@@ -279,47 +358,36 @@ class ImplicitKeyTreap(Value, string push_op="", string update_op="") {
     }
     return _get (t.right, pos - 1);
   }
-
-  private static Node *_remove (Node *t, int pos, ref Node *parent, ref bool right_path) in {
+  
+  private static void _remove (ref Node *t, int pos) in {
+    assert (t);
     assert (pos >= 0);
     assert (pos < _size (t));
-    assert (t);
   } body {
-    static if (push_op != "") _push (t);
-    if (t.left) {
-      if (pos < t.left.sz) {
-        parent = t;
-        right_path = false;
-        --t.sz;
-        return _remove (t.left, pos, parent, right_path);
-      }
-      pos -= t.left.sz;
+    static if (has_push) push_op (t);
+    int ls;
+    if (t.left) ls = t.left.sz;
+    if (pos == ls) {
+      _merge (t, t.left, t.right);
+    } else if (pos < ls) {
+      _remove (t.left, pos);
+      if (t) _relax_dec (t);
+    } else {
+      _remove (t.right, pos - ls - 1);
+      if (t) _relax_dec (t);
     }
-    if (!pos) {
-      return t;
-    }
-    parent = t;
-    right_path = true;
-    --t.sz;
-    return _remove (t.right, pos - 1, parent, right_path);
   }
 
   final void insert (int pos, Value value) {
-    Node *tl, tr;
-    _split (root, tl, tr, pos, 0);
-    root = _merge (_merge (tl, newNode (value)), tr);
+    _insert (root, new Node (value), pos);
+  }
+  
+  final void remove (int pos) {
+    _remove (root, pos);
   }
 
-  final void remove (int pos) {
-    Node *parent;
-    bool right_path;
-    auto t = _remove (root, pos, parent, right_path);
-    Node *p = _merge (t.left, t.right);
-    if (parent) {
-      right_path ? parent.right : parent.left = p;
-    } else {
-      root = p;
-    }
+  final void replace (int pos, Value value) {
+    _replace (root, pos, value);
   }
 
   final Value get (int pos) const in {
@@ -336,7 +404,7 @@ class ImplicitKeyTreap(Value, string push_op="", string update_op="") {
     Value[] a = [];
     a.reserve (_size (root));
     void rec (Node *t) {
-      static if (push_op != "") _push (t);
+      static if (has_push) push_op (t);
       if (t.left) rec (t.left);
       a ~= t.value;
       if (t.right) rec (t.right);
@@ -344,26 +412,56 @@ class ImplicitKeyTreap(Value, string push_op="", string update_op="") {
     if (root) rec (root);
     return a;
   }
-
-  static if (update_op != "") {
-    final void update (size_t l, size_t r) {
-      Node *t1, t2, t, t4;
-      _split (root, t1, t2, l.to!int, 0);
-      _split (t2, t, t4, (r - l).to!int, 0);
-      mixin (update_op);
-      root = _merge (t1, _merge (t, t4));
+  
+  static if (has_relax) {
+    private Node[256] nodes;
+    private int cur;
+    
+    private void persistent_split (Node *t, ref Node *l, ref Node *r, int key) {
+      if (!t) {
+        l = r = null;
+        return;
+      }
+      int ls;
+      if (t.left) ls = t.left.sz;
+      Node *q = &nodes[cur++];
+      q.left = t.left;
+      q.right = t.right;
+      q.value = t.value;
+      q.y = t.y;
+      if (key <= ls) {
+        persistent_split (q.left, l, q.left, key);
+        r = q;
+      } else {
+        persistent_split (q.right, q.right, r, key - ls - 1);
+        l = q;
+      }
+      _relax (q);
+    }
+    final Extra reduce (int l, int r) {
+      cur = 0;
+      Node *t1, t2, t3;
+      persistent_split (root, t1, t2, l);
+      persistent_split (t2, t2, t3, r - l);
+      auto v = t2.extra;
+      return v;
     }
   }
-}
 
-alias ReversingTreap = ImplicitKeyTreap!(int, q{
-  if (t.value < 0) {
-    swap (t.left, t.right);
-    if (t.left) t.left.value *= -1;
-    if (t.right) t.right.value *= -1;
-    t.value *= -1;
+  static if (has_update) {
+    final void update (size_t l, size_t r) {
+      Node *t1, t2, t, t4, t5;
+      _split (root, t1, t2, l.to!int, 0);
+      _split (t2, t, t4, (r - l).to!int, 0);
+      update_op (t);
+      _merge (t5, t, t4);
+      _merge (root, t1, t5);
+    }
   }
-}, "t.value *= -1;");
+  this (Value[] v) {
+    _build (root, v);  
+  }
+}
 
 unittest {
   import std.range, std.stdio;
@@ -384,11 +482,4 @@ unittest {
   assert (t0.contains (1));
   assert (t0.remove (1));
   assert (!t0.contains (1));
-
-  auto tr = new ReversingTreap;
-  foreach (i; iota (1, 11)) tr.insert (i-1, i);
-  tr.update (0, 10);
-  assert (equal (tr.values (), retro (iota (1, 11))));
-  tr.remove (0);
-  assert (equal (tr.values (), retro (iota (1, 10))));
 }
