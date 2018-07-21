@@ -1,3 +1,4 @@
+import std.algorithm;
 import std.range;
 import std.stdio;
 import std.traits;
