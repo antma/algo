@@ -5,9 +5,22 @@ import std.traits;
 class InputReader {
   private:
   ubyte[] p;
-  ubyte[] buffer;
+  ubyte[8<<20] buffer = void;
   size_t cur;
   public:
+  final ubyte skipByte (ubyte lo) {
+    while (true) {
+      auto a = p[cur .. $];
+      auto r = a.find! (c => c >= lo);
+      if (!r.empty) {
+        cur += a.length - r.length;
+        return p[cur++];
+      }
+      p = stdin.rawRead (buffer);
+      cur = 0;
+      if (p.empty) return 0;
+    }
+  }
   final ubyte nextByte () {
     if (cur < p.length) {
        return p[cur++];
@@ -21,41 +34,30 @@ class InputReader {
   template next(T) if (isSigned!T) {
     final T next ()  {
       T res;
-      while (true) {
-        ubyte b = nextByte ();
-        if (48 <= b && b < 58) {
-          res = b - 48;
-          break;
-        }
-        if (b == 45) {
-          while (true) {
-            b = nextByte ();
-            if (b < 48 || b >= 58) {
-              return res;
-            }
-            res = res * 10 - (b - 48);
+      ubyte b = skipByte (45);
+      if (b == 45) {
+        while (true) {
+          b = nextByte ();
+          if (b < 48 || b >= 58) {
+            return res;
           }
+          res = res * 10 - (b - 48);
         }
-      }
-      while (true) {
-        ubyte b = nextByte ();
-        if (b < 48 || b >= 58) {
-          return res;
+      } else {
+        res = b - 48;
+        while (true) {
+          b = nextByte ();
+          if (b < 48 || b >= 58) {
+            return res;
+          }
+          res = res * 10 + (b - 48);
         }
-        res = res * 10 + (b - 48);
       }
     }
   }
   template next(T) if (isUnsigned!T) {
     final T next () {
-      T res;
-      while (true) {
-        ubyte b = nextByte ();
-        if (48 <= b && b < 58) {
-          res = b - 48;
-          break;
-        }
-      }
+      T res = skipByte (48) - 48;
       while (true) {
         ubyte b = nextByte ();
         if (b < 48 || b >= 58) {
@@ -66,8 +68,4 @@ class InputReader {
       return res;
     }
   }
-  this () {
-    buffer = new ubyte[16<<20];
-  }
 }
-
