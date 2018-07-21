@@ -191,7 +191,6 @@ class Treap(Key, Value, int flags = 3) {
   final bool contains (Key x) { return _find (root, x) !is null; }
 }
 
-
 struct ImplicitKeyTreapNode(Value, alias Extra="") {
   enum has_extra = is (Extra == struct);
   ImplicitKeyTreapNode!(Value, Extra)* left, right;
@@ -222,7 +221,7 @@ class ImplicitKeyTreap(Value, alias Extra="", alias relax_op="", alias push_op="
     ++t.sz;
     static if (has_relax) relax_op (t);
   }
-  
+
   private static void _relax_dec (Node *t) {
     --t.sz;
     static if (has_relax) relax_op (t);
@@ -252,7 +251,7 @@ class ImplicitKeyTreap(Value, alias Extra="", alias relax_op="", alias push_op="
     }
     _relax (t);
   }
-  
+
   private static void _build (ref Node *t, Value[] v) {
     if (v.length == 1) {
       t = new Node (v[0]);
@@ -265,7 +264,7 @@ class ImplicitKeyTreap(Value, alias Extra="", alias relax_op="", alias push_op="
       _merge (t, tl, tr);
     }
   }
-  
+
   private static void _insert (ref Node *t, Node *p, int pos) {
 	if (!t) {
       static if (has_relax) relax_op (p);
@@ -286,7 +285,7 @@ class ImplicitKeyTreap(Value, alias Extra="", alias relax_op="", alias push_op="
         _relax_inc (t);
       }
     }
-  } 
+  }
 
   private static void _merge (ref Node *t, Node *l, Node *r) {
     if (!l) {
@@ -311,7 +310,7 @@ class ImplicitKeyTreap(Value, alias Extra="", alias relax_op="", alias push_op="
       }
     }
   }
-  
+
   private static _replace (Node *t, int pos, Value value) {
     static if (has_relax) {
       Node*[128] path = void;
@@ -358,7 +357,7 @@ class ImplicitKeyTreap(Value, alias Extra="", alias relax_op="", alias push_op="
     }
     return _get (t.right, pos - 1);
   }
-  
+
   private static void _remove (ref Node *t, int pos) in {
     assert (t);
     assert (pos >= 0);
@@ -371,17 +370,19 @@ class ImplicitKeyTreap(Value, alias Extra="", alias relax_op="", alias push_op="
       _merge (t, t.left, t.right);
     } else if (pos < ls) {
       _remove (t.left, pos);
-      if (t) _relax_dec (t);
+      assert (t);
+      _relax_dec (t);
     } else {
       _remove (t.right, pos - ls - 1);
-      if (t) _relax_dec (t);
+      assert (t);
+      _relax_dec (t);
     }
   }
 
   final void insert (int pos, Value value) {
     _insert (root, new Node (value), pos);
   }
-  
+
   final void remove (int pos) {
     _remove (root, pos);
   }
@@ -400,8 +401,20 @@ class ImplicitKeyTreap(Value, alias Extra="", alias relax_op="", alias push_op="
     return _size (root);
   }
 
-  final Value[] values () {
-    Value[] a = [];
+  final Node*[] getNodes () {
+    Node*[] a;
+    a.reserve (_size (root));
+    void rec (Node *t) {
+      if (t.left) rec (t.left);
+      a ~= t;
+      if (t.right) rec (t.right);
+    }
+    rec (root);
+    return a;
+  }
+
+  final Value[] getValues () {
+    Value[] a;
     a.reserve (_size (root));
     void rec (Node *t) {
       static if (has_push) push_op (t);
@@ -412,11 +425,11 @@ class ImplicitKeyTreap(Value, alias Extra="", alias relax_op="", alias push_op="
     if (root) rec (root);
     return a;
   }
-  
+
   static if (has_relax) {
     private Node[256] nodes;
     private int cur;
-    
+
     private void persistent_split (Node *t, ref Node *l, ref Node *r, int key) {
       if (!t) {
         l = r = null;
@@ -449,17 +462,24 @@ class ImplicitKeyTreap(Value, alias Extra="", alias relax_op="", alias push_op="
   }
 
   static if (has_update) {
-    final void update (size_t l, size_t r) {
-      Node *t1, t2, t, t4, t5;
-      _split (root, t1, t2, l.to!int, 0);
-      _split (t2, t, t4, (r - l).to!int, 0);
-      update_op (t);
-      _merge (t5, t, t4);
-      _merge (root, t1, t5);
+    final void update (int l, int r) {
+      if (!l) {
+        Node *t1, t2;
+        _split (root, t1, t2, r);
+        update_op (t1);
+        _merge (root, t1, t2);
+      } else {
+        Node *t1, t2, t3;
+        _split (root, t1, t2, l);
+        _split (t2, t2, t3, r - l);
+        update_op (t2);
+        _merge (t2, t2, t3);
+        _merge (root, t1, t2);
+      }
     }
   }
   this (Value[] v) {
-    _build (root, v);  
+    _build (root, v);
   }
 }
 
