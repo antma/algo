@@ -425,14 +425,14 @@ class ImplicitKeyTreap(Value, alias Extra="", alias relax_op="", alias push_op="
       int ls;
       if (t.left) ls = t.left.sz;
       Node *q = &nodes[cur++];
-      q.left = t.left;
-      q.right = t.right;
       q.value = t.value;
       q.y = t.y;
       if (key <= ls) {
+        q.right = t.right;
         persistent_split (q.left, l, q.left, key);
         r = q;
       } else {
+        q.left = t.left;
         persistent_split (q.right, q.right, r, key - ls - 1);
         l = q;
       }
