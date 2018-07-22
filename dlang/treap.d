@@ -1,5 +1,6 @@
 import std.algorithm, std.conv, std.range;
 import std.random;
+import std.traits;
 
 //flags: +1 - has value
 //flags: +2 - has size
@@ -191,8 +192,8 @@ class Treap(Key, Value, int flags = 3) {
   final bool contains (Key x) { return _find (root, x) !is null; }
 }
 
-struct ImplicitKeyTreapNode(Value, alias Extra="") {
-  enum has_extra = is (Extra == struct);
+struct ImplicitKeyTreapNode(Value, Extra=void) {
+  enum has_extra = !(is (Extra == void));
   ImplicitKeyTreapNode!(Value, Extra)* left, right;
   Value value;
   static if (has_extra) Extra extra;
@@ -205,7 +206,7 @@ struct ImplicitKeyTreapNode(Value, alias Extra="") {
   }
 }
 
-class ImplicitKeyTreap(Value, alias Extra="", alias relax_op="", alias push_op="", alias update_op="") {
+class ImplicitKeyTreap(Value, Extra=void, alias relax_op="", alias push_op="", alias update_op="") {
   enum has_push = isCallable!push_op;
   enum has_relax = isCallable!relax_op;
   enum has_update = isCallable!update_op;
@@ -502,4 +503,10 @@ unittest {
   assert (t0.contains (1));
   assert (t0.remove (1));
   assert (!t0.contains (1));
+
+  auto ti = new ImplicitKeyTreap!(int,void)([2,1]);
+  assert (ti.get(0)==2);
+  assert (ti.get(1)==1);
+  assert (equal (ti.getValues(), [2,1]));
+
 }
