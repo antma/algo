@@ -443,11 +443,11 @@ class ImplicitKeyTreap(Value, Extra=void, alias relax_op="", alias push_op="", a
       q.y = t.y;
       if (key <= ls) {
         q.right = t.right;
-        persistent_split (q.left, l, q.left, key);
+        persistent_split (t.left, l, q.left, key);
         r = q;
       } else {
         q.left = t.left;
-        persistent_split (q.right, q.right, r, key - ls - 1);
+        persistent_split (t.right, q.right, r, key - ls - 1);
         l = q;
       }
       _relax (q);
@@ -457,8 +457,7 @@ class ImplicitKeyTreap(Value, Extra=void, alias relax_op="", alias push_op="", a
       Node *t1, t2, t3;
       persistent_split (root, t1, t2, l);
       persistent_split (t2, t2, t3, r - l);
-      auto v = t2.extra;
-      return v;
+      return t2.extra;
     }
   }
 
