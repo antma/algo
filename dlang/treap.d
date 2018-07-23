@@ -5,6 +5,7 @@ import std.traits;
 //flags: +1 - has value
 //flags: +2 - has size
 class Treap(Key, Value, int flags = 3) {
+  static assert ((flags & 1) || is (Value == void));
   private:
   static struct Node {
     Node *left;
@@ -16,15 +17,45 @@ class Treap(Key, Value, int flags = 3) {
   }
   static Node free_nodes;
   static this () { free_nodes.left = free_nodes.right = &free_nodes; }
-  static Node *newNode () {
+
+  static Node *allocNode () {
     Node *p = free_nodes.right;
     if (p == &free_nodes) {
       p = new Node ();
     } else {
       p.left.right = p.right; p.right.left = p.left;
+      p.left = p.right = null;
     }
     static if (flags & 2) p.sz = 1;
     return p;
+  }
+  static if (flags & 1) {
+    static Node* newNode (Key key, Value value) {
+      Node *p = allocNode ();
+      p.x = key;
+      p.y = uniform (int.min, int.max);
+      p.value = value;
+      return p;
+    }
+  } else {
+    static Node* newNode (Key key) {
+      Node *p = allocNode ();
+      p.x = key;
+      p.y = uniform (int.min, int.max);
+      return p;
+    }
+  }
+
+  static void _free (Node *t) {
+    Node *u = free_nodes.left, v = &free_nodes;
+    u.right = t; t.left = u;
+    t.right = v; v.left = t;
+  }
+
+  static void _clear (Node *t) {
+    if (t.left) _clear (t.left);
+    if (t.right) _clear (t.right);
+    _free (t);
   }
 
   Node *root;
@@ -155,20 +186,14 @@ class Treap(Key, Value, int flags = 3) {
 
   static if (flags & 1) {
     final void insert (Key key, Value value) {
-      Node *p = newNode ();
-      p.x = key;
-      p.y = uniform (int.min, int.max);
-      p.value = value;
-      root = _insert (root, p);
+      root = _insert (root, newNode (key, value));
     }
   } else {
     final void insert (Key key) {
-      Node *p = newNode ();
-      p.x = key;
-      p.y = uniform (int.min, int.max);
-      root = _insert (root, p);
+      root = _insert (root, newNode (key));
     }
   }
+
   static if (flags & 2) {
     final size_t countLess (Key x) { return _countLess (root, x); }
     final Key kthKey (size_t k) {
@@ -187,6 +212,11 @@ class Treap(Key, Value, int flags = 3) {
     u.right = t; t.left = u;
     t.right = v; v.left = t;
     return true;
+  }
+
+  final void clear () {
+    _clear (root);
+    root = null;
   }
 
   final bool contains (Key x) { return _find (root, x) !is null; }
@@ -488,7 +518,7 @@ unittest {
   writeln ("Testing ", __FILE__, " ...");
   auto t = new Treap!(int, long, 3);
   t.insert (1, 2);
-  auto t2 = new Treap!(int, long, 2);
+  auto t2 = new Treap!(int, void, 2);
   t2.insert (1);
   assert (t2.contains (1));
   assert (t2.kthKey (0) == 1);
@@ -497,7 +527,7 @@ unittest {
   assert (t2.remove (1));
   assert (!t2.contains (1));
 
-  auto t0 = new Treap!(int, int, 0);
+  auto t0 = new Treap!(int, void, 0);
   t0.insert (1);
   assert (t0.contains (1));
   assert (t0.remove (1));
