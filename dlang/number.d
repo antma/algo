@@ -102,7 +102,7 @@ struct IntM {
     return 0;
   }
   bool opEquals (const IntM rhs) const pure nothrow @nogc { return v == rhs.v; }
-  string toString() const pure nothrow { return v.text; }
+  string toString() const pure nothrow { return ((v < 0) ? v + q : v).text; }
 }
 
 unittest {
