@@ -10,15 +10,15 @@ class DisjointSet {
     p = iota (0, n).array;
     h = new int[n];
   }
-  int find_set (int x) pure nothrow @nogc {
+  int findSet (int x) pure nothrow @nogc {
     if (p[x] == x) {
       return x;
     }
-    return p[x] = find_set (p[x]);
+    return p[x] = findSet (p[x]);
   }
   void merge (int i, int j) pure nothrow @nogc {
-    i = find_set (i);
-    j = find_set (j);
+    i = findSet (i);
+    j = findSet (j);
     if (i != j) {
       if (h[i] < h[j]) {
         p[i] = j;
@@ -33,7 +33,7 @@ class DisjointSet {
   int biggest_set_size () pure {
     auto c = new int[n];
     foreach (i; 0 .. n) {
-      ++c[find_set (i)];
+      ++c[findSet (i)];
     }
     return c.reduce! (max);
   }
@@ -50,15 +50,15 @@ class DisjointSetList {
     @property int front () const pure nothrow @nogc { return begin; }
     void popFront () pure nothrow @nogc { begin = _next[begin]; }
   }
-  final int find_set (int x) pure nothrow @nogc {
+  final int findSet (int x) pure nothrow @nogc {
     if (p[x] == x) {
       return x;
     }
-    return p[x] = find_set (p[x]);
+    return p[x] = findSet (p[x]);
   }
   final void join (int x, int y) pure nothrow @nogc {
-    x = find_set (x);
-    y = find_set (y);
+    x = findSet (x);
+    y = findSet (y);
     maxv[x] = maxv[y];
     if (h[x] < h[y]) {
       p[x] = y;
@@ -91,6 +91,6 @@ class DisjointSetList {
     prev[v] = u;
   }
   Range opSlice (size_t begin, size_t end) pure {
-    return Range (next, maxv[find_set (begin.to!int)], end.to!int);
+    return Range (next, maxv[findSet (begin.to!int)], end.to!int);
   }
 };
