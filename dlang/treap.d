@@ -33,7 +33,7 @@ class Treap(Key, Value, int flags = 3) {
     static Node* newNode (Key key, Value value) {
       Node *p = allocNode ();
       p.x = key;
-      p.y = uniform (int.min, int.max);
+      p.y = uniform!int;
       p.value = value;
       return p;
     }
@@ -41,7 +41,7 @@ class Treap(Key, Value, int flags = 3) {
     static Node* newNode (Key key) {
       Node *p = allocNode ();
       p.x = key;
-      p.y = uniform (int.min, int.max);
+      p.y = uniform!int;
       return p;
     }
   }
@@ -231,7 +231,7 @@ struct ImplicitKeyTreapNode(Value, Extra=void) {
   int sz;
   this (Value _value) {
     value = _value;
-    y = uniform (int.min, int.max);
+    y = uniform!int;
     sz = 1;
   }
 }
