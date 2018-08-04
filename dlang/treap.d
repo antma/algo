@@ -2,22 +2,23 @@ import std.algorithm, std.conv, std.range;
 import std.random;
 import std.traits;
 
-//flags: +1 - has value
-//flags: +2 - has size
-class Treap(Key, Value, int flags = 3) {
-  static assert ((flags & 1) || is (Value == void));
+struct TreapNode(Key, Value = void, Extra=void, bool has_size = false) {
+  enum has_value = !(is (Value == void));
+  enum has_extra = !(is (Extra == void));
+  TreapNode!(Key, Value, Extra, has_size)* left, right;
+  Key x;
+  static if (has_value) Value value;
+  static if (has_extra) Extra extra;
+  int y;
+  static if (has_size) int sz;
+}
+
+class Treap(Key, Value = void, Extra = void, bool has_size = false, alias relax_op="") {
   private:
-  static struct Node {
-    Node *left;
-    Node *right;
-    Key x;
-    static if (flags & 1) Value value;
-    int y;
-    static if (flags & 2) int sz;
-  }
+  enum has_relax = isCallable!relax_op;
+  alias Node = TreapNode!(Key, Value, Extra, has_size);
   static Node free_nodes;
   static this () { free_nodes.left = free_nodes.right = &free_nodes; }
-
   static Node *allocNode () {
     Node *p = free_nodes.right;
     if (p == &free_nodes) {
@@ -26,15 +27,16 @@ class Treap(Key, Value, int flags = 3) {
       p.left.right = p.right; p.right.left = p.left;
       p.left = p.right = null;
     }
-    static if (flags & 2) p.sz = 1;
+    static if (has_size) p.sz = 1;
     return p;
   }
-  static if (flags & 1) {
+  static if (Node.has_value) {
     static Node* newNode (Key key, Value value) {
       Node *p = allocNode ();
       p.x = key;
       p.y = uniform!int;
       p.value = value;
+      static if (has_relax) relax_op (p);
       return p;
     }
   } else {
@@ -42,6 +44,7 @@ class Treap(Key, Value, int flags = 3) {
       Node *p = allocNode ();
       p.x = key;
       p.y = uniform!int;
+      static if (has_relax) relax_op (p);
       return p;
     }
   }
@@ -59,7 +62,7 @@ class Treap(Key, Value, int flags = 3) {
   }
 
   Node *root;
-  static if (flags & 2) {
+  static if (has_size) {
     static int _size (const Node *t) {
       return t ? t.sz : 0;
     }
@@ -67,6 +70,7 @@ class Treap(Key, Value, int flags = 3) {
       t.sz = 1;
       if (t.left) t.sz += t.left.sz;
       if (t.right) t.sz += t.right.sz;
+      static if (has_relax) relax_op (t);
     }
     static size_t _countLess (Node *t, Key x) {
       size_t s;
@@ -115,7 +119,7 @@ class Treap(Key, Value, int flags = 3) {
       l = t;
       _split (t.right, x, t.right, r);
     }
-    static if (flags & 2) _relax (t);
+    static if (has_size) _relax (t);
   }
 
   static Node *_insert (Node *t, Node *p) {
@@ -129,11 +133,12 @@ class Treap(Key, Value, int flags = 3) {
       } else {
         t.right = _insert (t.right, p);
       }
-      static if (flags & 2) ++t.sz;
+      static if (has_size) ++t.sz;
+      static if (has_relax) relax_op (t);
       return t;
     }
     _split (t, p.x, p.left, p.right);
-    static if (flags & 2) _relax (p);
+    static if (has_size) _relax (p);
     return p;
   }
 
@@ -144,47 +149,38 @@ class Treap(Key, Value, int flags = 3) {
       return l;
     } else if (l.y > r.y) {
       l.right = _merge (l.right, r);
-      static if (flags & 2) _relax (l);
+      static if (has_size) _relax (l);
       return l;
     } else {
       r.left = _merge (l, r.left);
-      static if (flags & 2) _relax (r);
+      static if (has_size) _relax (r);
       return r;
     }
   }
 
-  static Node *_remove (ref Node **w, Key x, ) {
-    static if (flags & 2) {
-      Node*[128] path = void;
-      int m = -1;
+  static bool _remove (ref Node *t, Key x) {
+    if (t.x == x) {
+      Node *w = _merge (t.left, t.right), u = free_nodes.left, v = &free_nodes;
+      u.right = t; t.left = u;
+      t.right = v; v.left = t;
+      t = w;
+      return true;
+    } if (x < t.x) {
+      if (!t.left || !_remove (t.left, x)) return false;
+      static if (has_size) --t.sz;
+      static if (has_relax) relax_op (t);
+      return true;
+    } else {
+      if (!t.right || !_remove (t.right, x)) return false;
+      static if (has_size) --t.sz;
+      static if (has_relax) relax_op (t);
+      return true;
     }
-    Node **p = w;
-    Node *t = *p;
-    while (t) {
-      static if (flags & 2) {
-        if (t.x == x) {
-          foreach (i; 0 .. m + 1) {
-            --path[i].sz;
-          }
-          w = p;
-          return t;
-        }
-        path[++m] = t;
-      } else {
-        if (t.x == x) {
-          w = p;
-          return t;
-        }
-      }
-      p = (x < t.x) ? &(t.left) : &(t.right);
-      t = *p;
-    }
-    return null;
   }
 
   public:
 
-  static if (flags & 1) {
+  static if (Node.has_value) {
     final void insert (Key key, Value value) {
       root = _insert (root, newNode (key, value));
     }
@@ -194,7 +190,7 @@ class Treap(Key, Value, int flags = 3) {
     }
   }
 
-  static if (flags & 2) {
+  static if (has_size) {
     final size_t countLess (Key x) { return _countLess (root, x); }
     final Key kthKey (size_t k) {
       Node *p = _kthNode (root, k);
@@ -204,14 +200,8 @@ class Treap(Key, Value, int flags = 3) {
   }
 
   final bool remove (Key x) {
-    Node **w = &root;
-    auto t = _remove (w, x);
-    if (!t) return false;
-    *w =  _merge (t.left, t.right);
-    Node *u = free_nodes.left, v = &free_nodes;
-    u.right = t; t.left = u;
-    t.right = v; v.left = t;
-    return true;
+    if (!root) return false;
+    return _remove (root, x);
   }
 
   final void clear () {
@@ -514,28 +504,31 @@ class ImplicitKeyTreap(Value, Extra=void, alias relax_op="", alias push_op="", a
 }
 
 unittest {
-  import std.range, std.stdio;
+  import std.range, std.stdio, std.format;
   writeln ("Testing ", __FILE__, " ...");
-  auto t = new Treap!(int, long, 3);
-  t.insert (1, 2);
-  auto t2 = new Treap!(int, void, 2);
-  t2.insert (1);
-  assert (t2.contains (1));
-  assert (t2.kthKey (0) == 1);
-  assert (t2.countLess (2) == 1);
-  assert (t2.countLess (1) == 0);
-  assert (t2.remove (1));
-  assert (!t2.contains (1));
-
-  auto t0 = new Treap!(int, void, 0);
-  t0.insert (1);
-  assert (t0.contains (1));
-  assert (t0.remove (1));
-  assert (!t0.contains (1));
-
-  auto ti = new ImplicitKeyTreap!(int,void)([2,1]);
-  assert (ti.get(0)==2);
-  assert (ti.get(1)==1);
-  assert (equal (ti.getValues(), [2,1]));
-
+  import std.format;
+  auto t = new Treap!(int, void, long, true, function void(TreapNode!(int, void, long, true) *t) {
+    t.extra = t.x;
+    if (t.left) t.extra += t.left.extra;
+    if (t.right) t.extra += t.right.extra;
+  });
+  static assert (t.has_relax);
+  rndGen.seed (1);
+  int[] c;
+  void check (lazy string msg) {
+    assert (t.root.extra == sum (c), format ("SUM: tread %d, slow %d, c = %s, %s", t.root.extra, sum (c), c, msg));
+  }
+  foreach (k; 0 .. 100) {
+    int i = uniform (0, k + 1);
+    c ~= i;
+    t.insert (i);
+    check (format ("k = %d", k));
+  }
+  foreach (k; 1 .. c.length) {
+    auto i = uniform (0, c.length);
+    swap (c[i], c[$-1]);
+    t.remove (c[$-1]);
+    --c.length;
+    check (format ("k = %d", k));
+  }
 }
