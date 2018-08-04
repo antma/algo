@@ -2,13 +2,18 @@ import std.algorithm;
 import std.range;
 import std.stdio;
 import std.traits;
+import std.array;
 
 class InputReader {
   private:
   ubyte[] p;
-  ubyte[8<<20] buffer = void;
+  ubyte[] buffer;
   size_t cur;
   public:
+  this () {
+    buffer = uninitializedArray!(ubyte[])(16<<20);
+    p = stdin.rawRead (buffer);
+  }
   final ubyte skipByte (ubyte lo) {
     while (true) {
       auto a = p[cur .. $];
