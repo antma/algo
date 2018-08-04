@@ -1,3 +1,4 @@
+import std.array;
 import core.bitop;
 
 class LazyPropagationSegmentTree(T = int, T init = T.init) {
@@ -36,8 +37,7 @@ class LazyPropagationSegmentTree(T = int, T init = T.init) {
   this (const T[] a) {
     n = a.length;
     h = bsr (n);
-    t = new T[n];
-    t ~= a;
+    t = uninitializedArray!(T[])(n) ~ a;
     d = new T[n];
     static if (init != T.init) d[] = init;
     build (0, n);

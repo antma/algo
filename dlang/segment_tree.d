@@ -1,3 +1,4 @@
+import std.array;
 import std.functional;
 import std.traits;
 
@@ -31,8 +32,7 @@ class SegmentTree(T = int, alias op="a+b", T zero = T.init) {
   }
   this (const T[] a) pure nothrow {
     n = a.length;
-    t = new T[n];
-    t ~= a;
+    t = uninitializedArray!(T[])(n) ~ a;
     build ();
   }
 }
@@ -141,8 +141,7 @@ class SetSegmentTree(S, alias combine) if (isSomeFunction!combine) {
   }
   this (S[] a) {
     n = a.length;
-    t = new S[n];
-    t ~= a;
+    t = uninitializedArray!(T[])(n) ~ a;
     build ();
   }
 }
