@@ -84,7 +84,7 @@ class Treap(Key, Value = void, Extra = void, bool has_size = false, alias relax_
       }
       return s;
     }
-    static Node *_kthNode (Node *t, size_t k) {
+    static const(Node) *_kthNode (const(Node) *t, size_t k) {
       if (k >= _size (t)) return null;
       while (t) {
         immutable ls = _size (t.left);
@@ -192,8 +192,8 @@ class Treap(Key, Value = void, Extra = void, bool has_size = false, alias relax_
 
   static if (has_size) {
     final size_t countLess (Key x) { return _countLess (root, x); }
-    final Key kthKey (size_t k) {
-      Node *p = _kthNode (root, k);
+    final Key kthKey (size_t k) const {
+      auto p = _kthNode (root, k);
       assert (p);
       return p.x;
     }
