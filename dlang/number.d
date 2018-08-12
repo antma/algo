@@ -37,45 +37,45 @@ struct IntM {
     }
     return this;
   }
-  IntM opUnary (string op)() const pure nothrow @nogc if (op == "-") {
+  IntM opUnary (string op : "-")() const pure nothrow @nogc {
     return IntM ((q - v) % q);
   }
-  ref IntM opUnary (string op)() pure nothrow @nogc if (op == "++") {
+  ref IntM opUnary (string op : "++")() pure nothrow @nogc {
     if (++v >= q) {
       v -= q;
     }
     return this;
   }
-  ref IntM opUnary (string op)() pure nothrow @nogc if (op == "--") {
+  ref IntM opUnary (string op : "--")() pure nothrow @nogc {
     if (--v < 0) {
       v += q;
     }
     return this;
   }
-  ref IntM opOpAssign (string op)(in IntM rhs) pure nothrow @nogc if (op == "+") {
+  ref IntM opOpAssign (string op : "+")(in IntM rhs) pure nothrow @nogc {
     v += rhs.v;
     v %= q;
     return this;
   }
-  ref IntM opOpAssign (string op)(in IntM rhs) pure nothrow @nogc if (op == "-") {
+  ref IntM opOpAssign (string op : "-")(in IntM rhs) pure nothrow @nogc {
     v -= rhs.v;
     v %= q;
     return this;
   }
-  ref IntM opOpAssign (string op)(in IntM rhs) pure nothrow @nogc if (op == "*") {
+  ref IntM opOpAssign (string op : "*")(in IntM rhs) pure nothrow @nogc {
     v = ((v.to!(long)) * rhs.v.to!(long)) % q;
     return this;
   }
-  IntM opBinary (string op)(in IntM rhs) const pure nothrow @nogc if (op == "+") {
+  IntM opBinary (string op : "+")(in IntM rhs) const pure nothrow @nogc {
     return IntM ( (v + rhs.v) % q);
   }
-  IntM opBinary (string op)(in IntM rhs) const pure nothrow @nogc if (op == "-") {
+  IntM opBinary (string op : "-")(in IntM rhs) const pure nothrow @nogc {
     return IntM ( (v - rhs.v) % q);
   }
-  IntM opBinary (string op)(in IntM rhs) const pure nothrow @nogc if (op == "*") {
+  IntM opBinary (string op : "*")(in IntM rhs) const pure nothrow @nogc {
     return IntM (((v.to!(long)) * rhs.v.to!(long)) % q);
   }
-  IntM opBinary (string op)(in int rhs) const pure nothrow @nogc if (op == "^^") {
+  IntM opBinary (string op : "^^")(in int rhs) const pure nothrow @nogc {
     IntM a = 1, b = this;
     int p = rhs;
     while (p > 0) {
