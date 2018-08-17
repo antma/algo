@@ -7,6 +7,34 @@ using namespace std;
 class BigInt {
   private:
   vector<short> v;
+  void incrementFrom (int k, int c) {
+    const int n = v.size ();
+    for (; k < n && c; ++k) {
+      v[k] += c;
+      if (v[k] >= 10000) {
+        v[k] = 0;
+        c = 1;
+      } else {
+        c = 0;
+      }
+    }
+    if (c) {
+      v.push_back (1);
+    }
+  }
+  void decrementFrom (int k, int c) {
+    const int n = v.size ();
+    for (; k < n && c; ++k) {
+      v[k] -= c;
+      if (v[k] < 0) {
+        v[k] += 10000;
+        c = 1;
+      } else {
+        c = 0;
+      }
+    }
+    while (!v.empty () && !v.back ()) v.pop_back ();
+  }
   public:
   /* 0 <= n < 10000 */
   BigInt (short n = 0) : v (1, n) { }
@@ -28,21 +56,37 @@ class BigInt {
     }
     if (v.empty ()) v.push_back (0);
   }
-
   BigInt& operator++() {
-    const int n = v.size ();
-    int c = 1;
-    for (int k = 0; k < n && c; ++k) {
-      v[k] += c;
-      if (v[k] >= 10000) {
-        v[k] = 0;
+    incrementFrom (0, 1);
+    return *this;
+  }
+  BigInt& operator+= (const short rhs) {
+    incrementFrom (0, rhs);
+    return *this;
+  }
+  BigInt& operator-= (const short rhs) {
+    decrementFrom (0, rhs);
+    return *this;
+  }
+  BigInt& operator+= (const BigInt &rhs) {
+    int k, c = 0;
+    for (k = 0; k < (int) rhs.v.size (); ++k) {
+      c += rhs.v[k];
+      if (k < (int) v.size ()) {
+        c += v[k];
+      }
+      int x = c;
+      if (c >= 10000) {
+        x -= 10000;
         c = 1;
       } else {
         c = 0;
       }
+      if (k < (int) v.size ()) v[k] = x;
+      else v.push_back (x);
     }
-    if (c) {
-      v.push_back (1);
+    if (c > 0) {
+      incrementFrom (k, 1);
     }
     return *this;
   }
