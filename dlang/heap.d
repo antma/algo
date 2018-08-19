@@ -1,4 +1,4 @@
-import std.stdio;
+import std.array;
 
 class Heap(T) {
   private:
@@ -97,10 +97,10 @@ class Heap(T) {
   @property
   bool empty () const pure nothrow @nogc { return size == 0; }
 
-  this (int n_, T default_value) {
+  this (int n_, T default_value = T.init) {
     n = n_;
     size = 0;
-    a = new T[n];
+    a = uninitializedArray! (T[]) (n);
     a[] = default_value;
     h = new int[n+1];
     g = new int[n];
@@ -108,6 +108,7 @@ class Heap(T) {
 }
 
 unittest {
+  import std.stdio;
   writeln ("Testing heap.d ...");
   auto h = new Heap!int (5, 239);
   assert (h.empty);
