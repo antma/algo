@@ -1,4 +1,12 @@
 
+let gcd a b =
+  let rec loop a b =
+    if b = 0 then a
+    else loop b (a mod b)
+  in
+  if a < b then loop b a else loop a b
+;;
+
 let gcd64 a b =
   let rec loop a b =
     if (Int64.compare b Int64.zero) = 0 then a
