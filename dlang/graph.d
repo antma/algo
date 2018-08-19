@@ -1,31 +1,28 @@
-import std.container;
+import std.typecons;
 
-class Graph {
-  int n;
-  SList!int [] g;
-  this (int n_) {
-    n = n_;
-    g = new SList!int [n];
+class UndirectedGraph {
+  immutable int n;
+  int[][] edges;
+  this (int _n) {
+    n = _n;
+    edges = new int[][n];
   }
-  void add_edge (int i, int j) {
-    g[i].insert (j);
+  final addEdge (int i, int j) {
+    edges[i] ~= j;
+    edges[j] ~= i;
   }
-  void bfs (int start, int[] d, int[] parent) {
-    auto q = new DList!(int);
-    d[] = -1;
-    d[start] = 0;
-    parent[start] = -1;
-    q.insertBack (start);
-    while (!q.empty()) {
-      immutable i = q.front ();
-      q.removeFront ();
-      foreach (j; g[i]) {
-        if (d[j] < 0) {
-          d[j] = d[i] + 1;
-          parent[j] = i;
-          q.insertBack (j);
-        }
-      }
-    }
+}
+
+class WeightedUndirectedGraph(W) {
+  immutable int n;
+  alias E = Tuple!(int,W);
+  E[][] edges;
+  this (int _n) {
+    n = _n;
+    edges = new E[][n];
+  }
+  final addEdge (int i, int j, W weight) {
+    edges[i] ~= tuple (j, weight);
+    edges[j] ~= tuple (i, weight);
   }
 }
