@@ -1,13 +1,14 @@
 import std.array;
 import core.bitop;
 
-class LazyPropagationSegmentTree(T = int, T init = T.init) {
+class LazyPropagationSegmentTree(T = int, D = int, D init = D.init) {
   immutable size_t n;
   immutable int h;
-  T[] t, d;
+  T[] t;
+  D[] d;
 
   abstract void calc (size_t p, int k);
-  abstract void apply (size_t p, T value, int k);
+  abstract void apply (size_t p, D value, int k);
 
   final void build (size_t l, size_t r) {
     int k = 2;
@@ -37,14 +38,15 @@ class LazyPropagationSegmentTree(T = int, T init = T.init) {
   this (const T[] a) {
     n = a.length;
     h = bsr (n);
-    t = uninitializedArray!(T[])(n) ~ a;
-    d = new T[n];
-    static if (init != T.init) d[] = init;
+    t = uninitializedArray!(T[])(n);
+    t ~= a;
+    d = uninitializedArray!(D[])(n);
+    d[] = init;
     build (0, n);
   }
 }
 
-class AssignSumLazyPropagationSegmentTree (T = int) : LazyPropagationSegmentTree!(T, T.min) {
+class AssignSumLazyPropagationSegmentTree (T = int) : LazyPropagationSegmentTree!(T, T, T.min) {
   override void calc (size_t p, int k) {
     if (d[p] == T.min) t[p] = t[p<<1] + t[(p << 1) | 1];
     else t[p] = d[p] * k;
