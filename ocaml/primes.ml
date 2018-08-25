@@ -1,9 +1,9 @@
 class bitset n =
   object
-  val a = Array.make ((n + 31) lsr 5) Int32.zero
-  method test k = (Int32.compare (Int32.logand a.(k lsr 5) (Int32.shift_left Int32.one (k land 31))) Int32.zero) != 0
-  method set k = let j = k lsr 5 in a.(j) <- Int32.logor a.(j) (Int32.shift_left Int32.one (k land 31))
-  method clear k =  let j = k lsr 5 in a.(j) <- Int32.logand a.(j) (Int32.lognot (Int32.shift_left Int32.one (n land 31)))
+  val a = Array.make ((n + 63) lsr 6) Int64.zero
+  method test k = (Int64.compare (Int64.logand a.(k lsr 6) (Int64.shift_left Int64.one (k land 63))) Int64.zero) != 0
+  method set k = let j = k lsr 6 in a.(j) <- Int64.logor a.(j) (Int64.shift_left Int64.one (k land 63))
+  method clear k =  let j = k lsr 6 in a.(j) <- Int64.logand a.(j) (Int64.lognot (Int64.shift_left Int64.one (n land 63)))
 end
 
 class prime_table n =
