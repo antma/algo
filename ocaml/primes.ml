@@ -40,3 +40,21 @@ class prime_table n =
     else if (p land 1) = 0 then false
     else (not (c#test (p lsr 1)))
 end
+
+let sieve_array n =
+  let p = Array.make (n+1) 0 in
+  let rec loop k =
+    if k * k <= n then begin
+      let rec loop2 j =
+        if j <= n then begin
+          if p.(j) = 0 then p.(j) <- k;
+          loop2 (j + k)
+        end
+      in
+      if p.(k) = 0 then loop2 k;
+      loop (k + 1)
+    end
+  in
+  loop 2;
+  p
+;;
