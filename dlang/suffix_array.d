@@ -3,6 +3,7 @@ import std.array;
 import std.conv;
 import std.format;
 import std.range;
+import std.typecons;
 
 class SuffixArray {
   string s;
@@ -76,6 +77,56 @@ class LCPSuffixArray : SuffixArray {
     immutable m = (l + r) >> 1;
     LCP[n + 1 + m] = min (lcp_build (l, m), lcp_build (m, r));
     return LCP[n + 1 + m];
+  }
+  final Tuple!(int, int) interval (in string x) {
+    immutable lx = x.length;
+    Tuple!(int, int) f (int u, int lu, int v, int lv) {
+      if (u + 1 >= v) return tuple (int.min, int.min);
+      int m = (u + v) >> 1;
+      if (lu <= lcp (m, v) && lcp (m, v) < lv) {
+        return f (m, lcp (m, v), v, lv);
+      } else if (lu <= lv && lv < lcp (m, v)) {
+        return f (u, lu, m, lv);
+      } else if (lv <= lcp (u, m) && lcp (u, m) < lu) {
+        return f (u, lu, m, lcp (u, m));
+      } else if (lv <= lu && lu < lcp (u, m)) {
+        return f (m, lu, v, lv);
+      } else {
+        int l = max (lu, lv);
+        immutable off = O[m];
+        immutable lm = n - off;
+        immutable ml = min (lx, lm);
+        while (l < ml && x[l] == s[off+l]) ++l;
+        if (l == lx) {
+          int e = m;
+          while (u + 1 < e) {
+            int j = (u + e) >> 1;
+            if (lcp (j, e) < lx) {
+              u = j;
+            } else {
+              e = j;
+            }
+          }
+          if (lcp (u, e) >= lx) u = max (u - 1, -1);
+          e = m;
+          while (e + 1 < v) {
+            int j = (e + v) >> 1;
+            if (lcp (e, j) < lx) {
+              v = j;
+            } else {
+              e = j;
+            }
+          }
+          if (lcp (e, v) >= lx) v = min (v + 1, n);
+          return tuple (u, v);
+        } else if (l == lm || (l != lx && s[off+l] < x[l])) {
+          return f (m, l, v, lv);
+        } else {
+          return f (u, lu, m, l);
+        }
+      }
+    }
+    return f (-1, 0, n, 0);
   }
   this (string s) pure {
     super (s);
