@@ -59,7 +59,7 @@ class Heap(T) {
     immutable pos = g[k];
     if (!pos) {
       insert (k);
-    } else if (value < a[k]) {
+    } else {
       heapifyBack (pos);
     }
   }
@@ -108,7 +108,7 @@ class Heap(T) {
 }
 
 unittest {
-  import std.stdio;
+  import std.stdio, std.conv, std.algorithm;
   writeln ("Testing heap.d ...");
   auto h = new Heap!int (5, 239);
   assert (h.empty);
@@ -123,4 +123,36 @@ unittest {
   assert (i == 1);
   i = h.extractMin;
   assert (i == 4);
+
+  h = new Heap!int (3, 100);
+  h.decreaseKey (0, 2);
+  h.decreaseKey (1, 3);
+  h.decreaseKey (2, 4);
+  h.decreaseKey (1, 1);
+  assert (h.extractMin () == 1);
+
+  int[] a = [7, 7, 7, 7, 777, 123, 35, 36, 37, 7, 10, 43, 124, 1932, 321, 7, 7, 7, 7, 7, 7, 7];
+  h = new Heap!int (a.length.to!int, int.max);
+  auto b = a.dup;
+  sort (b);
+  foreach_reverse (pos, k; a) {
+    h.decreaseKey (pos.to!int, k);
+  }
+  foreach (pos, k; a) {
+    immutable j = h.extractMin ();
+    assert (b[pos] == h[j]);
+  }
+
+  h = new Heap!int (a.length.to!int, int.max);
+  foreach_reverse (pos, k; a) {
+    h.decreaseKey (pos.to!int, k);
+  }
+  foreach (pos, k; a) {
+    h.decreaseKey (pos.to!int, k / 10);
+  }
+  foreach (pos, k; a) {
+    immutable j = h.extractMin ();
+    assert (b[pos] / 10 == h[j]);
+  }
+
 }
