@@ -52,9 +52,47 @@ let sieve_array n =
         end
       in
       if p.(k) = 0 then loop2 k;
-      loop (k + 1)
+      loop (succ k)
+    end else begin
+      let rec loop2 j =
+        if j <= n then begin
+          if p.(j) = 0 then p.(j) <- j;
+          loop2 (succ j)
+        end
+      in
+      loop2 k
     end
   in
   loop 2;
   p
+;;
+
+let prime_factorization_array n =
+  let p = sieve_array n in
+  let c = Array.make (n+1) 0 in
+  let next = Array.make (n+1) 0 in
+  for i = 2 to n do
+    let k = p.(i) in let j = i / k in
+    if p.(j) = k then begin
+      c.(i) <- c.(j) + 1;
+      next.(i) <- next.(j);
+    end else begin
+      c.(i) <- 1;
+      next.(i) <- j;
+    end
+  done;
+  (p, c, next)
+;;
+
+let totient_array n =
+  let (p, c, next) = prime_factorization_array n in
+  let phi = Array.make (n+1) 0 in
+  phi.(1) <- 1;
+  for i = 2 to n do
+    let x = p.(i) in
+    let j = next.(i) in
+    let f = (i / j) / x in
+    phi.(i) <- (x - 1) * f *  phi.(j)
+  done;
+  (phi, p, c, next)
 ;;
