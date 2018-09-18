@@ -6,7 +6,7 @@ import std.range;
 import std.stdio;
 import std.string;
 
-int[] computePrefixFunction (string s) {
+int[] computePrefixFunction(T) (T[] s) {
   immutable n = s.length;
   auto p = new int[n];
   p[0] = 0;
@@ -23,7 +23,25 @@ int[] computePrefixFunction (string s) {
   return p;
 }
 
-int[] computeZFunction (string s) {
+int kmp_match(T) (T[] t, T[] p) {
+  auto pi = computePrefixFunction (p);
+  immutable m = p.length;
+  size_t q;
+  foreach (i, c; t) {
+    while (q > 0 && c != p[q]) {
+      q = pi[q-1];
+    }
+    if (c == p[q]) {
+      ++q;
+    }
+    if (q == m) {
+      return (i - (m - 1)).to!int;
+    }
+  }
+  return -1;
+}
+
+int[] computeZFunction(T) (T[] s) {
   immutable n = s.length;
   auto z = new int[n];
   size_t l, r;
