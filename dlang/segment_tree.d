@@ -141,7 +141,7 @@ class SetSegmentTree(S, alias combine) if (isSomeFunction!combine) {
   }
   this (S[] a) {
     n = a.length;
-    t = uninitializedArray!(T[])(n) ~ a;
+    t = uninitializedArray!(S[])(n) ~ a;
     build ();
   }
 }
