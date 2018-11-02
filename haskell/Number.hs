@@ -1,3 +1,9 @@
+module Number (
+  gcdExt,
+  SieveArray,
+  sieveArray, primeFactorizationArray, totientArray, factors
+) where
+
 import Control.Monad
 import Control.Monad.ST
 import qualified Data.Array as A

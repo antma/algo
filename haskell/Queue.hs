@@ -1,3 +1,9 @@
+module Queue (
+  Queue,
+  queueEmpty, queuePush, queuePop
+) where
+
+type Queue a = ([a], [a])
 queueEmpty :: Queue a
 queueEmpty = ([], [])
 queuePush :: Queue a -> a -> Queue a
