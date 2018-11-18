@@ -6,10 +6,8 @@ module Number (
 
 import Control.Monad
 import Control.Monad.ST
-import qualified Data.Array as A
-import qualified Data.Array.Unboxed as UA
+import Data.Array.Unboxed
 import Data.Array.ST
-import Data.Array.MArray as M
 
 gcdExt :: Integral a => a -> a -> (a, a, a)
 gcdExt a 0 = (a, 1, 0)
@@ -18,7 +16,7 @@ gcdExt a b = (g, x, y - x * c)
     (c, d) = divMod a b
     (g, y, x) = gcdExt b d
 
-type SieveArray = UA.UArray Int Int
+type SieveArray = UArray Int Int
 sieveArray :: Int -> SieveArray
 
 sieveArray n = runSTUArray $ do
@@ -35,14 +33,14 @@ sieveArray n = runSTUArray $ do
 primeFactorizationArray :: SieveArray -> SieveArray
 
 primeFactorizationArray p = runSTUArray $ do
-  let (_, n) = UA.bounds p
-  c <- M.newArray_ (0, 2 * n + 1)
+  let (_, n) = bounds p
+  c <- newArray_ (0, 2 * n + 1)
   forM_ [2 .. n] $ \i -> do
-    let k = p UA.! i
+    let k = p ! i
         j = i `div` k
         i2 = 2 * i
         j2 = 2 * j
-    if (p UA.! j) == k then do
+    if (p ! j) == k then do
       cj <- readArray c j2
       writeArray c i2 (succ cj)
       nj <- readArray c (succ j2)
@@ -55,20 +53,20 @@ primeFactorizationArray p = runSTUArray $ do
 totientArray :: SieveArray -> SieveArray -> SieveArray
 
 totientArray p pf = runSTUArray $ do
-  let (_, n) = UA.bounds p
-  phi <- M.newArray_ (0, n)
+  let (_, n) = bounds p
+  phi <- newArray_ (0, n)
   writeArray phi 0 0
   writeArray phi 1 1
   forM_ [2 .. n] $ \i -> do
-    let x = p UA.! i
-        j = pf UA.! (succ (2 * i))
+    let x = p ! i
+        j = pf ! (succ (2 * i))
         f = (i `div` j) `div` x
     pj <- readArray phi j
     writeArray phi i ( (pred x) * f * pj)
   return phi
 
 factors _ _ 1 = []
-factors sa pfa n = (sa UA.! n, pfa UA.! i2) : (factors sa pfa $ pfa UA.! (succ i2))
+factors sa pfa n = (sa ! n, pfa ! i2) : (factors sa pfa $ pfa ! (succ i2))
   where
     i2 = 2 * n
 
