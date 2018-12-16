@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 module StringFunctions (
   AString,
-  toArrayString, prefixFunction
+  toArrayString, prefixFunction, match
 ) where
 
 import qualified Data.ByteString.Char8 as C
@@ -33,3 +33,15 @@ prefixFunction p = runSTUArray $ do
           loop (succ q) k''
   loop 2 0
   return pi
+
+match :: UArray Int Int -> AString -> C.ByteString -> Bool
+match pi p s = match' s 0
+  where
+    (_, m) = bounds p
+    match' s q 
+      | C.null s = False
+      | otherwise = if q'' == m then True else match' (C.tail s) q''
+        where
+          c = C.head s
+          q' = head $ dropWhile (\x -> x > 0 && (p ! (succ x)) /= c) $ iterate (pi !) q
+          q'' = if p ! (succ q') == c then succ q' else q'
