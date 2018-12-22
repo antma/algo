@@ -1,11 +1,13 @@
 {-# LANGUAGE BangPatterns #-}
 module TreapSet (
   TreapSet,
-  size, split, insert, merge, remove, count
+  key, size, split, insert, merge, remove, count, kth
 ) where
 
 type Key = Int
 data TreapSet = Node !Key !Int !Int TreapSet TreapSet | Nil
+
+key (Node x _ _ _ _) = x
 
 size Nil = 0
 size (Node _ _ sz _ _) = sz
@@ -46,3 +48,15 @@ count x = count' 0
       | x' < x = count' (c + 1 + (size l')) r'
       | otherwise = count' c l'
     
+kth :: TreapSet -> Int -> Key
+kth t k
+  | k < 0 || k >= size t = undefined
+  | otherwise = key $ loop t k
+  where
+    loop cur@(Node x _ _ left right) k
+      | k > ls = loop right (k - (ls + 1))
+      | k < ls = loop left k
+      | otherwise = cur
+      where
+        ls = size left
+
