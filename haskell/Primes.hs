@@ -1,7 +1,8 @@
 {-# LANGUAGE FlexibleContexts #-}
 module Primes (
   primeArray,
-  isprime
+  isprime,
+  primes
 ) where
 
 import Control.Monad
@@ -30,3 +31,6 @@ primeArray n = runSTUArray $ do
 
 isprime p x = if even x then x == 2 else not (p ! (shiftR x 1))
 
+primes n = 2 : (filter ( not . (pa ! ) . (`shiftR` 1))) [3, 5 .. n]
+  where
+    pa = primeArray n
