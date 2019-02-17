@@ -3,7 +3,7 @@ module DisjointSet (
 ) where
 
 import Control.Monad.ST
-import Data.Array.ST
+import Data.Array.ST.Safe
 
 disjointSetInit n = do
   p <- newListArray (0, n) [0 .. n] :: ST s (STUArray s Int Int)
@@ -15,7 +15,7 @@ disjointSetFind d@(p, _) x = do
   if px == x then return x
   else do
     px <- disjointSetFind d px
-    writeArray p x (px)
+    writeArray p x px
     return px
 
 disjointSetMerge d@(p, h) i j = do
