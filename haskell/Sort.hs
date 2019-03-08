@@ -10,12 +10,12 @@ import Control.Monad
 import Control.Monad.ST
 import qualified Data.Array.Unboxed as U
 
-qsort :: (Ord e, MArray a e m, Ix i, Integral i) => a i e -> [i] -> m ()
+qsort :: (Ord e, MArray a e m) => a Int e -> [Int] -> m ()
 qsort x rnds = do
   bds@(l',r') <- getBounds x
   let
     srt l r (y:ys) = do
-      xm <- readArray x (l + (mod y (r - l + 1)))
+      xm <- readArray x (l + mod y (r - l + 1))
       let
         f i j
           | i > j = return (i, j)
