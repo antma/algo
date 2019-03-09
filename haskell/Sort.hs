@@ -11,8 +11,9 @@ import Control.Monad.ST
 import qualified Data.Array.Unboxed as U
 
 qsort :: (Ord e, MArray a e m) => a Int e -> [Int] -> m ()
+qsort :: (Ord e, MArray a e m) => a Int e -> [Int] -> m ()
 qsort x rnds = do
-  bds@(l',r') <- getBounds x
+  (l',r') <- getBounds x
   let
     srt l r (y:ys) = do
       xm <- readArray x (l + mod y (r - l + 1))
@@ -22,19 +23,17 @@ qsort x rnds = do
           | otherwise = do
                let g' i = do
                      xi <- readArray x i
-                     if xm > xi then g' (succ i) else return i
+                     if xm > xi then g' (succ i) else return (i, xi)
                    g'' j = do
                      xj <- readArray x j
-                     if xm < xj then g'' (pred j) else return j
-               i' <- g' i
-               j' <- g'' j
-               if i' <= j' then do
-                 v1 <- readArray x i'
-                 v2 <- readArray x j'
+                     if xm < xj then g'' (pred j) else return (j, xj)
+               (i', v1) <- g' i
+               (j', v2) <- g'' j
+               if i' < j' then do
                  writeArray x i' v2
                  writeArray x j' v1
                  f (succ i') (pred j')
-               else return (i', j')
+               else return $! if i' > j' then (i', j') else (succ i', pred i')
       (i'', j'') <- f l r
       when (l < j'') $ srt l j'' ys
       when (i'' < r) $ srt i'' r ys
