@@ -11,7 +11,6 @@ import Control.Monad.ST
 import qualified Data.Array.Unboxed as U
 
 qsort :: (Ord e, MArray a e m) => a Int e -> [Int] -> m ()
-qsort :: (Ord e, MArray a e m) => a Int e -> [Int] -> m ()
 qsort x rnds = do
   (l',r') <- getBounds x
   let
