@@ -3,7 +3,9 @@ module Primes (
   primeArray,
   isprime,
   primes,
-  factors, factorization
+  factors, factorization,
+  divisors,
+  eulerTotientFunction
 ) where
 
 import Control.Monad
@@ -58,3 +60,6 @@ divisors primes' n = sort $ loop (factorization primes' n) 1 []
     loop ((!c, !p):xs) m r = snd $ (iterate f (m, r)) !! (p + 1)
       where
         f (!m', r') = (m' * c, loop xs m' r')
+
+eulerTotientFunction :: [Int] -> Int -> Int
+eulerTotientFunction primes' n = product $ map (\(!a, !c) -> let !q = a ^ (pred c) in q * pred a) $ factorization primes' n
