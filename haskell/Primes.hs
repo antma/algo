@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE BangPatterns, FlexibleContexts #-}
 module Primes (
   primeArray,
   isprime,
@@ -31,12 +31,15 @@ primeArray n = runSTUArray $ do
       loop (2 * p * succ p)
   return a
 
+isprime :: UArray Int Bool -> Int -> Bool
 isprime p x = if even x then x == 2 else not (p ! shiftR x 1)
 
+primes :: Int -> [Int]
 primes n = 2 : filter ( not . (pa ! ) . (`shiftR` 1)) [3, 5 .. n]
   where
     pa = primeArray n
 
+factors :: [Int] -> Int -> [Int]
 factors p n = loop n p []
   where
     loop 1 _ r = r
@@ -45,4 +48,13 @@ factors p n = loop n p []
       | mod m x == 0 = loop (div m x) l (x:r)
       | otherwise = loop m xs r
 
-factorization p n = map (\l -> (head l, length l)) $ group $ factors p n
+factorization :: [Int] -> Int -> [(Int, Int)]
+factorization primes' n = map (\l -> (head l, length l)) $ group $ factors primes' n
+
+divisors :: [Int] -> Int -> [Int]
+divisors primes' n = sort $ loop (factorization primes' n) 1 []
+  where
+    loop [] !m r = m : r
+    loop ((!c, !p):xs) m r = snd $ (iterate f (m, r)) !! (p + 1)
+      where
+        f (!m', r') = (m' * c, loop xs m' r')
