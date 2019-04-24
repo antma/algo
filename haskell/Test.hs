@@ -3,6 +3,7 @@ module Main where
 import Test.HUnit
 import qualified TreapSet
 import qualified Random
+import qualified Primes
 import Data.Int
 
 maket :: [Int32] -> Int32 -> TreapSet.TreapSet
@@ -19,10 +20,13 @@ test2 = TestCase (assertBool "check heap (maximum)" (y >= yl && y >= yr))
     (TreapSet.Node _ yl _ _ _) = l
     (TreapSet.Node _ yr _ _ _) = r
 
+test3 = TestCase (assertBool "check sumOfDivisors" (Primes.sumOfDivisors [2] 6 == 12))
 
 tests :: Test
 tests = TestList [TestLabel "test1" test1,
-                  TestLabel "test2" test2]
+                  TestLabel "test2" test2,
+                  TestLabel "test3" test3
+                 ]
 
 main :: IO Counts
 main = do runTestTT tests

@@ -5,7 +5,9 @@ module Primes (
   primes,
   factors, factorization,
   divisors,
-  eulerTotientFunction
+  eulerTotientFunction,
+  countDivisors,
+  sumOfDivisors
 ) where
 
 import Control.Monad
@@ -13,6 +15,7 @@ import Control.Monad.ST
 import Data.Array.ST
 import Data.Array.Unboxed
 import Data.Bits
+import Data.Int
 import Data.List
 
 primeArray :: Int -> UArray Int Bool
@@ -63,3 +66,11 @@ divisors primes' n = sort $ loop (factorization primes' n) 1 []
 
 eulerTotientFunction :: [Int] -> Int -> Int
 eulerTotientFunction primes' n = product $ map (\(!a, !c) -> let !q = a ^ (pred c) in q * pred a) $ factorization primes' n
+
+countDivisors :: [Int] -> Int -> Int
+countDivisors primes' = product . map (succ . snd) . factorization primes'
+
+sumOfDivisors :: [Int] -> Int -> Int64
+sumOfDivisors primes' = product . map f . factorization primes'
+  where
+    f (p, c) = fromIntegral $! div (pred $! p ^ (succ c)) (pred p)
