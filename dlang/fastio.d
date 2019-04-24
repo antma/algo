@@ -74,4 +74,11 @@ class InputReader {
       return res;
     }
   }
+  final T[] nextA(T) (int n) {
+    auto a = uninitializedArray!(T[]) (n);
+    foreach (i; 0 .. n) {
+      a[i] = next!T;
+    }
+    return a;
+  }
 }
