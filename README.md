@@ -15,6 +15,10 @@
 ## Fast IO
 - [All in One](https://www.spoj.com/problems/ALLIN1)
 
+## Heap
+- [Nonnegative Partial Sums](https://www.spoj.com/problems/PARSUMS)
+- [Dijkstra: Shortest Reach 2](https://www.hackerrank.com/challenges/dijkstrashortreach/)
+
 ## Knut Moriss Pratt
 - [Pattern Find](https://www.spoj.com/problems/NAJPF)
 
@@ -32,12 +36,16 @@
 - [String Function Calculation](https://www.hackerrank.com/challenges/string-function-calculation/problem)
 - [Ada and Trees](https://www.spoj.com/problems/ADATREE)
 - [Negative Score](https://www.spoj.com/problems/RPLN)
+- [Living with Courage](https://www.spoj.com/problems/COURAGE)
 
 ## Segment Tree (lazy propagation)
 - [Task Scheduling](https://www.hackerrank.com/challenges/task-scheduling/problem)
 - [Horrible Queries](https://www.spoj.com/problems/HORRIBLE)
 - [Light Switching](https://www.spoj.com/problems/LITE)
 - [Sum of Squares with Segment Tree](https://www.spoj.com/problems/SEGSQRSS)
+
+## Suffix Array
+- [Lexicographical Substring Search](https://www.spoj.com/problems/SUBLEX)
 
 ## Treap
 - [Ada and Harvest](https://www.spoj.com/problems/ADACROP)
