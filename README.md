@@ -3,6 +3,7 @@
 
 ## DisjointSet
 - [Two Flowers](https://www.codechef.com/problems/TWOFL)
+- [The Value of Friendship](https://www.hackerrank.com/challenges/value-of-friendship/)
 
 ## FenwickTree
 - [Distant Pairs](https://www.hackerrank.com/challenges/distant-pairs/problem)
