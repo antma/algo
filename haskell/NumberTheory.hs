@@ -1,6 +1,6 @@
 {-# LANGUAGE BangPatterns, Safe #-}
 
-module Number (
+module NumberTheory (
   gcdExt,
   SieveArray,
   sieveArray, primeFactorizationArray, totientArray, factors
