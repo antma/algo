@@ -1,5 +1,5 @@
-import suffix_array;
-import segment_tree;
+import SuffixArray;
+import SegmentTree;
 
 void main () {
 

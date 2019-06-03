@@ -1,6 +1,8 @@
 import std.conv;
 import std.random;
 
+//x^2 = n (mod p), p odd prime
+
 struct GFNumber {
   uint v, p;
   GFNumber opBinary(string op)(in GFNumber rhs) const if (op == "+") {
