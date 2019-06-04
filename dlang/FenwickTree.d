@@ -29,7 +29,7 @@ class FenwickTree(T = int, alias op = (x, y) => x + y, T zero = T.init) {
 
 unittest {
   import std.stdio;
-  writeln ("Testing fenwick_tree.d ...");
+  writeln ("Testing ", __FILE__, " ...");
   auto f = new FenwickTree!int(5);
   f.update (0, 1);
   assert (f.reduce (1) == 1);

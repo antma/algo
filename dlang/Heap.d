@@ -109,7 +109,7 @@ class Heap(T) {
 
 unittest {
   import std.stdio, std.conv, std.algorithm;
-  writeln ("Testing heap.d ...");
+  writeln ("Testing ", __FILE__, " ...");
   auto h = new Heap!int (5, 239);
   assert (h.empty);
   h.update (0, 10);

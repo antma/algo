@@ -106,7 +106,7 @@ struct IntM {
 }
 
 unittest {
-  writeln ("Testing number.d ...");
+  writeln ("Testing ", __FILE__, " ...");
   assert (gcd (4, 2) == gcd (2, 4));
   assert (gcd (4, 2) == 2);
   assert (gcd (27, 3) == 3);

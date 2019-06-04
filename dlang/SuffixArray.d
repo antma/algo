@@ -158,6 +158,7 @@ import std.random;
 import std.stdio;
 
 unittest {
+  writeln ("Testing ", __FILE__, " ...");
   void check (string s) {
     string z = s ~ '$';
     auto sa = new SuffixArray (z);
@@ -167,7 +168,6 @@ unittest {
       assert (s[i .. $] <= s[j .. $]);
     }
   }
-  writeln ("Testing suffix_array.d ...");
   check ("abacabadaba");
   string t = iota(0, 1000).map! (x => (uniform(0, 26) + 97).to!(char)).text;
   check (t);

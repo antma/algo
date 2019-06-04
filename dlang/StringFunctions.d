@@ -72,6 +72,6 @@ int[] computeZFunction(T) (const T[] s) {
 
 unittest {
   import std.stdio;
-  writeln ("Testing string_functions.d ...");
+  writeln ("Testing ", __FILE__, " ...");
   assert (equal (computePrefixFunction ("ababababca"), [0, 0, 1, 2, 3, 4, 5, 6, 0, 1]));
 }
