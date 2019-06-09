@@ -5,7 +5,7 @@ class FenwickTree(T = int, alias op = (x, y) => x + y, T zero = T.init) {
   public:
   this (size_t _n) pure nothrow {
     n = _n;
-    a = new int[n];
+    a = new T[n];
     static if (zero != T.init) a[] = zero;
   }
   void update (size_t x, T v) pure nothrow @nogc in {
