@@ -1,9 +1,9 @@
-typealias Value = Int
-typealias ValueArray = IntArray
+typealias HeapValue = Int
+typealias HeapValueArray = IntArray
 
-class Heap (private val n: Int, default: Value) {
+class Heap (private val n: Int, default: HeapValue) {
   private var size = 0
-  private val a = ValueArray (n, { default } )
+  private val a = HeapValueArray (n, { default } )
   private val h = IntArray (n + 1)
   private val g = IntArray (n)
   private fun heapifyFront (k: Int) {
@@ -50,7 +50,7 @@ class Heap (private val n: Int, default: Value) {
     g[i] = size
     heapifyBack (size)
   }
-  fun decreaseKey (k: Int, value: Value) {
+  fun decreaseKey (k: Int, value: HeapValue) {
     assert (k >= 0 && k < n)
     assert (value < a[k])
     a[k] = value
@@ -74,5 +74,5 @@ class Heap (private val n: Int, default: Value) {
     return he
   }
   fun isEmpty() = size == 0
-  operator fun get(index: Int): Value = a[index]
+  operator fun get(index: Int): HeapValue = a[index]
 }
