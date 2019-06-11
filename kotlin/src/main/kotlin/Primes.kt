@@ -1,9 +1,11 @@
+package cpalgo.primes
+
 import java.util.BitSet
 import kotlin.math.*
 
 fun primes(n: Int) = PrimeTable(n).primes()
 
-class PrimeTable(val n: Int) {
+public class PrimeTable(val n: Int) {
   private val m = max(1, n / 2)
   val a = BitSet(m)
   init {
@@ -20,6 +22,9 @@ class PrimeTable(val n: Int) {
   }
   fun isPrime (i: Int): Boolean = if ((i and 1) != 0) a[i ushr 1] else i == 2
   fun primes(): IntArray {
+    if (n < 3) {
+      return IntArray(0)
+    }
     val l = IntArray(a.cardinality()+1)
     var k = 0
     l[0] = 2

@@ -4,10 +4,11 @@ import environment_vars
 import os, os.path, glob, sys
 
 BUILD_DIR="build"
+RUNNER='org.junit.runner.JUnitCore'
 ev = environment_vars
 
 lst_classpath = [os.path.join(ev.KOTLIN_LIB, 'kotlin-test.jar'), ev.JUNIT4_JAR,  ev.HAMCREST_CORE_JAR, \
-os.path.join(BUILD_DIR, 'cpalgo-test.jar')]
+os.path.join(BUILD_DIR, 'cpalgo.jar'), os.path.join(BUILD_DIR, 'cpalgo-test.jar')]
 classpath = ':'.join(lst_classpath)
 tests = []
 for s in glob.glob(os.path.join('src', 'test', 'kotlin', '*.kt')):
@@ -18,6 +19,6 @@ if os.system('ant') != 0:
   sys.stderr.write('Ant failed\n')
   sys.exit(1)
 
-cmd = 'java -cp ' + classpath + ' org.junit.runner.JUnitCore ' + ' '.join(tests)
+cmd = 'java -cp ' + classpath + ' ' + RUNNER + ' ' + ' '.join(tests)
 print(cmd)
 os.system(cmd)
