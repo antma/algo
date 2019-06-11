@@ -1,4 +1,7 @@
-import std.algorithm, std.conv, std.stdio;
+import std.algorithm;
+import std.conv;
+import std.math;
+import std.stdio;
 
 T gcd(T) (T a, T b) pure nothrow @nogc {
   if (a < b) {
@@ -75,9 +78,9 @@ struct IntM {
   IntM opBinary (string op : "*")(in IntM rhs) const pure nothrow @nogc {
     return IntM (((v.to!(long)) * rhs.v.to!(long)) % q);
   }
-  IntM opBinary (string op : "^^")(in int rhs) const pure nothrow @nogc {
+  IntM opBinary (string op : "^^")(in long rhs) const pure nothrow @nogc {
     IntM a = 1, b = this;
-    int p = rhs;
+    long p = rhs;
     while (p > 0) {
       //a * (b ^ p) == x ^ rhs
       if (p & 1) {
@@ -103,18 +106,46 @@ struct IntM {
   }
   bool opEquals (const IntM rhs) const pure nothrow @nogc { return v == rhs.v; }
   string toString() const pure nothrow { return ((v < 0) ? v + q : v).text; }
+  //a ^ x = this (mod q)
+  int discreteLogarithm (in IntM a) const {
+    enum int n = ceil (sqrt (q.to!double)).to!int;
+    IntM an = a ^^ n;
+    int[int] h;
+    IntM cur = an;
+    foreach (p; 1 .. n + 1) {
+      auto ptr = cur.v !in h;
+      if (cur.v !in h) {
+        h[cur.v] = p;
+      }
+      cur *= an;
+    }
+    cur = this;
+    int res = int.max;
+    foreach (q; 0 .. n + 1) {
+      auto ptr = cur.v in h;
+      if (ptr) {
+        res = min (res, *ptr * n - q);
+      }
+      cur *= a;
+    }
+    return res != int.max ? res : -1;
+  }
 }
 
 unittest {
+  import std.range;
   writeln ("Testing ", __FILE__, " ...");
   assert (gcd (4, 2) == gcd (2, 4));
   assert (gcd (4, 2) == 2);
   assert (gcd (27, 3) == 3);
   int q = 1_000_000_007;
-  int x, y;
-  int g = gcdext (2, q, x, y);
-  assert (2 * x + q * y == g);
-  assert ((IntM (2) ^^ (x - 2)).to!(int) == 1);
+  void gcdExtTest () {
+    int x, y;
+    int g = gcdext (2, q, x, y);
+    assert (2 * x + q * y == g);
+    assert ((IntM (2) ^^ (x - 2)).to!(int) == 1);
+  }
+  gcdExtTest ();
   assert (-IntM (1) == IntM (q - 1));
   auto i = IntM(1);
   i++;
@@ -123,4 +154,19 @@ unittest {
   assert (i == IntM(1));
   assert ((i + 1) * (i + 1) == IntM(4));
   assert (i + i == IntM(2));
+
+  //discreteLogarithm
+  enum DL_TESTS = 10;
+  foreach (p; [2, 3, 5, 7, 11, 17]) {
+    IntM a = p;
+    IntM x = 1;
+    foreach (j; 0 .. DL_TESTS) {
+      assert (x.discreteLogarithm (a) == j);
+      x *= a;
+    }
+    foreach (j; iota (100, 10007 * DL_TESTS, 10007)) {
+      IntM y = IntM (p) ^^ j;
+      assert (y.discreteLogarithm (a) == j);
+    }
+  }
 }
