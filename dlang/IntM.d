@@ -14,7 +14,7 @@ T gcd(T) (T a, T b) pure nothrow @nogc {
 }
 
 T gcdext(T) (T a, T b, ref T x, ref T y) pure nothrow @nogc {
-  if (b == 0) {
+  if (!b) {
     x = 1;
     y = 0;
     return a;
@@ -24,62 +24,71 @@ T gcdext(T) (T a, T b, ref T x, ref T y) pure nothrow @nogc {
   return res;
 }
 
-struct IntM {
-  enum q = 1_000_000_007;
+struct IntM(int q = 1_000_000_007) {
+  alias N = IntM!q;
   int v;
-  this (int m) pure nothrow @nogc {
+  private void fromInt (int m) pure nothrow @nogc {
     v = m % q;
     if (v < 0) {
       v += q;
     }
   }
-  IntM opAssign (int m) pure nothrow @nogc {
-    v = m % q;
-    if (v < 0) {
-      v += q;
-    }
+  this (int m) pure nothrow @nogc {
+    fromInt (m);
+  }
+  N opAssign (int m) pure nothrow @nogc {
+    fromInt (m);
     return this;
   }
-  IntM opUnary (string op : "-")() const pure nothrow @nogc {
-    return IntM ((q - v) % q);
+  N opUnary (string op : "-")() const pure nothrow @nogc {
+    return N ((q - v) % q);
   }
-  ref IntM opUnary (string op : "++")() pure nothrow @nogc {
+  ref N opUnary (string op : "++")() pure nothrow @nogc {
     if (++v >= q) {
       v -= q;
     }
     return this;
   }
-  ref IntM opUnary (string op : "--")() pure nothrow @nogc {
+  ref N opUnary (string op : "--")() pure nothrow @nogc {
     if (--v < 0) {
       v += q;
     }
     return this;
   }
-  ref IntM opOpAssign (string op : "+")(in IntM rhs) pure nothrow @nogc {
+  ref N opOpAssign (string op : "+")(in N rhs) pure nothrow @nogc {
     v += rhs.v;
     v %= q;
     return this;
   }
-  ref IntM opOpAssign (string op : "-")(in IntM rhs) pure nothrow @nogc {
+  ref N opOpAssign (string op : "-")(in N rhs) pure nothrow @nogc {
     v -= rhs.v;
     v %= q;
     return this;
   }
-  ref IntM opOpAssign (string op : "*")(in IntM rhs) pure nothrow @nogc {
+  ref N opOpAssign (string op : "*")(in N rhs) pure nothrow @nogc {
     v = ((v.to!(long)) * rhs.v.to!(long)) % q;
     return this;
   }
-  IntM opBinary (string op : "+")(in IntM rhs) const pure nothrow @nogc {
-    return IntM ( (v + rhs.v) % q);
+  N opBinary (string op : "+")(in N rhs) const pure nothrow @nogc {
+    return N ( (v + rhs.v) % q);
   }
-  IntM opBinary (string op : "-")(in IntM rhs) const pure nothrow @nogc {
-    return IntM ( (v - rhs.v) % q);
+  N opBinary (string op : "-")(in N rhs) const pure nothrow @nogc {
+    return N ( (v - rhs.v) % q);
   }
-  IntM opBinary (string op : "*")(in IntM rhs) const pure nothrow @nogc {
-    return IntM (((v.to!(long)) * rhs.v.to!(long)) % q);
+  N opBinary (string op : "*")(in N rhs) const pure nothrow @nogc {
+    return N (((v.to!(long)) * rhs.v.to!(long)) % q);
   }
-  IntM opBinary (string op : "^^")(in long rhs) const pure nothrow @nogc {
-    IntM a = 1, b = this;
+  N opBinary (string op : "/")(in N rhs) const pure nothrow @nogc {
+    return this * N.inversion ();
+  }
+  N inversion () const pure @nogc {
+    int x, y;
+    immutable g = gcdext!int (v, q, x, y);
+    assert (g == 1);
+    return N (x);
+  }
+  N opBinary (string op : "^^")(in long rhs) const pure nothrow @nogc {
+    N a = 1, b = this;
     long p = rhs;
     while (p > 0) {
       //a * (b ^ p) == x ^ rhs
@@ -91,11 +100,11 @@ struct IntM {
     }
     return a;
   }
-  IntM opBinary (string op)(in int v) const pure nothrow @nogc if (op == "+" || op == "-" || op == "*") {
-    mixin ("return this " ~ op ~ " IntM(v);");
+  N opBinary (string op)(in int v) const pure nothrow @nogc if (op == "+" || op == "-" || op == "*" || op == "/") {
+    mixin ("return this " ~ op ~ " N(v);");
   }
   int opCast(T : int)() const pure nothrow @nogc { return v; }
-  int opCmp (const IntM rhs) const pure nothrow @nogc {
+  int opCmp (const N rhs) const pure nothrow @nogc {
     if (v < rhs.v) {
       return -1;
     }
@@ -104,14 +113,14 @@ struct IntM {
     }
     return 0;
   }
-  bool opEquals (const IntM rhs) const pure nothrow @nogc { return v == rhs.v; }
+  bool opEquals (const N rhs) const pure nothrow @nogc { return v == rhs.v; }
   string toString() const pure nothrow { return ((v < 0) ? v + q : v).text; }
   //a ^ x = this (mod q)
-  int discreteLogarithm (in IntM a) const {
+  int discreteLogarithm (in N a) const {
     enum int n = ceil (sqrt (q.to!double)).to!int;
-    IntM an = a ^^ n;
+    N an = a ^^ n;
     int[int] h;
-    IntM cur = an;
+    N cur = an;
     foreach (p; 1 .. n + 1) {
       auto ptr = cur.v !in h;
       if (cur.v !in h) {
@@ -134,6 +143,7 @@ struct IntM {
 
 unittest {
   import std.range;
+  alias N = IntM!();
   writeln ("Testing ", __FILE__, " ...");
   assert (gcd (4, 2) == gcd (2, 4));
   assert (gcd (4, 2) == 2);
@@ -142,30 +152,32 @@ unittest {
   void gcdExtTest () {
     int x, y;
     int g = gcdext (2, q, x, y);
+    assert (g == 1);
     assert (2 * x + q * y == g);
-    assert ((IntM (2) ^^ (x - 2)).to!(int) == 1);
+    assert ((N(2) ^^ (q - 1)).to!int == 1);
+    assert (N(2) ^^ (q - 2) == N(x));
   }
   gcdExtTest ();
-  assert (-IntM (1) == IntM (q - 1));
-  auto i = IntM(1);
+  assert (-N (1) == N (q - 1));
+  auto i = N(1);
   i++;
-  assert (i == IntM(2));
+  assert (i == N(2));
   i--;
-  assert (i == IntM(1));
-  assert ((i + 1) * (i + 1) == IntM(4));
-  assert (i + i == IntM(2));
+  assert (i == N(1));
+  assert ((i + 1) * (i + 1) == N(4));
+  assert (i + i == N(2));
 
   //discreteLogarithm
   enum DL_TESTS = 10;
   foreach (p; [2, 3, 5, 7, 11, 17]) {
-    IntM a = p;
-    IntM x = 1;
+    N a = p;
+    N x = 1;
     foreach (j; 0 .. DL_TESTS) {
       assert (x.discreteLogarithm (a) == j);
       x *= a;
     }
     foreach (j; iota (100, 10007 * DL_TESTS, 10007)) {
-      IntM y = IntM (p) ^^ j;
+      N y = N (p) ^^ j;
       assert (y.discreteLogarithm (a) == j);
     }
   }
