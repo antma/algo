@@ -79,7 +79,7 @@ struct IntM(int q = 1_000_000_007) {
     return N (((v.to!(long)) * rhs.v.to!(long)) % q);
   }
   N opBinary (string op : "/")(in N rhs) const pure nothrow @nogc {
-    return this * N.inversion ();
+    return this * rhs.inversion ();
   }
   N inversion () const pure @nogc {
     int x, y;
@@ -166,6 +166,7 @@ unittest {
   assert (i == N(1));
   assert ((i + 1) * (i + 1) == N(4));
   assert (i + i == N(2));
+  assert (((N(1) / N(2)) * N (2)) == N (1));
 
   //discreteLogarithm
   enum DL_TESTS = 10;
