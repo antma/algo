@@ -59,11 +59,33 @@ Factorization factorizationTrialDivision (ulong x, int[] primes) {
   return f;
 }
 
+Factorization factorizationSieveArray (int x, int[] sa) {
+  Factorization f;
+  uint last, c;
+  while (x > 1) {
+    int p = sa[x];
+    if (last != p) {
+      if (last) {
+        f ~= tuple! ("p", "c") (last.to!ulong, c);
+      }
+      c = 1;
+      last = p;
+    } else {
+      ++c;
+    }
+    x /= p;
+  }
+  if (last) {
+    f ~= tuple! ("p", "c") (last.to!ulong, c);
+  }
+  return f;
+}
+
 int[] sieveArray (int n) {
-  auto a = chain (only (0), iota (1, n + 1).map! (i => (i & 1) ? i : 2)).array;
-  foreach (p; iota (3, (sqrt(n.to!double) + 1e-9).to!int + 1, 2)) {
+  auto a = chain (only (0), iota (1, n).map! (i => (i & 1) ? i : 2)).array;
+  foreach (p; iota (3, sqrt(n.to!double).to!int + 1, 2)) {
     if (a[p] == p) {
-      foreach (o; iota (p * p, n + 1, 2 * p)) {
+      foreach (o; iota (p * p, n, 2 * p)) {
         if (a[o] == o) {
           a[o] = p;
         }
@@ -84,5 +106,14 @@ unittest {
     assert (equal (q, p), "n = %d, expected %s, result %s".format (n, p, q));
   }
   assert (equal ([tuple (17UL, 1U)], factorizationTrialDivision (17, primes)));
-  assert (equal (sieveArray (9), [0, 1, 2, 3, 2, 5, 2, 7, 2, 3]));
+  immutable int[] sa16 = [0, 1, 2, 3, 2, 5, 2, 7, 2, 3, 2, 11, 2, 13, 2, 3];
+  foreach (n; 1 .. 16) {
+    assert (equal (sieveArray (n), sa16[0 .. n]));
+  }
+  enum m = 200;
+  auto sa = sieveArray (m);
+  foreach (i; 1 .. m) {
+    auto f1 = factorizationTrialDivision (i, primes), f2 = factorizationSieveArray (i, sa);
+    assert (equal (f1, f2), format ("%s %s", f1, f2));
+  }
 }
