@@ -117,8 +117,9 @@ struct IntM(int q = 1_000_000_007) {
   string toString() const pure nothrow { return ((v < 0) ? v + q : v).text; }
   //a ^ x = this (mod q)
   int discreteLogarithm (in N a) const {
-    enum int n = ceil (sqrt (q.to!double)).to!int;
+    immutable int n = ceil (sqrt (q.to!double)).to!int;
     N an = a ^^ n;
+
     int[int] h;
     N cur = an;
     foreach (p; 1 .. n + 1) {
