@@ -5,13 +5,14 @@ OBJDIR := $(WORKDIR)
 OBJECTS := $(patsubst %.d,%.o,$(SOURCES))
 
 DMDFLAGS := -unittest
+DMD := dmd
 
 all: test
 
 #.PNONY: clean
 
 %.o : %.d
-	dmd $(DMDFLAGS) -c $<
+	$(DMD) $(DMDFLAGS) -c $<
 
 test: $(OBJECTS)
-	dmd $(DMDFLAGS) -of$@ $^
+	$(DMD) $(DMDFLAGS) -of$@ $^
