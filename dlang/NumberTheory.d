@@ -95,6 +95,25 @@ int[] sieveArray (int n) {
   return a;
 }
 
+long sumOfDivisors (long acc, int p, int c) {
+  return acc * ((p ^^ (c + 1) - 1) / (p - 1));
+}
+
+T[] sieveArrayDP(T) (int[] sa, T function(T acc, int p, int c) op, T base) {
+  T[] b = uninitializedArray! (T[]) (sa.length);
+  b[1] = base;
+  foreach (i; 2 .. sa.length) {
+    immutable p = sa[i];
+    int c = 1, x = i.to!int / p;
+    while (sa[x] == p) {
+      ++c;
+      x /= p;
+    }
+    b[i] = op (b[x], p, c);
+  }
+  return b;
+}
+
 unittest {
   import std.stdio, std.string;
   writeln ("Testing ", __FILE__, " ...");
@@ -110,10 +129,12 @@ unittest {
   foreach (n; 1 .. 16) {
     assert (equal (sieveArray (n), sa16[0 .. n]));
   }
-  enum m = 200;
+  enum m = 300;
   auto sa = sieveArray (m);
   foreach (i; 1 .. m) {
     auto f1 = factorizationTrialDivision (i, primes), f2 = factorizationSieveArray (i, sa);
     assert (equal (f1, f2), format ("%s %s", f1, f2));
   }
+  auto sd = sieveArrayDP (sa, &sumOfDivisors, 1L);
+  assert (sd[220] == 284 + 220 && sd[284] == 220 + 284);
 }
