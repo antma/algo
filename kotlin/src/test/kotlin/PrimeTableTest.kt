@@ -4,12 +4,13 @@ import org.junit.Test
 
 import cpalgo.primes.*
 
-val largePrimes = primes(1000000)
+val largePrimes = primes(2000000)
 
 class PrimeTableTest {
   @Test
   fun testPrimesLarge() {
-    assertEquals(largePrimes.map { it.toLong() }.sum(), 37550402023L)
+    assertEquals(largePrimes.takeWhile { it < 1_000_000 }.map { it.toLong() }.sum(), 37550402023L)
+    assertEquals(largePrimes.map { it.toLong() }.sum(), 142913828922L)
   }
   @Test
   fun testPrimesSmall() {
