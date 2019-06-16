@@ -1,9 +1,38 @@
+import core.bitop;
 import std.algorithm;
-import std.conv;
-import std.math;
-import std.range;
+import std.bigint;
 import std.bitmanip;
+import std.conv;
+import std.functional;
+import std.math;
+import std.numeric;
+import std.random;
+import std.range;
+import std.traits;
 import std.typecons;
+
+T gcdext(T) (T a, T b, ref T x, ref T y) pure nothrow @nogc {
+  if (!b) {
+    x = 1;
+    y = 0;
+    return a;
+  }
+  T res = gcdext (b, a % b, y, x);
+  y -= x * (a / b);
+  return res;
+}
+
+X genericPower(alias mul, X, Y) (X x, Y y, X one) if (isUnsigned!Y) {
+  X a = one, b = x;
+  while (y > 0) {
+    if (y & 1) {
+      a = binaryFun!mul (a, b);
+    }
+    b = binaryFun!mul (b, b);
+    y >>>= 1;
+  }
+  return a;
+}
 
 class PrimeTable {
   private:
@@ -114,6 +143,120 @@ T[] sieveArrayDP(T) (int[] sa, T function(T acc, int p, int c) op, T base) {
   return b;
 }
 
+//////////////////// primality testing ////////////////////
+class PrimalityTest32 {
+  private static bool witness (uint a, uint n) {
+    immutable n1 = n - 1;
+    immutable m = bsf (n1);
+    uint x = genericPower!( (a, b) => ((a.to!ulong * b) % n).to!uint, uint, uint) (a, n1 >>> m, 1U);
+    foreach (i; 0 .. m) {
+      uint y = (x.to!ulong * x) % n;
+      if (y == 1 && x != 1 && x != n1) {
+         return true;
+      }
+      x = y;
+    }
+    return x != 1;
+  }
+  public static bool isPrime (uint n) {
+    if (n <= 23) return ((1 << n) & 0x8a28ac) != 0;
+    if (gcd (n, 223092870) > 1) return false;
+    if (n <= 529) return true;
+    if (witness (2, n) || witness (61, n)) return false;
+    if (n < 916327) return true;
+    if (witness (7, n)) return false;
+    if (n < 4759123141)  return true;
+    if (witness (3, n) || witness (24251, n)) return false;
+    return true;
+  }
+}
+
+class Montgomery64 {
+  //R = 2 ^ 64
+  //phi(R) = 2 ^ 63
+  immutable ulong n, r_mod_n, neg_r_mod_n, r_div_n, r1, n1, rr;
+  ulong reduce (BigInt t) const {
+    ulong a = (t & ulong.max).to!ulong;
+    a *= n1;
+    t += BigInt (a) * n;
+    t >>= 64;
+    a = t.to!ulong;
+    return (a >= n) ? a - n : a;
+  }
+  ulong mul_asm (ulong a, ulong b) const {
+    asm {
+      mov RAX, a;
+      mul RAX, b;
+      //RDX:RAD = (a * b)
+      mov RCX, RDX;
+      mov RBX, RAX;
+      //t = RCX:RBX
+      mul RAX, [RDI + n1.offsetof];
+      mul RAX, [RDI + n.offsetof];
+      add RAX, RBX;
+      adc RCX, RDX;
+      mov RAX, RCX;
+    }
+  }
+  ulong mul (ulong a, ulong b) const {
+    immutable r = mul_asm (a, b);
+    return (r >= n) ? r - n : r;
+  }
+  ulong pow (ulong x, ulong y) const {
+    ulong a = r_mod_n, b = x;
+    while (y > 0) {
+      if (y & 1) {
+        a = mul (a, b);
+      }
+      b = mul (b, b);
+      y >>>= 1;
+    }
+    return a;
+  }
+  this (ulong _n) {
+    n = _n;
+    ulong d = ulong.max / n;
+    ulong m = ulong.max - d * n;
+    if (++m == n) { m = 0; ++d; }
+    r_mod_n = m;
+    neg_r_mod_n = m ? n - m : 0;
+    r_div_n = d;
+    ulong x, y;
+    gcdext (n, r_mod_n, y, x);
+    y -= x * r_div_n;
+    n1 = -y;
+    r1 = x;
+    rr = ((BigInt (m) * m) % n).to!ulong;
+  }
+}
+
+class PrimalityTest64 {
+  private static bool witness (ulong a, const ref Montgomery64 m) {
+    immutable n1 = m.n - 1;
+    immutable l = bsf (n1);
+    a = m.mul (a, m.rr);
+    ulong x = m.pow (a, n1 >>> l);
+    foreach (i; 0 .. l) {
+      ulong y = m.mul (x, x);
+      if (y == m.r_mod_n && x != m.r_mod_n && x != m.neg_r_mod_n) {
+         return true;
+      }
+      x = y;
+    }
+    return x != m.r_mod_n;
+  }
+  public static bool isPrime (ulong n, int tries = 5) {
+    if (n <= uint.max) return PrimalityTest32.isPrime (n.to!uint);
+    if (gcd (n, 223092870) > 1) return false;
+    auto m = new Montgomery64 (n);
+    foreach (t; 0 .. tries) {
+      if (witness (uniform (2L, n - 1), m)) return false;
+    }
+    return true;
+  }
+
+}
+
 unittest {
   import std.stdio, std.string;
   writeln ("Testing ", __FILE__, " ...");
@@ -137,4 +280,8 @@ unittest {
   }
   auto sd = sieveArrayDP (sa, &sumOfDivisors, 1L);
   assert (sd[220] == 284 + 220 && sd[284] == 220 + 284);
+  auto pt = new PrimeTable (1_000_000);
+  foreach (p; 1 .. 1_000_000) {
+    assert (pt.isPrime (p) == PrimalityTest32.isPrime (p));
+  }
 }

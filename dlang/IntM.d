@@ -3,26 +3,7 @@ import std.conv;
 import std.math;
 import std.stdio;
 
-T gcd(T) (T a, T b) pure nothrow @nogc {
-  if (a < b) {
-    swap (a, b);
-  }
-  while (b) {
-    T c = a % b; a = b; b = c;
-  }
-  return a;
-}
-
-T gcdext(T) (T a, T b, ref T x, ref T y) pure nothrow @nogc {
-  if (!b) {
-    x = 1;
-    y = 0;
-    return a;
-  }
-  T res = gcdext (b, a % b, y, x);
-  y -= x * (a / b);
-  return res;
-}
+import NumberTheory : genericPower, gcdext;
 
 struct IntM(int q = 1_000_000_007) {
   alias N = IntM!q;
@@ -88,17 +69,7 @@ struct IntM(int q = 1_000_000_007) {
     return N (x);
   }
   N opBinary (string op : "^^")(in long rhs) const pure nothrow @nogc {
-    N a = 1, b = this;
-    long p = rhs;
-    while (p > 0) {
-      //a * (b ^ p) == x ^ rhs
-      if (p & 1) {
-        a *= b;
-      }
-      b *= b;
-      p >>>= 1;
-    }
-    return a;
+    return genericPower! ("a * b", N, ulong) (this, rhs, N(1));
   }
   N opBinary (string op)(in int v) const pure nothrow @nogc if (op == "+" || op == "-" || op == "*" || op == "/") {
     mixin ("return this " ~ op ~ " N(v);");
@@ -146,9 +117,6 @@ unittest {
   import std.range;
   alias N = IntM!();
   writeln ("Testing ", __FILE__, " ...");
-  assert (gcd (4, 2) == gcd (2, 4));
-  assert (gcd (4, 2) == 2);
-  assert (gcd (27, 3) == 3);
   int q = 1_000_000_007;
   void gcdExtTest () {
     int x, y;
