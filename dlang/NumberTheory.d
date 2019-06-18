@@ -128,6 +128,10 @@ long sumOfDivisors (long acc, int p, int c) {
   return acc * ((p ^^ (c + 1) - 1) / (p - 1));
 }
 
+int totient (int acc, int p, int c) {
+  return acc * (p ^^ (c - 1)) * (p - 1);
+}
+
 T[] sieveArrayDP(T) (int[] sa, T function(T acc, int p, int c) op, T base) {
   T[] b = uninitializedArray! (T[]) (sa.length);
   b[1] = base;
