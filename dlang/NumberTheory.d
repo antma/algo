@@ -147,6 +147,16 @@ T[] sieveArrayDP(T) (int[] sa, T function(T acc, int p, int c) op, T base) {
   return b;
 }
 
+int[][] divisorsArray (int n) {
+  auto d = new int[][n];
+  foreach (i; 2 .. n) {
+    foreach (j; iota (i, n, i)) {
+      d[j] ~= i;
+    }
+  }
+  return d;
+}
+
 //////////////////// primality testing ////////////////////
 class PrimalityTest32 {
   private static bool witness (uint a, uint n) {
@@ -288,4 +298,5 @@ unittest {
   foreach (p; 1 .. 1_000_000) {
     assert (pt.isPrime (p) == PrimalityTest32.isPrime (p));
   }
+  assert (divisorsArray(7).equal ([ [], [], [2], [3], [2, 4], [5], [2, 3, 6]]));
 }
