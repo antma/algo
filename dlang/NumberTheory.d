@@ -125,7 +125,7 @@ int[] sieveArray (int n) {
 }
 
 long sumOfDivisors (long acc, int p, int c) {
-  return acc * ((p ^^ (c + 1) - 1) / (p - 1));
+  return acc * ((p.to!long ^^ (c + 1) - 1) / (p - 1));
 }
 
 int totient (int acc, int p, int c) {
@@ -299,4 +299,8 @@ unittest {
     assert (pt.isPrime (p) == PrimalityTest32.isPrime (p));
   }
   assert (divisorsArray(7).equal ([ [], [], [2], [3], [2, 4], [5], [2, 3, 6]]));
+
+  auto sa_large = sieveArray (50_000);
+  auto sd_large = sieveArrayDP (sa_large, &sumOfDivisors, 1L);
+  assert (sd_large.all! (i => i >= 0));
 }
