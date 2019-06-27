@@ -22,7 +22,7 @@ T gcdext(T) (T a, T b, ref T x, ref T y) pure nothrow @nogc {
   return res;
 }
 
-X genericPower(alias mul, X, Y) (X x, Y y, X one) if (isUnsigned!Y) {
+X genericPower(alias mul, X, Y) (X x, Y y, X one) pure if (isUnsigned!Y) {
   X a = one, b = x;
   while (y > 0) {
     if (y & 1) {
@@ -67,7 +67,7 @@ class PrimeTable {
 }
 
 alias Factorization = Tuple!(ulong, "p", uint, "c")[];
-Factorization factorizationTrialDivision (ulong x, int[] primes) {
+Factorization factorizationTrialDivision (ulong x, int[] primes) pure {
   Factorization f;
   foreach (p; primes) {
     if (p.to!ulong * p > x) {
@@ -88,7 +88,7 @@ Factorization factorizationTrialDivision (ulong x, int[] primes) {
   return f;
 }
 
-Factorization factorizationSieveArray (int x, int[] sa) {
+Factorization factorizationSieveArray (int x, int[] sa) pure nothrow {
   Factorization f;
   uint last, c;
   while (x > 1) {
@@ -110,7 +110,26 @@ Factorization factorizationSieveArray (int x, int[] sa) {
   return f;
 }
 
-int[] sieveArray (int n) {
+int[] divisorsFromFactorization (in Factorization f, bool sorted = true) pure nothrow {
+  int[] r;
+  void go (size_t k, int cur) {
+    if (k == f.length) {
+      r ~= cur;
+    } else {
+      foreach (i; 0 .. f[k].c + 1) {
+        go (k + 1, cur);
+        cur *= f[k].p;
+      }
+    }
+  }
+  go (0, 1);
+  if (sorted) {
+    sort (r);
+  }
+  return r;
+}
+
+int[] sieveArray (int n) pure {
   auto a = chain (only (0), iota (1, n).map! (i => (i & 1) ? i : 2)).array;
   foreach (p; iota (3, sqrt(n.to!double).to!int + 1, 2)) {
     if (a[p] == p) {
@@ -124,11 +143,11 @@ int[] sieveArray (int n) {
   return a;
 }
 
-long sumOfDivisors (long acc, int p, int c) {
+long sumOfDivisors (long acc, int p, int c) pure @nogc {
   return acc * ((p.to!long ^^ (c + 1) - 1) / (p - 1));
 }
 
-int totient (int acc, int p, int c) {
+int totient (int acc, int p, int c) pure nothrow @nogc {
   return acc * (p ^^ (c - 1)) * (p - 1);
 }
 
@@ -147,7 +166,7 @@ T[] sieveArrayDP(T) (int[] sa, T function(T acc, int p, int c) op, T base) {
   return b;
 }
 
-int[][] divisorsArray (int n) {
+int[][] divisorsArray (int n) pure nothrow {
   auto d = new int[][n];
   foreach (i; 2 .. n) {
     foreach (j; iota (i, n, i)) {
@@ -303,4 +322,7 @@ unittest {
   auto sa_large = sieveArray (50_000);
   auto sd_large = sieveArrayDP (sa_large, &sumOfDivisors, 1L);
   assert (sd_large.all! (i => i >= 0));
+
+  assert (equal (divisorsFromFactorization (factorizationTrialDivision (24, [2, 3]), true), [1, 2, 3, 4, 6, 8, 12, 24]));
+
 }
