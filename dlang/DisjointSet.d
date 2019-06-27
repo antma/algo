@@ -16,7 +16,7 @@ class DisjointSet {
     }
     return p[x] = findSet (p[x]);
   }
-  void merge (int i, int j) pure nothrow @nogc {
+  bool merge (int i, int j) pure nothrow @nogc {
     i = findSet (i);
     j = findSet (j);
     if (i != j) {
@@ -28,9 +28,11 @@ class DisjointSet {
         p[i] = j;
         ++h[j];
       }
+      return true;
     }
+    return false;
   }
-  int biggest_set_size () pure {
+  int biggestSetSize () pure {
     auto c = new int[n];
     foreach (i; 0 .. n) {
       ++c[findSet (i)];
@@ -38,6 +40,7 @@ class DisjointSet {
     return c.reduce! (max);
   }
 }
+
 class DisjointSetList {
   private:
   int[] p, h, prev, next, maxv;
