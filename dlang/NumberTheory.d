@@ -22,7 +22,7 @@ T gcdext(T) (T a, T b, ref T x, ref T y) pure nothrow @nogc {
   return res;
 }
 
-X genericPower(alias mul, X, Y) (X x, Y y, X one) pure if (isUnsigned!Y) {
+X genericPower(alias mul, X, Y) (X x, Y y, X one = 1.to!X) pure if (isUnsigned!Y) {
   X a = one, b = x;
   while (y > 0) {
     if (y & 1) {
@@ -67,7 +67,7 @@ class PrimeTable {
 }
 
 alias Factorization = Tuple!(ulong, "p", uint, "c")[];
-Factorization factorizationTrialDivision (ulong x, int[] primes) pure {
+Factorization factorizationTrialDivision (ulong x, in int[] primes) pure {
   Factorization f;
   foreach (p; primes) {
     if (p.to!ulong * p > x) {
@@ -88,7 +88,7 @@ Factorization factorizationTrialDivision (ulong x, int[] primes) pure {
   return f;
 }
 
-Factorization factorizationSieveArray (int x, int[] sa) pure nothrow {
+Factorization factorizationSieveArray (int x, in int[] sa) pure nothrow {
   Factorization f;
   uint last, c;
   while (x > 1) {
@@ -151,8 +151,9 @@ int totient (int acc, int p, int c) pure nothrow @nogc {
   return acc * (p ^^ (c - 1)) * (p - 1);
 }
 
-T[] sieveArrayDP(T) (int[] sa, T function(T acc, int p, int c) op, T base) {
+T[] sieveArrayDP(T) (in int[] sa, T function(T acc, int p, int c) op, T base) {
   T[] b = uninitializedArray! (T[]) (sa.length);
+  b[0] = 0;
   b[1] = base;
   foreach (i; 2 .. sa.length) {
     immutable p = sa[i];
@@ -178,10 +179,10 @@ int[][] divisorsArray (int n) pure nothrow {
 
 //////////////////// primality testing ////////////////////
 class PrimalityTest32 {
-  private static bool witness (uint a, uint n) {
+  private static bool witness (uint a, uint n) pure {
     immutable n1 = n - 1;
     immutable m = bsf (n1);
-    uint x = genericPower!( (a, b) => ((a.to!ulong * b) % n).to!uint, uint, uint) (a, n1 >>> m, 1U);
+    uint x = genericPower!( (a, b) => ((a.to!ulong * b) % n).to!uint, uint, uint) (a, n1 >>> m);
     foreach (i; 0 .. m) {
       uint y = (x.to!ulong * x) % n;
       if (y == 1 && x != 1 && x != n1) {
@@ -191,7 +192,7 @@ class PrimalityTest32 {
     }
     return x != 1;
   }
-  public static bool isPrime (uint n) {
+  public static bool isPrime (uint n) pure {
     if (n <= 23) return ((1 << n) & 0x8a28ac) != 0;
     if (gcd (n, 223092870) > 1) return false;
     if (n <= 529) return true;
@@ -287,7 +288,6 @@ class PrimalityTest64 {
     }
     return true;
   }
-
 }
 
 unittest {

@@ -69,7 +69,7 @@ struct IntM(int q = 1_000_000_007) {
     return N (x);
   }
   N opBinary (string op : "^^")(in long rhs) const pure nothrow @nogc {
-    return genericPower! ("a * b", N, ulong) (this, rhs, N(1));
+    return genericPower! ("a * b", N, ulong) (this, rhs);
   }
   N opBinary (string op)(in int v) const pure nothrow @nogc if (op == "+" || op == "-" || op == "*" || op == "/") {
     mixin ("return this " ~ op ~ " N(v);");
