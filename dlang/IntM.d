@@ -7,13 +7,16 @@ import NumberTheory : genericPower, gcdext;
 
 struct IntM(int q = 1_000_000_007) {
   alias N = IntM!q;
+  private:
   int v;
-  private void fromInt (int m) pure nothrow @nogc {
+  invariant () { assert (v >= 0 && v < q); }
+  void fromInt (int m) pure nothrow @nogc {
     v = m % q;
     if (v < 0) {
       v += q;
     }
   }
+  public:
   this (int m) pure nothrow @nogc {
     fromInt (m);
   }
@@ -22,7 +25,7 @@ struct IntM(int q = 1_000_000_007) {
     return this;
   }
   N opUnary (string op : "-")() const pure nothrow @nogc {
-    return N ((q - v) % q);
+    return N (-v);
   }
   ref N opUnary (string op : "++")() pure nothrow @nogc {
     if (++v >= q) {
@@ -37,42 +40,42 @@ struct IntM(int q = 1_000_000_007) {
     return this;
   }
   ref N opOpAssign (string op : "+")(in N rhs) pure nothrow @nogc {
-    v += rhs.v;
-    v %= q;
+    v = (v + rhs.v) % q;
     return this;
   }
   ref N opOpAssign (string op : "-")(in N rhs) pure nothrow @nogc {
-    v -= rhs.v;
-    v %= q;
+    v = (v - rhs.v + q) % q;
     return this;
   }
   ref N opOpAssign (string op : "*")(in N rhs) pure nothrow @nogc {
-    v = ((v.to!(long)) * rhs.v.to!(long)) % q;
+    v = (v.to!(long) * rhs.v) % q;
     return this;
   }
-  N opBinary (string op : "+")(in N rhs) const pure nothrow @nogc {
-    return N ( (v + rhs.v) % q);
+  ref N opOpAssign (string op : "/")(in N rhs) pure nothrow @nogc {
+    return this *= rhs.inversion ();
   }
-  N opBinary (string op : "-")(in N rhs) const pure nothrow @nogc {
-    return N ( (v - rhs.v) % q);
+  ref N opOpAssign (string op)(in int rhs) pure nothrow @nogc if (op == "+" || op == "-" || op == "*" || op == "/") {
+    mixin ("return this " ~ op ~ "= N(rhs);");
   }
-  N opBinary (string op : "*")(in N rhs) const pure nothrow @nogc {
-    return N (((v.to!(long)) * rhs.v.to!(long)) % q);
+  N opBinary (string op)(in N rhs) const pure nothrow @nogc if (op == "+" || op == "-" || op == "*" || op == "/") {
+    N t = this;
+    mixin ("t " ~ op ~ "= rhs;");
+    return t;
   }
-  N opBinary (string op : "/")(in N rhs) const pure nothrow @nogc {
-    return this * rhs.inversion ();
+  N opBinary (string op)(in int rhs) const pure nothrow @nogc if (op == "+" || op == "-" || op == "*" || op == "/") {
+    mixin ("return this " ~ op ~ " N(rhs);");
   }
-  N inversion () const pure @nogc {
+  N opBinaryRight (string op)(in int rhs) const pure nothrow @nogc if (op == "+" || op == "*") {
+    mixin ("return this " ~ op ~ " N(rhs);");
+  }
+  N inversion () const pure nothrow @nogc {
     int x, y;
     immutable g = gcdext!int (v, q, x, y);
     assert (g == 1);
     return N (x);
   }
-  N opBinary (string op : "^^")(in long rhs) const pure nothrow @nogc {
+  N opBinary (string op : "^^")(in ulong rhs) const pure nothrow @nogc {
     return genericPower! ("a * b", N, ulong) (this, rhs);
-  }
-  N opBinary (string op)(in int v) const pure nothrow @nogc if (op == "+" || op == "-" || op == "*" || op == "/") {
-    mixin ("return this " ~ op ~ " N(v);");
   }
   int opCast(T : int)() const pure nothrow @nogc { return v; }
   int opCmp (const N rhs) const pure nothrow @nogc {
@@ -84,13 +87,11 @@ struct IntM(int q = 1_000_000_007) {
     }
     return 0;
   }
-  bool opEquals (const N rhs) const pure nothrow @nogc { return v == rhs.v; }
-  string toString() const pure nothrow { return ((v < 0) ? v + q : v).text; }
+  string toString() const pure nothrow { return v.text; }
   //a ^ x = this (mod q)
-  int discreteLogarithm (in N a) const {
+  int discreteLogarithm (in N a) const pure {
     immutable int n = ceil (sqrt (q.to!double)).to!int;
     N an = a ^^ n;
-
     int[int] h;
     N cur = an;
     foreach (p; 1 .. n + 1) {
@@ -134,8 +135,24 @@ unittest {
   i--;
   assert (i == N(1));
   assert ((i + 1) * (i + 1) == N(4));
+  assert ((i - 2) * (i - 2) == N(1));
+  assert (((i - 2) ^^ 2) == N(1));
   assert (i + i == N(2));
   assert (((N(1) / N(2)) * N (2)) == N (1));
+  assert (2 * i == N(2));
+  assert (2 + i == N(3));
+
+  assert(N(2).to!int == 2);
+  assert(N(1) < N(2));
+
+  N t = 1;
+  t /= N(2);
+  assert (t.to!int == (q + 1) / 2);
+  assert (N(1) / N(2) == t);
+
+  t = 1;
+  t /= 2;
+  assert (t.to!int == (q + 1) / 2);
 
   //discreteLogarithm
   enum DL_TESTS = 10;
