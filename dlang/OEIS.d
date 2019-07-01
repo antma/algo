@@ -2,6 +2,16 @@ import std.algorithm;
 import std.conv;
 import std.range;
 
+//https://oeis.org/A000045
+auto fibonacciNumbers(T) () {
+  return recurrence! ((a, n) => a[n-1] + a[n-2]) (0.to!T, 1.to!T);
+}
+
+unittest {
+  assert (fibonacciNumbers!long ().take (41).equal(
+  [0,1,1,2,3,5,8,13,21,34,55,89,144,233,377,610,987,1597,2584,4181,6765,10946,17711,28657,46368,75025,121393,196418,317811,514229,832040,1346269,2178309,3524578,5702887,9227465,14930352,24157817,39088169,63245986,102334155]));
+}
+
 //https://oeis.org/A001318
 auto generalizedPentagonalNumbers () {
   return roundRobin (only (0UL),
