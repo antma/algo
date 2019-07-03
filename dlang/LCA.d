@@ -9,7 +9,8 @@ int[] tarjanOflineLCA (int root, in int[][] childs, in Tuple!(int, int)[] v) {
   auto color = new bool[n];
   auto es = new int[][n];
   auto ds = new DisjointSet (n);
-  foreach (int i, ref p; v) {
+  foreach (idx, const ref p; v) {
+    immutable i = idx.to!int;
     es[p[0]] ~= i;
     es[p[1]] ~= i;
   }
