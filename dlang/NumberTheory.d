@@ -110,9 +110,10 @@ Factorization factorizationSieveArray (int x, in int[] sa) pure nothrow {
   return f;
 }
 
-int[] divisorsFromFactorization (in Factorization f, bool sorted = true) pure nothrow {
-  int[] r;
-  void go (size_t k, int cur) {
+auto divisorsFromFactorization(T) (in Factorization f, bool sorted = true) pure nothrow
+  if (isIntegral!T) {
+  T[] r;
+  void go (size_t k, T cur) {
     if (k == f.length) {
       r ~= cur;
     } else {
@@ -323,6 +324,6 @@ unittest {
   auto sd_large = sieveArrayDP (sa_large, &sumOfDivisors, 1L);
   assert (sd_large.all! (i => i >= 0));
 
-  assert (equal (divisorsFromFactorization (factorizationTrialDivision (24, [2, 3]), true), [1, 2, 3, 4, 6, 8, 12, 24]));
+  assert (equal (divisorsFromFactorization!int (factorizationTrialDivision (24, [2, 3]), true), [1, 2, 3, 4, 6, 8, 12, 24]));
 
 }
