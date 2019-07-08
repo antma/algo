@@ -82,6 +82,9 @@ struct Rational {
     t.denominator = denominator;
     mixin ("return t " ~ op ~ "= rhs;");
   }
+  int opCmp (in Rational rhs) const {
+    return (numerator * rhs.denominator).opCmp (denominator * rhs.numerator);
+  }
   string toString () const {
     return format! "%s / %s" (numerator, denominator);
   }
@@ -96,4 +99,5 @@ unittest {
   auto two = Rational (_two, _one);
   auto r = recurrence! ( (x, n) => two + (one / x[n-1]) ) (Rational (BigInt (5), _two)).map! (x => (x - one).text).take (8);
   assert (equal (r, [ "3 / 2", "7 / 5", "17 / 12", "41 / 29", "99 / 70", "239 / 169", "577 / 408", "1393 / 985"]));
+  assert (one < two);
 }
