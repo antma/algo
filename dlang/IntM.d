@@ -10,75 +10,93 @@ struct IntM(int q = 1_000_000_007) {
   private:
   int v;
   invariant () { assert (v >= 0 && v < q); }
-  void fromInt (int m) pure nothrow @nogc {
+  pure nothrow @nogc
+  void fromInt (int m) {
     v = m % q;
     if (v < 0) {
       v += q;
     }
   }
   public:
-  this (int m) pure nothrow @nogc {
+  pure nothrow @nogc
+  this (int m) {
     fromInt (m);
   }
-  N opAssign (int m) pure nothrow @nogc {
+  pure nothrow @nogc
+  N opAssign (int m) {
     fromInt (m);
     return this;
   }
-  N opUnary (string op : "-")() const pure nothrow @nogc {
+  pure nothrow @nogc
+  N opUnary (string op : "-")() const {
     return N (-v);
   }
-  ref N opUnary (string op : "++")() pure nothrow @nogc {
+  pure nothrow @nogc
+  ref N opUnary (string op : "++")() {
     if (++v >= q) {
       v -= q;
     }
     return this;
   }
-  ref N opUnary (string op : "--")() pure nothrow @nogc {
+  pure nothrow @nogc
+  ref N opUnary (string op : "--")() {
     if (--v < 0) {
       v += q;
     }
     return this;
   }
-  ref N opOpAssign (string op : "+")(in N rhs) pure nothrow @nogc {
+  pure nothrow @nogc
+  ref N opOpAssign (string op : "+")(in N rhs) {
     v = (v + rhs.v) % q;
     return this;
   }
-  ref N opOpAssign (string op : "-")(in N rhs) pure nothrow @nogc {
+  pure nothrow @nogc
+  ref N opOpAssign (string op : "-")(in N rhs) {
     v = (v - rhs.v + q) % q;
     return this;
   }
-  ref N opOpAssign (string op : "*")(in N rhs) pure nothrow @nogc {
+  pure nothrow @nogc
+  ref N opOpAssign (string op : "*")(in N rhs) {
     v = (v.to!(long) * rhs.v) % q;
     return this;
   }
-  ref N opOpAssign (string op : "/")(in N rhs) pure nothrow @nogc {
+  pure nothrow @nogc
+  ref N opOpAssign (string op : "/")(in N rhs) {
     return this *= rhs.inversion ();
   }
-  ref N opOpAssign (string op)(in int rhs) pure nothrow @nogc if (op == "+" || op == "-" || op == "*" || op == "/") {
+  pure nothrow @nogc
+  ref N opOpAssign (string op)(in int rhs) if (op == "+" || op == "-" || op == "*" || op == "/") {
     mixin ("return this " ~ op ~ "= N(rhs);");
   }
-  N opBinary (string op)(in N rhs) const pure nothrow @nogc if (op == "+" || op == "-" || op == "*" || op == "/") {
+  pure nothrow @nogc
+  N opBinary (string op)(in N rhs) const if (op == "+" || op == "-" || op == "*" || op == "/") {
     N t = this;
     mixin ("t " ~ op ~ "= rhs;");
     return t;
   }
-  N opBinary (string op)(in int rhs) const pure nothrow @nogc if (op == "+" || op == "-" || op == "*" || op == "/") {
+  pure nothrow @nogc
+  N opBinary (string op)(in int rhs) const if (op == "+" || op == "-" || op == "*" || op == "/") {
     mixin ("return this " ~ op ~ " N(rhs);");
   }
-  N opBinaryRight (string op)(in int rhs) const pure nothrow @nogc if (op == "+" || op == "*") {
+  pure nothrow @nogc
+  N opBinaryRight (string op)(in int rhs) const if (op == "+" || op == "*") {
     mixin ("return this " ~ op ~ " N(rhs);");
   }
-  N inversion () const pure nothrow @nogc {
+  pure nothrow @nogc
+  N inversion () const {
     int x, y;
     immutable g = gcdext!int (v, q, x, y);
     assert (g == 1);
     return N (x);
   }
-  N opBinary (string op : "^^")(in ulong rhs) const pure nothrow @nogc {
+  pure nothrow @nogc
+  N opBinary (string op : "^^")(in ulong rhs) const {
     return genericPower! ("a * b", N, ulong) (this, rhs);
   }
-  int opCast(T : int)() const pure nothrow @nogc { return v; }
-  int opCmp (const N rhs) const pure nothrow @nogc {
+  pure nothrow @nogc
+  int opCast(T : int)() const { return v; }
+  pure nothrow @nogc
+  int opCmp (const N rhs) const {
     if (v < rhs.v) {
       return -1;
     }
@@ -87,9 +105,11 @@ struct IntM(int q = 1_000_000_007) {
     }
     return 0;
   }
-  string toString() const pure nothrow { return v.text; }
+  pure nothrow
+  string toString() const { return v.text; }
   //a ^ x = this (mod q)
-  int discreteLogarithm (in N a) const pure {
+  pure
+  int discreteLogarithm (in N a) const {
     immutable int n = ceil (sqrt (q.to!double)).to!int;
     N an = a ^^ n;
     int[int] h;
