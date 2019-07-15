@@ -3,6 +3,7 @@ import std.algorithm;
 import std.bigint;
 import std.bitmanip;
 import std.conv;
+import std.exception;
 import std.functional;
 import std.math;
 import std.numeric;
@@ -11,7 +12,8 @@ import std.range;
 import std.traits;
 import std.typecons;
 
-T gcdext(T) (T a, T b, ref T x, ref T y) pure nothrow @nogc {
+pure nothrow @nogc
+T gcdext(T) (T a, T b, ref T x, ref T y) {
   if (!b) {
     x = 1;
     y = 0;
@@ -22,7 +24,9 @@ T gcdext(T) (T a, T b, ref T x, ref T y) pure nothrow @nogc {
   return res;
 }
 
-X genericPower(alias mul, X, Y) (X x, Y y, X one = 1.to!X) pure if (isUnsigned!Y) {
+pure
+X genericPower(alias mul, X, Y) (X x, Y y, X one = 1.to!X)
+  if (isUnsigned!Y) {
   X a = one, b = x;
   while (y > 0) {
     if (y & 1) {
@@ -39,10 +43,12 @@ class PrimeTable {
   BitArray a;
   size_t n;
   public:
-  bool isPrime (size_t i) const pure nothrow @nogc {
+  pure nothrow @nogc
+  bool isPrime (size_t i) const {
     return (i & 1) ? !a[i>>>1] : (i == 2);
   }
-  int[] primes () const pure {
+  pure
+  int[] primes () const {
     int[] p;
     if (n > 2) {
       p ~= 2;
@@ -50,7 +56,8 @@ class PrimeTable {
     }
     return p;
   }
-  this (size_t _n) pure {
+  pure
+  this (size_t _n) {
     n = _n;
     auto m = n >> 1;
     a.length = max (1, m);
@@ -67,7 +74,9 @@ class PrimeTable {
 }
 
 alias Factorization = Tuple!(ulong, "p", uint, "c")[];
-Factorization factorizationTrialDivision (ulong x, in int[] primes) pure {
+
+pure
+Factorization factorizationTrialDivision (ulong x, in int[] primes) {
   Factorization f;
   foreach (p; primes) {
     if (p.to!ulong * p > x) {
@@ -88,7 +97,8 @@ Factorization factorizationTrialDivision (ulong x, in int[] primes) pure {
   return f;
 }
 
-Factorization factorizationSieveArray (int x, in int[] sa) pure nothrow {
+pure nothrow
+Factorization factorizationSieveArray (int x, in int[] sa) {
   Factorization f;
   uint last, c;
   while (x > 1) {
@@ -110,7 +120,8 @@ Factorization factorizationSieveArray (int x, in int[] sa) pure nothrow {
   return f;
 }
 
-auto divisorsFromFactorization(T) (in Factorization f, bool sorted = true) pure nothrow
+pure nothrow
+auto divisorsFromFactorization(T) (in Factorization f, bool sorted = true)
   if (isIntegral!T) {
   T[] r;
   void go (size_t k, T cur) {
@@ -130,7 +141,8 @@ auto divisorsFromFactorization(T) (in Factorization f, bool sorted = true) pure 
   return r;
 }
 
-int[] sieveArray (int n) pure {
+pure
+immutable(int[]) sieveArray (int n) {
   auto a = chain (only (0), iota (1, n).map! (i => (i & 1) ? i : 2)).array;
   foreach (p; iota (3, sqrt(n.to!double).to!int + 1, 2)) {
     if (a[p] == p) {
@@ -141,18 +153,26 @@ int[] sieveArray (int n) pure {
       }
     }
   }
-  return a;
+  return assumeUnique (a);
 }
 
-long sumOfDivisors (long acc, int p, int c) pure @nogc {
+pure nothrow @nogc
+int numberOfDivisors (int acc, int p, int c) {
+  return acc * (c + 1);
+}
+
+pure nothrow @nogc
+long sumOfDivisors (long acc, int p, int c) {
   return acc * ((p.to!long ^^ (c + 1) - 1) / (p - 1));
 }
 
-int totient (int acc, int p, int c) pure nothrow @nogc {
+pure nothrow @nogc
+int totient (int acc, int p, int c) {
   return acc * (p ^^ (c - 1)) * (p - 1);
 }
 
-T[] sieveArrayDP(T) (in int[] sa, T function(T acc, int p, int c) op, T base) {
+pure
+T[] sieveArrayDP(T) (in int[] sa, T function(T acc, int p, int c) pure nothrow @nogc op, T base) {
   T[] b = uninitializedArray! (T[]) (sa.length);
   b[0] = 0;
   b[1] = base;
@@ -168,7 +188,8 @@ T[] sieveArrayDP(T) (in int[] sa, T function(T acc, int p, int c) op, T base) {
   return b;
 }
 
-int[][] divisorsArray (int n) pure nothrow {
+pure nothrow
+int[][] divisorsArray (int n) {
   auto d = new int[][n];
   foreach (i; 2 .. n) {
     foreach (j; iota (i, n, i)) {
@@ -180,7 +201,8 @@ int[][] divisorsArray (int n) pure nothrow {
 
 //////////////////// primality testing ////////////////////
 class PrimalityTest32 {
-  private static bool witness (uint a, uint n) pure {
+  pure
+  private static bool witness (uint a, uint n) {
     immutable n1 = n - 1;
     immutable m = bsf (n1);
     uint x = genericPower!( (a, b) => ((a.to!ulong * b) % n).to!uint, uint, uint) (a, n1 >>> m);
@@ -193,7 +215,8 @@ class PrimalityTest32 {
     }
     return x != 1;
   }
-  public static bool isPrime (uint n) pure {
+  pure
+  public static bool isPrime (uint n) {
     if (n <= 23) return ((1 << n) & 0x8a28ac) != 0;
     if (gcd (n, 223092870) > 1) return false;
     if (n <= 529) return true;
@@ -210,14 +233,6 @@ class Montgomery64 {
   //R = 2 ^ 64
   //phi(R) = 2 ^ 63
   immutable ulong n, r_mod_n, neg_r_mod_n, r_div_n, r1, n1, rr;
-  ulong reduce (BigInt t) const {
-    ulong a = (t & ulong.max).to!ulong;
-    a *= n1;
-    t += BigInt (a) * n;
-    t >>= 64;
-    a = t.to!ulong;
-    return (a >= n) ? a - n : a;
-  }
   ulong mul_asm (ulong a, ulong b) const {
     asm {
       mov RAX, a;
@@ -248,6 +263,7 @@ class Montgomery64 {
     }
     return a;
   }
+  pure
   this (ulong _n) {
     n = _n;
     ulong d = ulong.max / n;
@@ -266,7 +282,7 @@ class Montgomery64 {
 }
 
 class PrimalityTest64 {
-  private static bool witness (ulong a, const ref Montgomery64 m) {
+  private static bool witness (ulong a, const Montgomery64 m) {
     immutable n1 = m.n - 1;
     immutable l = bsf (n1);
     a = m.mul (a, m.rr);
@@ -312,12 +328,17 @@ unittest {
     auto f1 = factorizationTrialDivision (i, primes), f2 = factorizationSieveArray (i, sa);
     assert (equal (f1, f2), format ("%s %s", f1, f2));
   }
+  auto nd = sieveArrayDP (sa, &numberOfDivisors, 1);
+  assert (nd[14] == 4);
+  assert (nd[15] == 4);
+
   auto sd = sieveArrayDP (sa, &sumOfDivisors, 1L);
   assert (sd[220] == 284 + 220 && sd[284] == 220 + 284);
   auto pt = new PrimeTable (1_000_000);
   foreach (p; 1 .. 1_000_000) {
     assert (pt.isPrime (p) == PrimalityTest32.isPrime (p));
   }
+  assert (PrimalityTest64.isPrime (999999999989));
   assert (divisorsArray(7).equal ([ [], [], [2], [3], [2, 4], [5], [2, 3, 6]]));
 
   auto sa_large = sieveArray (50_000);
