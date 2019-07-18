@@ -157,6 +157,12 @@ immutable(int[]) sieveArray (int n) {
 }
 
 pure nothrow @nogc
+byte mu (byte acc, int p, int c) {
+  if (c > 1 || !acc) return 0;
+  return (acc == 1) ? -1 : 1;
+}
+
+pure nothrow @nogc
 int numberOfDivisors (int acc, int p, int c) {
   return acc * (c + 1);
 }
@@ -331,6 +337,8 @@ unittest {
   auto nd = sieveArrayDP (sa, &numberOfDivisors, 1);
   assert (nd[14] == 4);
   assert (nd[15] == 4);
+  auto mf = sieveArrayDP (sa, &mu, 1);
+  assert (mf[1 .. 13].equal([1, -1, -1, 0, -1, 1, -1, 0, 0, 1, -1, 0]));
 
   auto sd = sieveArrayDP (sa, &sumOfDivisors, 1L);
   assert (sd[220] == 284 + 220 && sd[284] == 220 + 284);
