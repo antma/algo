@@ -76,9 +76,11 @@ class PrimeTable {
 alias Factorization = Tuple!(ulong, "p", uint, "c")[];
 
 pure
-Factorization factorizationTrialDivision (ulong x, in int[] primes) {
+Factorization factorizationTrialDivision (ulong x, in int[] primes) in {
+  assert (primes.takeExactly (2).equal ([2, 3]));
+} body {
   Factorization f;
-  foreach (p; primes) {
+  foreach (p; chain (primes, iota (primes.back + 2, int.max, 2))) {
     if (p.to!ulong * p > x) {
       break;
     }
@@ -334,6 +336,12 @@ unittest {
     auto f1 = factorizationTrialDivision (i, primes), f2 = factorizationSieveArray (i, sa);
     assert (equal (f1, f2), format ("%s %s", f1, f2));
   }
+
+  assert (factorizationTrialDivision ((1L << 60) - 1, [2, 3]).equal(
+    [ tuple (3, 2), tuple (5, 2), tuple (7, 1), tuple (11, 1),
+      tuple (13, 1), tuple (31, 1), tuple (41, 1), tuple (61, 1),
+      tuple (151, 1), tuple (331, 1), tuple (1321, 1) ]));
+
   auto nd = sieveArrayDP (sa, &numberOfDivisors, 1);
   assert (nd[14] == 4);
   assert (nd[15] == 4);
