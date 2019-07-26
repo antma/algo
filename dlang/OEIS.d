@@ -1,6 +1,7 @@
 import std.algorithm;
 import std.conv;
 import std.range;
+import std.traits;
 
 //https://oeis.org/A000045
 auto fibonacciNumbers(T) () {
@@ -72,4 +73,51 @@ auto partitionNumbers(T) () {
 unittest {
   assert (partitionNumbers!uint().take(50).equal(
   [1,1,2,3,5,7,11,15,22,30,42,56,77,101,135,176,231,297,385,490,627,792,1002,1255,1575,1958,2436,3010,3718,4565,5604,6842,8349,10143,12310,14883,17977,21637,26015,31185,37338,44583,53174,63261,75175,89134,105558,124754,147273,173525]));
+}
+
+class SmoothNumbers(T)
+  if (isIntegral!T) {
+  private:
+    immutable int[] m;
+    immutable size_t n;
+    T[] a;
+    size_t[] h;
+    T[] b;
+    size_t idx;
+  public:
+  enum empty = false;
+  T front;
+  final void popFront () {
+    front = minElement (b[]);
+    a ~= front;
+    foreach (i; 0 .. n) {
+      if (b[i] == front) {
+        b[i] = a[++h[i]] * m[i];
+      }
+    }
+  }
+  this (in int[] m) {
+    this.m = m.idup;
+    n = m.length;
+    h = new size_t[n];
+    b = new T[n];
+    a ~= 1;
+    front = 1;
+    foreach (i; 0 .. n) {
+      b[i] = m[i].to!T;
+    }
+  }
+}
+
+//https://oeis.org/A051037
+//a.k.a 5-smooth numbers
+class HammingSequence(T) : SmoothNumbers!T {
+  this () {
+    super ([2,3,5]);
+  }
+}
+
+unittest {
+  assert(new HammingSequence!int().take(62).equal(
+[1,2,3,4,5,6,8,9,10,12,15,16,18,20,24,25,27,30,32,36,40,45,48,50,54,60,64,72,75,80,81,90,96,100,108,120,125,128,135,144,150,160,162,180,192,200,216,225,240,243,250,256,270,288,300,320,324,360,375,384,400,405]));
 }
