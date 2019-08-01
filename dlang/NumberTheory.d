@@ -122,6 +122,75 @@ Factorization factorizationSieveArray (int x, in int[] sa) {
   return f;
 }
 
+ulong squareMod (ulong a, ulong n) {
+  asm {
+    mov RAX, a;
+    mov RBX, n;
+    mul RAX, RAX;
+    div RBX;
+    mov RAX, RDX;
+  }
+}
+
+Factorization factorizationPollardRho (ulong n, in int[] small_primes) {
+  enum max_iterations = 10_000;
+  ulong[] r;
+  foreach (p; small_primes) {
+    if (p * p >= n) {
+      break;
+    }
+    if (!(n % p)) {
+      do {
+        r ~= p;
+        n /= p;
+      } while (!(n % p));
+    }
+  }
+  void factor (ulong n) {
+    if (PrimalityTest64.isPrime (n)) {
+      r ~= n;
+      return;
+    }
+    while (true) {
+      int k = 2;
+      long x = uniform (0, n);
+      long y = x;
+      bool success;
+      foreach (i; 2 .. max_iterations) {
+        long xi = squareMod (x, n);
+        if (xi > 0) {
+          --xi;
+        } else {
+          xi = n - 1;
+        }
+        ulong d = gcd (y - xi, n);
+        if (d != 1 && d != n) {
+          factor (d);
+          n /= d;
+          success = true;
+          break;
+        }
+        if (i == k) {
+          y = xi;
+          k = k << 1;
+        }
+        x = xi;
+      }
+      if (success && PrimalityTest64.isPrime (n)) {
+        r ~= n;
+        break;
+      }
+    }
+  }
+  factor (n);
+  sort (r);
+  Factorization f;
+  foreach (p; r.group ()) {
+    f ~= tuple!("p", "c")(p[0], p[1]);
+  }
+  return f;
+}
+
 pure nothrow
 auto divisorsFromFactorization(T) (in Factorization f, bool sorted = true)
   if (isIntegral!T) {
@@ -341,6 +410,9 @@ unittest {
     [ tuple (3, 2), tuple (5, 2), tuple (7, 1), tuple (11, 1),
       tuple (13, 1), tuple (31, 1), tuple (41, 1), tuple (61, 1),
       tuple (151, 1), tuple (331, 1), tuple (1321, 1) ]));
+
+  assert (factorizationPollardRho (571611561829541, [2, 3, 5]).equal(
+    [ tuple (239, 2), tuple (10007, 1), tuple (1000003, 1)]));
 
   auto nd = sieveArrayDP (sa, &numberOfDivisors, 1);
   assert (nd[14] == 4);
