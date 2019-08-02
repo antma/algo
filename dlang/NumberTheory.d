@@ -136,7 +136,7 @@ Factorization factorizationPollardRho (ulong n, in int[] small_primes) {
   enum max_iterations = 10_000;
   ulong[] r;
   foreach (p; small_primes) {
-    if (p * p >= n) {
+    if (p * p > n) {
       break;
     }
     if (!(n % p)) {
@@ -182,7 +182,9 @@ Factorization factorizationPollardRho (ulong n, in int[] small_primes) {
       }
     }
   }
-  factor (n);
+  if (n > 1) {
+    factor (n);
+  }
   sort (r);
   Factorization f;
   foreach (p; r.group ()) {
@@ -410,6 +412,9 @@ unittest {
     [ tuple (3, 2), tuple (5, 2), tuple (7, 1), tuple (11, 1),
       tuple (13, 1), tuple (31, 1), tuple (41, 1), tuple (61, 1),
       tuple (151, 1), tuple (331, 1), tuple (1321, 1) ]));
+
+  assert (factorizationPollardRho (1, [2, 3, 5]).empty);
+  assert (factorizationPollardRho (4, [2, 3, 5]).equal([tuple (2, 2)]));
 
   assert (factorizationPollardRho (571611561829541, [2, 3, 5]).equal(
     [ tuple (239, 2), tuple (10007, 1), tuple (1000003, 1)]));
