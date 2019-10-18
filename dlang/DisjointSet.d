@@ -1,22 +1,24 @@
 import std.algorithm, std.conv, std.range;
 
-class DisjointSet {
+final class DisjointSet {
   private:
     int [] p, h;
     int n;
   public:
-  this (int _n) {
+  this (in int _n) {
     n = _n;
     p = iota (0, n).array;
     h = new int[n];
   }
-  int findSet (int x) pure nothrow @nogc {
+  pure nothrow @nogc
+  int findSet (in int x) {
     if (p[x] == x) {
       return x;
     }
     return p[x] = findSet (p[x]);
   }
-  bool merge (int i, int j) pure nothrow @nogc {
+  pure nothrow @nogc
+  bool merge (int i, int j) {
     i = findSet (i);
     j = findSet (j);
     if (i != j) {
@@ -32,7 +34,8 @@ class DisjointSet {
     }
     return false;
   }
-  int biggestSetSize () pure {
+  pure
+  int biggestSetSize () {
     auto c = new int[n];
     foreach (i; 0 .. n) {
       ++c[findSet (i)];
@@ -41,7 +44,7 @@ class DisjointSet {
   }
 }
 
-class DisjointSetList {
+final class DisjointSetList {
   private:
   int[] p, h, prev, next, maxv;
   int n;
@@ -49,17 +52,22 @@ class DisjointSetList {
     int[] _next;
     int begin;
     immutable int end;
-    @property bool empty () const pure nothrow @nogc { return begin >= end; }
-    @property int front () const pure nothrow @nogc { return begin; }
-    void popFront () pure nothrow @nogc { begin = _next[begin]; }
+    @property pure nothrow @nogc
+    bool empty () const { return begin >= end; }
+    @property pure nothrow @nogc
+    int front () const { return begin; }
+    pure nothrow @nogc
+    void popFront () { begin = _next[begin]; }
   }
-  final int findSet (int x) pure nothrow @nogc {
+  pure nothrow @nogc
+  int findSet (int x) {
     if (p[x] == x) {
       return x;
     }
     return p[x] = findSet (p[x]);
   }
-  final void join (int x, int y) pure nothrow @nogc {
+  pure nothrow @nogc
+  void join (int x, int y) {
     x = findSet (x);
     y = findSet (y);
     maxv[x] = maxv[y];
@@ -73,7 +81,8 @@ class DisjointSetList {
     }
   }
   public:
-  this (int _m) pure nothrow {
+  pure nothrow
+  this (int _m) {
     n = _m + 1;
     p = iota (0, n).array;
     h = new int[n];
@@ -87,13 +96,15 @@ class DisjointSetList {
     prev[0] = _m;
     next[_m] = 0;
   }
-  final void removeKey (int k) pure nothrow @nogc {
+  pure nothrow @nogc
+  void removeKey (int k) {
     join (k, next[k]);
     int u = prev[k], v = next[k];
     next[u] = v;
     prev[v] = u;
   }
-  Range opSlice (size_t begin, size_t end) pure {
+  pure
+  Range opSlice (size_t begin, size_t end) {
     return Range (next, maxv[findSet (begin.to!int)], end.to!int);
   }
-};
+}

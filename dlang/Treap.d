@@ -13,7 +13,7 @@ struct TreapNode(Key, Value = void, Extra=void, bool has_size = false) {
   static if (has_size) int sz;
 }
 
-class Treap(Key, Value = void, Extra = void, bool has_size = false, alias relax_op="") {
+final class Treap(Key, Value = void, Extra = void, bool has_size = false, alias relax_op="") {
   private:
   enum has_relax = isCallable!relax_op;
   alias Node = TreapNode!(Key, Value, Extra, has_size);
@@ -181,35 +181,35 @@ class Treap(Key, Value = void, Extra = void, bool has_size = false, alias relax_
   public:
 
   static if (Node.has_value) {
-    final void insert (Key key, Value value) {
+    void insert (Key key, Value value) {
       root = _insert (root, newNode (key, value));
     }
   } else {
-    final void insert (Key key) {
+    void insert (Key key) {
       root = _insert (root, newNode (key));
     }
   }
 
   static if (has_size) {
-    final size_t countLess (Key x) { return _countLess (root, x); }
-    final Key kthKey (size_t k) const {
+    size_t countLess (Key x) { return _countLess (root, x); }
+    Key kthKey (size_t k) const {
       auto p = _kthNode (root, k);
       assert (p);
       return p.x;
     }
   }
 
-  final bool remove (Key x) {
+  bool remove (Key x) {
     if (!root) return false;
     return _remove (root, x);
   }
 
-  final void clear () {
+  void clear () {
     _clear (root);
     root = null;
   }
 
-  final bool contains (Key x) { return _find (root, x) !is null; }
+  bool contains (Key x) { return _find (root, x) !is null; }
 }
 
 struct ImplicitKeyTreapNode(Value, Extra=void) {
@@ -226,7 +226,7 @@ struct ImplicitKeyTreapNode(Value, Extra=void) {
   }
 }
 
-class ImplicitKeyTreap(Value, Extra=void, alias relax_op="", alias push_op="", alias update_op="") {
+final class ImplicitKeyTreap(Value, Extra=void, alias relax_op="", alias push_op="", alias update_op="") {
   enum has_push = isCallable!push_op;
   enum has_relax = isCallable!relax_op;
   enum has_update = isCallable!update_op;
@@ -400,29 +400,29 @@ class ImplicitKeyTreap(Value, Extra=void, alias relax_op="", alias push_op="", a
     }
   }
 
-  final void insert (int pos, Value value) {
+  void insert (int pos, Value value) {
     _insert (root, new Node (value), pos);
   }
 
-  final void remove (int pos) {
+  void remove (int pos) {
     _remove (root, pos);
   }
 
-  final void replace (int pos, Value value) {
+  void replace (int pos, Value value) {
     _replace (root, pos, value);
   }
 
-  final Value get (int pos) const in {
+  Value get (int pos) const in {
     assert (pos < size ());
   } body {
     return _get (root, pos).value;
   }
 
-  final int size () const {
+  int size () const {
     return _size (root);
   }
 
-  final Node*[] getNodes () {
+  Node*[] getNodes () {
     Node*[] a;
     a.reserve (_size (root));
     void rec (Node *t) {
@@ -434,7 +434,7 @@ class ImplicitKeyTreap(Value, Extra=void, alias relax_op="", alias push_op="", a
     return a;
   }
 
-  final Value[] getValues () {
+  Value[] getValues () {
     Value[] a;
     a.reserve (_size (root));
     void rec (Node *t) {
@@ -472,7 +472,7 @@ class ImplicitKeyTreap(Value, Extra=void, alias relax_op="", alias push_op="", a
       }
       _relax (q);
     }
-    final Extra reduce (int l, int r) {
+    Extra reduce (int l, int r) {
       cur = 0;
       Node *t1, t2, t3;
       persistent_split (root, t1, t2, l);
@@ -482,7 +482,7 @@ class ImplicitKeyTreap(Value, Extra=void, alias relax_op="", alias push_op="", a
   }
 
   static if (has_update) {
-    final void update (int l, int r) {
+    void update (int l, int r) {
       if (!l) {
         Node *t1, t2;
         _split (root, t1, t2, r);

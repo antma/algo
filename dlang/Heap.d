@@ -1,13 +1,14 @@
 import std.array;
 
-class Heap(T) {
+final class Heap(T) {
   private:
     T [] a;
     int [] h;
     int [] g;
     int n;
     int size;
-  final void heapifyFront (int k) pure nothrow @nogc {
+  pure nothrow @nogc
+  void heapifyFront (int k) {
     immutable he = h[k];
     int i = k;
     int j = i << 1;
@@ -28,7 +29,8 @@ class Heap(T) {
       g[he] = i;
     }
   }
-  final void heapifyBack (int k) pure nothrow @nogc {
+  pure nothrow @nogc
+  void heapifyBack (int k) {
     immutable he = h[k];
     int i = k;
     while (i > 1) {
@@ -45,13 +47,15 @@ class Heap(T) {
       g[he] = i;
     }
   }
-  final void insert (int i) pure nothrow @nogc {
+  pure nothrow @nogc
+  void insert (int i) {
     h[++size] = i;
     g[i] = size;
     heapifyBack (size);
   }
   public:
-  final void decreaseKey (int k, T value) pure nothrow @nogc in {
+  pure nothrow @nogc
+  void decreaseKey (int k, T value) in {
     assert (k >= 0 && k < n);
     assert (value < a[k]);
   } body {
@@ -63,7 +67,8 @@ class Heap(T) {
       heapifyBack (pos);
     }
   }
-  final void update (int k, T value) pure nothrow @nogc in {
+  pure nothrow @nogc
+  void update (int k, T value) in {
     assert (k >= 0 && k < n);
   } body {
     immutable pos = g[k];
@@ -78,7 +83,8 @@ class Heap(T) {
       heapifyFront (pos);
     }
   }
-  final int extractMin () pure nothrow @nogc {
+  pure nothrow @nogc
+  int extractMin () {
     assert (size > 0);
     immutable he = h[1];
     g[he] = 0;
@@ -89,13 +95,13 @@ class Heap(T) {
     }
     return he;
   }
-
-  inout(T) opIndex (size_t index) pure nothrow @nogc inout {
+  pure nothrow @nogc
+  inout(T) opIndex (size_t index) inout {
     return a[index];
   }
 
-  @property
-  bool empty () const pure nothrow @nogc { return size == 0; }
+  @property pure nothrow @nogc
+  bool empty () const { return size == 0; }
 
   this (int n_, T default_value = T.init) {
     n = n_;
@@ -154,5 +160,4 @@ unittest {
     immutable j = h.extractMin ();
     assert (b[pos] / 10 == h[j]);
   }
-
 }

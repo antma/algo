@@ -2,23 +2,26 @@ import std.array;
 import std.functional;
 import std.traits;
 
-class SegmentTree(T = int, alias op="a+b", T zero = T.init) {
+final class SegmentTree(T = int, alias op="a+b", T zero = T.init) {
   private:
   T [] t;
   size_t n;
-  final void build () pure nothrow @nogc {
+  pure nothrow @nogc
+  void build () {
     foreach_reverse (i; 1 .. n) {
       immutable k = i << 1;
       t[i] = binaryFun!op (t[k], t[k+1]);
     }
   }
   public:
-  final void update (size_t p, T v) pure nothrow @nogc {
+  pure nothrow @nogc
+  void update (size_t p, T v) {
     for (t[p += n] = v; p > 1; p >>= 1) {
       t[p>>1] = binaryFun!op (t[p], t[p ^ 1]);
     }
   }
-  final T reduce (size_t l, size_t r) const pure nothrow @nogc {
+  pure nothrow @nogc
+  T reduce (size_t l, size_t r) const {
     T res = zero;
     for (l += n, r += n; l < r; l >>= 1, r >>= 1) {
       if (l & 1) {
@@ -30,32 +33,33 @@ class SegmentTree(T = int, alias op="a+b", T zero = T.init) {
     }
     return res;
   }
-  this (const T[] a) pure nothrow {
+  pure nothrow
+  this (const T[] a) {
     n = a.length;
     t = uninitializedArray!(T[])(n) ~ a;
     build ();
   }
 }
 
-class NonCommutativeSegmentTree(T = int, alias op) {
+final class NonCommutativeSegmentTree(T = int, alias op) {
   private:
   T [] t;
   size_t n;
-  final void build () {
+  void build () {
     foreach_reverse (i; 1 .. n) {
       immutable k = i << 1;
       t[i] = binaryFun!op (t[k], t[k+1]);
     }
   }
   public:
-  final void update (size_t p, const T v) {
+  void update (size_t p, const T v) {
     for (t[p += n] = v; p > 1; ) {
       p >>= 1;
       immutable k = p << 1;
       t[p] = binaryFun!op (t[k], t[k+1]);
     }
   }
-  final T reduce (size_t l, size_t r) const {
+  T reduce (size_t l, size_t r) const {
     T res1, res2;
     for (l += n, r += n; l < r; l >>= 1, r >>= 1) {
       if (l & 1) {
@@ -76,11 +80,12 @@ class NonCommutativeSegmentTree(T = int, alias op) {
 }
 
 //Modification on semi-interval, single element access
-class SegmentTreeSliceUpdate(T = int) {
+final class SegmentTreeSliceUpdate(T = int) {
   private:
   T [] t;
   size_t n;
-  final void push () pure nothrow @nogc {
+  pure nothrow @nogc
+  void push () {
     foreach (i; 1 .. n) {
       immutable k = i << 1;
       t[k] = t[k] + t[i];
@@ -88,7 +93,8 @@ class SegmentTreeSliceUpdate(T = int) {
       t[i] = 0;
     }
   }
-  final void update (size_t l, size_t r, T v) pure nothrow @nogc {
+  pure nothrow @nogc
+  void update (size_t l, size_t r, T v) {
     for (l += n, r += n; l < r; l >>= 1, r >>= 1) {
       if (l & 1) {
         t[l++] += v;
@@ -99,35 +105,38 @@ class SegmentTreeSliceUpdate(T = int) {
     }
   }
   public:
-  final inout(T) opIndex (size_t index) inout pure nothrow @nogc {
+  pure nothrow @nogc
+  inout(T) opIndex (size_t index) inout {
      T res;
      for (index += n; index > 0; index >>= 1) {
        res += t[index];
      }
      return res;
   }
-  final const(T[]) force () pure nothrow {
+  pure nothrow
+  const(T[]) force () {
     push ();
     return t[n .. 2 * n].idup;
   }
-  this (int _n) pure nothrow {
+  pure nothrow
+  this (int _n) {
     n = _n;
     t = new T[2 * n];
   }
 }
 
-class SetSegmentTree(S, alias combine) if (isSomeFunction!combine) {
+final class SetSegmentTree(S, alias combine) if (isSomeFunction!combine) {
   private:
   S [] t;
   size_t n;
-  final void build () {
+  void build () {
     foreach_reverse (i; 1 .. n) {
       immutable k = i << 1;
       t[i] = combine (t[k], t[k+1]);
     }
   }
   public:
-  final U reduce(U, U zero) (size_t l, size_t r, U delegate(U, S) op) {
+  U reduce(U, U zero) (size_t l, size_t r, U delegate(U, S) op) {
     U res = zero;
     for (l += n, r += n; l < r; l >>= 1, r >>= 1) {
       if (l & 1) {

@@ -38,7 +38,7 @@ X genericPower(alias mul, X, Y) (X x, Y y, X one = 1.to!X)
   return a;
 }
 
-class PrimeTable {
+final class PrimeTable {
   private:
   BitArray a;
   size_t n;
@@ -279,7 +279,7 @@ int[][] divisorsArray (int n) {
 }
 
 //////////////////// primality testing ////////////////////
-class PrimalityTest32 {
+final class PrimalityTest32 {
   pure
   private static bool witness (uint a, uint n) {
     immutable n1 = n - 1;
@@ -308,7 +308,7 @@ class PrimalityTest32 {
   }
 }
 
-class Montgomery64 {
+final class Montgomery64 {
   //R = 2 ^ 64
   //phi(R) = 2 ^ 63
   immutable ulong n, r_mod_n, neg_r_mod_n, r_div_n, r1, n1, rr;
@@ -360,7 +360,7 @@ class Montgomery64 {
   }
 }
 
-class PrimalityTest64 {
+final class PrimalityTest64 {
   private static bool witness (ulong a, const Montgomery64 m) {
     immutable n1 = m.n - 1;
     immutable l = bsf (n1);

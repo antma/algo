@@ -1,3 +1,4 @@
+//generic algorithms on integral sequences
 import std.algorithm;
 import std.range;
 import std.typecons;

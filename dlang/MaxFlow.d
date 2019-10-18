@@ -17,7 +17,7 @@ struct MaxFlowEdge(C) {
   }
 }
 
-class PushRelabelMaxFlowGraph(C,E) {
+final class PushRelabelMaxFlowGraph(C,E) {
   alias Edge = MaxFlowEdge!C;
   private:
   Edge[][] edges;
@@ -28,18 +28,18 @@ class PushRelabelMaxFlowGraph(C,E) {
   int[] gc;
   immutable int n;
   int maxh;
-  final void addLink (int u, int v) {
+  void addLink (int u, int v) {
     dl[u].next = v;
     dl[v].prev = u;
   }
-  final void insert (int ht, int v) {
+  void insert (int ht, int v) {
     addLink (dl[n + ht].prev, v);
     addLink (v, n + ht);
   }
-  final void remove (int i) {
+  void remove (int i) {
     addLink (dl[i].prev, dl[i].next);
   }
-  final void initPreflow () {
+  void initPreflow () {
     foreach (i; n .. dl.length.to!int) {
       dl[i].prev = dl[i].next = i;
     }
@@ -54,7 +54,7 @@ class PushRelabelMaxFlowGraph(C,E) {
     }
     gc[0] = n - 1;
   }
-  final void push (int i, ref Edge edge) {
+  void push (int i, ref Edge edge) {
     immutable j = edge.v;
     E d = edge.c - edge.f;
     if (d > e[i]) d = e[i];
@@ -63,7 +63,7 @@ class PushRelabelMaxFlowGraph(C,E) {
     e[i] -= d;
     e[j] += d;
   }
-  final void lift (int i) {
+  void lift (int i) {
     int m = int.max;
     foreach (const p; edges[i]) {
       if (p.f < p.c && m > h[p.v]) {
@@ -72,7 +72,7 @@ class PushRelabelMaxFlowGraph(C,E) {
     }
     h[i] = m + 1;
   }
-  final void discharge (int i) {
+  void discharge (int i) {
     //int nh = INT_MAX;
     while (e[i] > 0) {
       if (current[i].empty) {
@@ -129,7 +129,7 @@ class PushRelabelMaxFlowGraph(C,E) {
     }
   }
   public:
-  final void addEdge (int i, int j, C w1, C w2) {
+  void addEdge (int i, int j, C w1, C w2) {
     immutable ei = edges[i].length.to!int, ej = edges[j].length.to!int;
     edges[i] ~= Edge (w1, j, ej);
     edges[j] ~= Edge (w2, i, ei);

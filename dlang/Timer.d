@@ -13,10 +13,10 @@ static if (__VERSION__ >= 2075) {
   import std.datetime : StopWatch;
 }
 
-class Timer {
+final class Timer {
   immutable double timeout;
   StopWatch sw;
-  this(double _timeout) {
+  this (double _timeout) {
     timeout = _timeout;
     sw.start ();
   }

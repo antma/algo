@@ -5,11 +5,11 @@ import std.complex;
 alias Real = real;
 alias CReal = Complex!real;
 
-class FFT {
+final class FFT {
   private size_t[] tbl;
   private size_t n, h, ldn;
-  
-  private final size_t revbinUpdate (const size_t k) {
+
+  private size_t revbinUpdate (const size_t k) {
     if (tbl[k] != size_t.max) return tbl[k];
     size_t r = k, i = h;
     while (! ((r ^= i) & i)) {
@@ -17,7 +17,7 @@ class FFT {
     }
     return tbl[k] = r;
   }
-  private final void revbinPermute (CReal[] a) {
+  private void revbinPermute (CReal[] a) {
     if (n <= 2) return;
     size_t r = 0, x = 1;
     while (x < h) {
@@ -32,8 +32,8 @@ class FFT {
       ++x;
     }
   }
-  
-  final fft (CReal[] a, int s) {
+
+  void fft (CReal[] a, int s) {
     if (ldn < 1) return;
     revbinPermute (a);
     int r = 0;
@@ -64,15 +64,15 @@ class FFT {
       }
     }
   }
-  
-  final normalize (CReal[] a) {
+
+  void normalize (CReal[] a) {
     immutable Real x = 1.0 / n;
     foreach (ref y; a) {
-      y *= x; 
+      y *= x;
     }
   }
-  
-  final conv (CReal[] c, CReal[] a, CReal[] b) in {
+
+  void conv (CReal[] c, CReal[] a, CReal[] b) in {
     assert (a.length == n);
     assert (b.length == n);
     assert (c.length == n);
@@ -86,7 +86,7 @@ class FFT {
     fft (c, -1);
     normalize (c);
   }
-  
+
   this (size_t _n) in {
     assert (0 == (_n & (_n - 1)));
   } body {

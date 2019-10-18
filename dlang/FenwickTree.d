@@ -1,4 +1,4 @@
-class FenwickTree(T = int, alias op = (x, y) => x + y, T zero = T.init) {
+final class FenwickTree(T = int, alias op = (x, y) => x + y, T zero = T.init) {
   private:
   T [] a;
   size_t n;

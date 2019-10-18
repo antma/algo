@@ -9,8 +9,8 @@ class SuffixArray {
   string s;
   int [] O;
   int n;
-
-  final void countingSort (int m, int [] c, int [] p, int [] o) const pure nothrow {
+  pure nothrow
+  final void countingSort (int m, int [] c, int [] p, int [] o) const {
     auto cnt = new int[m];
     foreach (i; 0 .. p.length) {
       ++cnt[c[p[i]]];
@@ -22,8 +22,8 @@ class SuffixArray {
       o[--cnt[c[p[i]]]] = p[i];
     }
   }
-
-  this (string s_) pure {
+  pure
+  this (string s_) {
     s = s_ ~ 0.to!(char);
     n = s.length.to!(int);
     auto c = s.map! (to!(int)).array;
@@ -62,15 +62,17 @@ class SuffixArray {
     O = p[1 .. n];
     --n;
   }
-};
+}
 
 class LCPSuffixArray : SuffixArray {
   int [] R; //reverse permutation
   int [] LCP;
-  final int lcp (int l, int r) const pure nothrow @nogc {
+  pure nothrow @nogc
+  final int lcp (int l, int r) const {
     return (r - l == 1) ? LCP[r] : LCP[n + 1 + ((l + r) >> 1)];
   }
-  final int lcp_build (int l, int r) pure nothrow @nogc {
+  pure nothrow @nogc
+  final int lcp_build (int l, int r) {
     if (r - l == 1) {
       return LCP[r];
     }
@@ -128,7 +130,8 @@ class LCPSuffixArray : SuffixArray {
     }
     return f (-1, 0, n, 0);
   }
-  this (string s) pure {
+  pure
+  this (string s) {
     super (s);
     LCP = new int [2 * n + 1];
     R = new int[n];
@@ -152,7 +155,7 @@ class LCPSuffixArray : SuffixArray {
     LCP[n] = 0;
     lcp_build (-1, n);
   }
-};
+}
 
 import std.random;
 import std.stdio;
