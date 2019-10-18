@@ -4,7 +4,7 @@ import std.stdio;
 import std.traits;
 import std.array;
 
-class InputReader {
+final class InputReader {
   private:
   ubyte[] p;
   ubyte[] buffer;
@@ -14,7 +14,7 @@ class InputReader {
     buffer = uninitializedArray!(ubyte[])(16<<20);
     p = stdin.rawRead (buffer);
   }
-  final ubyte skipByte (ubyte lo) {
+  ubyte skipByte (ubyte lo) {
     while (true) {
       auto a = p[cur .. $];
       auto r = a.find! (c => c >= lo);
@@ -27,7 +27,7 @@ class InputReader {
       if (p.empty) return 0;
     }
   }
-  final ubyte nextByte () {
+  ubyte nextByte () {
     if (cur < p.length) {
        return p[cur++];
     }
@@ -38,7 +38,7 @@ class InputReader {
   }
 
   template next(T) if (isSigned!T) {
-    final T next ()  {
+    T next ()  {
       T res;
       ubyte b = skipByte (45);
       if (b == 45) {
@@ -62,7 +62,7 @@ class InputReader {
     }
   }
   template next(T) if (isUnsigned!T) {
-    final T next () {
+    T next () {
       T res = skipByte (48) - 48;
       while (true) {
         ubyte b = nextByte ();
@@ -74,7 +74,7 @@ class InputReader {
       return res;
     }
   }
-  final T[] nextA(T) (int n) {
+  T[] nextA(T) (int n) {
     auto a = uninitializedArray!(T[]) (n);
     foreach (i; 0 .. n) {
       a[i] = next!T;
