@@ -1,49 +1,60 @@
 import std.algorithm;
+import std.array;
 import std.range;
 import std.stdio;
 import std.traits;
-import std.array;
 
 final class InputReader {
   private:
-  ubyte[] p;
-  ubyte[] buffer;
-  size_t cur;
+  ubyte[] p, buffer;
+  bool eof;
+  bool rawRead () {
+    if (eof) {
+      return false;
+    }
+    p = stdin.rawRead (buffer);
+    if (p.empty) {
+      return eof = true;
+    }
+    return true;
+  }
+  ubyte nextByte(bool check) () {
+    static if (check) {
+      if (p.empty) {
+        if (!rawRead ()) {
+          return 0;
+        }
+      }
+    }
+    auto r = p.front;
+    p = dropOne (p);
+    return r;
+  }
   public:
   this () {
     buffer = uninitializedArray!(ubyte[])(16<<20);
-    p = stdin.rawRead (buffer);
   }
-  ubyte skipByte (ubyte lo) {
+  bool seekByte (in ubyte lo) {
     while (true) {
-      auto a = p[cur .. $];
-      auto r = a.find! (c => c >= lo);
-      if (!r.empty) {
-        cur += a.length - r.length;
-        return p[cur++];
+      p = p.find! (c => c >= lo);
+      if (!p.empty) {
+        return false;
       }
-      p = stdin.rawRead (buffer);
-      cur = 0;
-      if (p.empty) return 0;
+      if (!rawRead ()) {
+        return true;
+      }
     }
   }
-  ubyte nextByte () {
-    if (cur < p.length) {
-       return p[cur++];
-    }
-    p = stdin.rawRead (buffer);
-    if (p.empty) return 0;
-    cur = 1;
-    return p[0];
-  }
-
   template next(T) if (isSigned!T) {
     T next ()  {
+      if (seekByte (45)) {
+        return 0;
+      }
       T res;
-      ubyte b = skipByte (45);
+      ubyte b = nextByte!false ();
       if (b == 45) {
         while (true) {
-          b = nextByte ();
+          b = nextByte!true ();
           if (b < 48 || b >= 58) {
             return res;
           }
@@ -52,7 +63,7 @@ final class InputReader {
       } else {
         res = b - 48;
         while (true) {
-          b = nextByte ();
+          b = nextByte!true ();
           if (b < 48 || b >= 58) {
             return res;
           }
@@ -63,9 +74,12 @@ final class InputReader {
   }
   template next(T) if (isUnsigned!T) {
     T next () {
-      T res = skipByte (48) - 48;
+      if (seekByte (48)) {
+        return 0;
+      }
+      T res = nextByte!false () - 48;
       while (true) {
-        ubyte b = nextByte ();
+        ubyte b = nextByte!true ();
         if (b < 48 || b >= 58) {
           break;
         }
@@ -74,7 +88,7 @@ final class InputReader {
       return res;
     }
   }
-  T[] nextA(T) (int n) {
+  T[] nextA(T) (in int n) {
     auto a = uninitializedArray!(T[]) (n);
     foreach (i; 0 .. n) {
       a[i] = next!T;
