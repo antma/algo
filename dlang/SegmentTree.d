@@ -36,7 +36,8 @@ final class SegmentTree(T = int, alias op="a+b", T zero = T.init) {
   pure nothrow
   this (const T[] a) {
     n = a.length;
-    t = uninitializedArray!(T[])(n) ~ a;
+    t = uninitializedArray!(T[])(n);
+    t ~= a;
     build ();
   }
 }
