@@ -14,7 +14,8 @@ final class InputReader {
     }
     p = stdin.rawRead (buffer);
     if (p.empty) {
-      return eof = true;
+      eof = true;
+      return false;
     }
     return true;
   }
