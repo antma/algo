@@ -5,14 +5,20 @@ import std.typecons;
 import std.traits;
 
 //LIS
-int longestStrictlyIncreasingSequenceLength(T) (const T[] a) {
-  immutable n = a.length;
-  auto p = new T[n+2];
+int longestIncreasingSequenceLength(R, bool strict=true) (R range)
+  if (isInputRange!R && isIntegral!(ElementType!R) && hasLength!R) {
+  alias T = ElementType!R;
+  auto p = new T[range.length];
   int m = 1;
   p[0] = T.min;
   p[1] = T.max;
-  foreach (i; a) {
-    auto k = p[0 .. m].assumeSorted.lowerBound (i).length;
+  foreach (i; range) {
+    static if (strict) {
+      immutable j = i;
+    } else {
+      immutable j = i + 1;
+    }
+    auto k = p[0 .. m].assumeSorted.lowerBound (j).length;
     if (i < p[k]) {
       p[k] = i;
       if (k == m) {
@@ -24,7 +30,7 @@ int longestStrictlyIncreasingSequenceLength(T) (const T[] a) {
 }
 
 //Kadane's algorithm
-long maximumSubarraySum(R) (R range) if (isInputRange!R && isIntegral!(ElementType!R)) {
+long maximumSubArraySum(R) (R range) if (isInputRange!R && isIntegral!(ElementType!R)) {
   alias T = ElementType!R;
   alias S = Tuple! (long, "best", long, "cur");
   S next (in S s, in T x) {
@@ -40,7 +46,7 @@ long maximumSubarraySum(R) (R range) if (isInputRange!R && isIntegral!(ElementTy
 unittest {
   import std.stdio;
   writeln ("Testing ", __FILE__, " ...");
-  assert (longestStrictlyIncreasingSequenceLength ([2, 7, 4, 3, 8]) == 3);
-  assert (maximumSubarraySum ([5, -2 , 1]) == 5L);
+  assert (longestIncreasingSequenceLength ([2, 7, 4, 3, 8]) == 3);
+  assert (maximumSubArraySum ([5, -2 , 1]) == 5L);
 }
 
