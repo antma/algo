@@ -1,4 +1,6 @@
+package cpalgo.numtheory
 import kotlin.math.*
+import java.util.BitSet
 
 //p^q (mod m)
 fun powMod (p: Int, q: Int, m: Int): Int {
@@ -27,4 +29,33 @@ fun sieveArray(n: Int): IntArray {
     }
   }
   return a
+}
+
+class LinearSieve(val n: Int, prime: (Int) -> Int, divides : (Int, Int) -> Int) {
+  private val composite = BitSet(n)
+  private val primes = arrayListOf<Int>()
+  private val f = IntArray(n)
+  operator fun get(i: Int) = f[i]
+  init {
+    f[1] = 1
+    for (i in 2 until n) {
+      if (!composite[i]) {
+        primes.add(i)
+        f[i] = prime(i)
+      }
+      for (j in primes) {
+        val k = i * j
+        if (k >= n) {
+          break
+        }
+        composite[k] = true
+        if (i % j == 0) {
+          f[k] = divides(f[i], j)
+          break
+        } else {
+          f[k] = f[i] * f[j]
+        }
+      }
+    }
+  }
 }
