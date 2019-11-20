@@ -50,3 +50,25 @@ fun Graph.hasCycle(): Boolean {
   }
   return false
 }
+
+class WeightedGraph(val nodes: Int, maxEdges: Int) {
+  val first = IntArray(nodes) { -1 }
+  val nxt = IntArray(maxEdges) { -1 }
+  val v = IntArray(maxEdges)
+  val w = IntArray(maxEdges)
+  var k = 0
+  fun addEdge(i: Int, j: Int, weight: Int) {
+    v[k] = j
+    w[k] = weight;
+    nxt[k] = first[i]
+    first[i] = k
+    ++k
+  }
+  inline fun adjacentVerticesForeach(i: Int, op: (Int, Int) -> Unit) {
+    var k = first[i]
+    while (k >= 0) {
+      op (v[k], w[k])
+      k = nxt[k]
+    }
+  }
+}
