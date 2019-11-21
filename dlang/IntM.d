@@ -2,6 +2,7 @@ import std.algorithm;
 import std.conv;
 import std.math;
 import std.stdio;
+import std.traits;
 
 import NumberTheory : genericPower, gcdext;
 
@@ -11,20 +12,23 @@ struct IntM(int q = 1_000_000_007) {
   int v;
   invariant () { assert (v >= 0 && v < q); }
   pure nothrow @nogc
-  void fromInt (int m) {
-    v = m % q;
-    if (v < 0) {
-      v += q;
+  static int from(T) (const T m) if (isIntegral!T) {
+    int v = m % q;
+    static if (isSigned!T) {
+      if (v < 0) {
+        v += q;
+      }
     }
+    return v;
   }
   public:
   pure nothrow @nogc
-  this (int m) {
-    fromInt (m);
+  this(T) (const T m) if (isIntegral!T) {
+    v = from!T (m);
   }
   pure nothrow @nogc
-  N opAssign (int m) {
-    fromInt (m);
+  N opAssign(T) (const T m) if (isIntegral!T) {
+    v = from!T (m);
     return this;
   }
   pure nothrow @nogc
@@ -75,11 +79,11 @@ struct IntM(int q = 1_000_000_007) {
     return t;
   }
   pure nothrow @nogc
-  N opBinary (string op)(in int rhs) const if (op == "+" || op == "-" || op == "*" || op == "/") {
+  N opBinary(string op,T)(const T rhs) const if (isIntegral!T && (op == "+" || op == "-" || op == "*" || op == "/")) {
     mixin ("return this " ~ op ~ " N(rhs);");
   }
   pure nothrow @nogc
-  N opBinaryRight (string op)(in int rhs) const if (op == "+" || op == "*") {
+  N opBinaryRight(string op,T)(const T rhs) const if (isIntegral!T && (op == "+" || op == "*")) {
     mixin ("return this " ~ op ~ " N(rhs);");
   }
   pure nothrow @nogc
@@ -188,4 +192,10 @@ unittest {
       assert (y.discreteLogarithm (a) == j);
     }
   }
+  assert(N(1_000_000_007L * 1_000_000_007L) == N(0));
+  assert(N(1_000_000_007UL * 1_000_000_007UL) == N(0));
+
+  assert(N(ulong.max) == N(582344007));
+  assert(N(long.max) == N(291172003));
+  assert(N(18446744073127207607UL) == N(-1));
 }
