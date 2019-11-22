@@ -1,6 +1,5 @@
 import std.algorithm;
 import std.array;
-import std.range;
 import std.stdio;
 import std.traits;
 
@@ -28,7 +27,7 @@ final class InputReader {
       }
     }
     auto r = p.front;
-    p = dropOne (p);
+    p.popFront ();
     return r;
   }
   public:
