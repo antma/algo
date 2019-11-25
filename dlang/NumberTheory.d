@@ -386,6 +386,93 @@ final class PrimalityTest64 {
   }
 }
 
+class PrimeBlock {
+  enum p = 30030;
+  static immutable small_primes = [2,3,5,7,11,13];
+  static immutable int[] idx, delta;
+  static immutable ushort[] tbl;
+  static int l;
+  int[] w;
+  ulong[] a;
+  ulong off, end;
+  immutable int m;
+  static this () {
+    auto b = new ushort[p];
+    foreach (i; small_primes) for (int j = 0; j < p; j += i) b[j] = ushort.max;
+    auto t = iota (0, p).filter! (i => !b[i]).array;
+    idx = assumeUnique (t);
+    l = idx.length.to!int;
+    auto d = new int[l];
+    foreach (i; 0 .. l - 1) d[i] = idx[i+1] - idx[i];
+    d[l-1] = idx[0] + p - idx[l-1];
+    delta = assumeUnique (d);
+    foreach (i, k; idx) b[k] = i.to!ushort;
+    foreach_reverse (i, k; b) if (k == ushort.max) b[i] = b[i+1];
+    tbl = assumeUnique (b);
+  }
+  bool g(int u)(bool delegate(ulong) op) {
+    foreach (i; 0 .. a.length) {
+      auto x = ~a[i];
+      while (x) {
+        immutable j = (i << 6) + bsf (x);
+        if (op (off + idx[j % l] + p * (j / l))) return true;
+        x &= x - 1;
+        static if (u) x &= ~a[i];
+      }
+    }
+    return false;
+  }
+  void h (int q) {
+    auto u = (off + q - 1) / q;
+    int v = u % p, k = tbl[v];
+    u += idx[k] - v;
+    int o = (u * q - off).to!int;
+    while (o < m) {
+      int y = o / p, x = tbl[o - y * p] + y * l;
+      a[x >> 6] |= 1UL << (x & 63);
+      o += q * delta[k];
+      if (++k == l) k = 0;
+    }
+  }
+  this (int n) {
+    n = ((n + p - 1) / p) * p;
+    while (n & 7) n += p;
+    m = n;
+    a = new ulong[((m / p) * l) / 64];
+    a[0] |= 1;
+    off = 0;
+    g!1 (delegate bool(ulong x) {
+      if (x * x >= m) return true;
+      w ~= x.to!int;
+      h (x.to!int);
+      return false;
+    });
+    g!0 (delegate bool(ulong x) {
+      w ~= x.to!int;
+      return false;
+    });
+    off = m;
+  }
+  void gen (bool delegate(ulong) op, ulong start) {
+    bool s;
+    if (!start) {
+      foreach (p; small_primes) if (op (p)) return;
+      foreach (p; w) if (op (p)) return;
+      off = m;
+    } else off = start;
+    do {
+      auto e = off + m;
+      a[] = 0;
+      foreach (p; w) {
+        if (p.to!long * p >= e) break;
+        h (p);
+      }
+      s = g!0 (op);
+      off = e;
+    } while(!s);
+  }
+}
+
 unittest {
   import std.stdio, std.string;
   writeln ("Testing ", __FILE__, " ...");
