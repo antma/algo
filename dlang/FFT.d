@@ -80,9 +80,7 @@ final class FFT {
   body {
     fft (a, 1);
     fft (b, 1);
-    foreach (i; 0 .. n) {
-      c[i] = a[i] * b[i];
-    }
+    c[] = a[] * b[];
     fft (c, -1);
     normalize (c);
   }
