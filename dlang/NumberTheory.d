@@ -73,6 +73,52 @@ final class PrimeTable {
   }
 }
 
+class LinearSieve(T)
+  if (isIntegral!T) {
+  private:
+  BitArray composite;
+  T[] f;
+  int[] primes;
+  public:
+  pure nothrow @nogc
+  T opIndex (size_t index) const {
+    return f[index];
+  }
+  auto opSlice(size_t begin, size_t end) const {
+    return f[begin .. end];
+  }
+  this (const int n, int function (const T) prime, int function (const T, const int) divides) {
+    composite.length = n;
+    f = new T[n];
+    f[1] = 1;
+    foreach (i; 2 .. n) {
+      if (!composite[i]) {
+        primes ~= i;
+        f[i] = prime (i);
+      }
+      foreach (j; primes) {
+        immutable k = i * j;
+        if (k >= n) {
+          break;
+        }
+        composite[k] = true;
+        if (!(i % j)) {
+          f[k] = divides(f[i], j);
+          break;
+        } else {
+          f[k] = f[i] * f[j];
+        }
+      }
+    }
+  }
+}
+
+auto totientSieve (const int n) {
+  return new LinearSieve!int (n, function int (const int p) { return p - 1; }, function int (const int acc, const int j) {
+    return acc * j;
+  });
+}
+
 alias Factorization = Tuple!(ulong, "p", uint, "c")[];
 
 pure
@@ -526,5 +572,9 @@ unittest {
   assert (sd_large.all! (i => i >= 0));
 
   assert (equal (divisorsFromFactorization!int (factorizationTrialDivision (24, [2, 3]), true), [1, 2, 3, 4, 6, 8, 12, 24]));
+
+  immutable totients = [1, 1, 2, 2, 4, 2, 6, 4, 6, 4, 10, 4, 12, 6, 8, 8, 16, 6, 18, 8, 12, 10, 22, 8, 20, 12, 18, 12, 28, 8, 30, 16, 20, 16, 24, 12, 36, 18, 24, 16, 40, 12, 42, 20, 24, 22, 46, 16, 42, 20, 32, 24, 52, 18, 40, 24, 36, 28];
+  auto t = totientSieve (totients.length.to!int + 1);
+  assert (t[1 .. totients.length + 1].equal (totients));
 
 }
