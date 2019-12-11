@@ -8,7 +8,7 @@ template <typename T, class O> class SegmentTree {
   size_t n;
   vector<T> t;
   const T zero;
-  O op;
+  const O &op;
   void build () {
     for (int i = n - 1; i >= 1; --i) {
       const int k = i << 1;
@@ -33,7 +33,7 @@ template <typename T, class O> class SegmentTree {
     }
     return res;
   }
-  SegmentTree (vector<T> &a, const T &_zero) : n (a.size ()), t (2 * n), zero (_zero) {
+  SegmentTree (vector<T> &a, const T &_zero, const O &o) : n (a.size ()), t (2 * n), zero (_zero), op (o) {
     copy (a.cbegin (), a.cend (), t.begin () + n);
     build ();
   }
