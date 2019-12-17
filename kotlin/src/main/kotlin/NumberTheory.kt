@@ -59,3 +59,7 @@ class LinearSieve(val n: Int, prime: (Int) -> Int, divides : (Int, Int) -> Int) 
     }
   }
 }
+
+fun totientSieve(n: Int): LinearSieve {
+  return LinearSieve(n, { p -> p - 1 }, { acc, p -> acc * p })
+}
