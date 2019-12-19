@@ -93,21 +93,57 @@ auto sigma2Sieve (const int n) {
   });
 }
 
+auto mobiusSieve (const int n) {
+  return new LinearSieve!int (n, function int (const int p) { return -1; }, function int (const int acc, const int j) {
+    return 0;
+  });
+}
+
 auto totientSieve (const int n) {
   return new LinearSieve!int (n, function int (const int p) { return p - 1; }, function int (const int acc, const int j) {
     return acc * j;
   });
 }
 
+final class HarmonicSeries {
+  private:
+  immutable ulong n;
+  long cur;
+  public:
+  @property
+  bool empty () const {
+    return front < 0;
+  }
+  long front;
+  void popFront () {
+    if (front > n) {
+      front = -1;
+      return;
+    }
+    front = 1 + (n / cur);
+    if (front > n) {
+      front = n + 1;
+    }
+    cur = n / front;
+  }
+  this (ulong n) {
+    this.n = cur = n;
+    front = 1;
+  }
+}
+
 unittest {
-  import std.stdio, std.string;
+  import std.stdio, std.string, std.array;
   writeln ("Testing ", __FILE__, " ...");
+  immutable mu = [1, -1, -1, 0, -1, 1, -1, 0, 0, 1, -1, 0];
+  auto m = mobiusSieve (mu.length.to!int + 1);
+  assert (m[1 .. mu.length + 1].equal (mu));
   immutable totients = [1, 1, 2, 2, 4, 2, 6, 4, 6, 4, 10, 4, 12, 6, 8, 8, 16, 6, 18, 8, 12, 10, 22, 8, 20, 12, 18, 12, 28, 8, 30, 16, 20, 16, 24, 12, 36, 18, 24, 16, 40, 12, 42, 20, 24, 22, 46, 16, 42, 20, 32, 24, 52, 18, 40, 24, 36, 28];
   auto t = totientSieve (totients.length.to!int + 1);
   assert (t[1 .. totients.length + 1].equal (totients));
-
   immutable sigma2 = [
   	1, 5, 10, 21, 26, 50, 50, 85, 91, 130, 122, 210, 170, 250, 260, 341, 290, 455, 362, 546, 500, 610, 530, 850, 651, 850, 820, 1050, 842, 1300, 962, 1365, 1220, 1450, 1300, 1911, 1370, 1810, 1700, 2210, 1682, 2500, 1850, 2562, 2366, 2650, 2210, 3410, 2451, 3255];
   auto ts2 = sigma2Sieve (sigma2.length.to!int + 1);
   assert (ts2[1 .. sigma2.length + 1].equal (sigma2));
+  assert (new HarmonicSeries (10).array.equal ([1, 2, 3, 4, 6, 11]));
 }
