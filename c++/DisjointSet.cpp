@@ -20,7 +20,7 @@ class DisjointSet {
     }
     return p[x] = findSet (p[x]);
   }
-  void merge (int i, int j) {
+  bool merge (int i, int j) {
     i = findSet (i);
     j = findSet (j);
     if (i != j) {
@@ -32,6 +32,8 @@ class DisjointSet {
         p[i] = j;
         ++h[j];
       }
+      return true;
     }
+    return false;
   }
 };
