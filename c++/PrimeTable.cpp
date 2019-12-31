@@ -13,29 +13,24 @@ class PrimeTable {
     if (!(i & 1)) return i == 2;
     return (a[i>>6] & (1U << ((i >> 1) & 31))) != 0;
   }
-  void getPrimes (vector<int> &r) {
+  vector<int> getPrimes () const {
     vector<int> b;
-    int i;
     b.push_back (2);
-    for (i = 3; i <= n; i += 2) {
+    for (int i = 3; i < n; i += 2) {
       if (a[i>>6] & (1U << ((i >> 1) & 31))) {
         b.push_back (i);
       }
     }
-    b.swap (r);
+    return b;
   }
   //generate all primes less than N (p[i] < N)
-  PrimeTable (int maxN) : n (maxN)
-  {
+  PrimeTable (int maxN) : n (maxN), a ( (n + 63) >> 6, -1) {
     const int nMaxSieveHalf = n / 2,
               nMaxSqrt = (int) floor (sqrt (n) / 2 + 1e-9);
-    int i;
-    a.resize ((n + 63) >> 6);
-    fill (a.begin (), a.end (), -1);
     a[0] = -2;
-    for (i = 1; i < nMaxSqrt; ++i) {
+    for (int i = 1; i < nMaxSqrt; ++i) {
       if (a[i >> 5] & (1U << (i & 31))) {
-        for (int j = 2 * i * (i+1); j < nMaxSieveHalf; j += i + i + 1) {
+        for (int j = 2 * i * (i + 1); j < nMaxSieveHalf; j += i + i + 1) {
           a[j >> 5] &= ~(1U << (j & 31));
         }
       }
