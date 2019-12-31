@@ -27,7 +27,7 @@ class PrimeTable {
   PrimeTable (int maxN) : n (maxN), a ( (n + 63) >> 6, -1) {
     const int nMaxSieveHalf = n / 2,
               nMaxSqrt = (int) floor (sqrt (n) / 2 + 1e-9);
-    a[0] = -2;
+    --a[0];
     for (int i = 1; i < nMaxSqrt; ++i) {
       if (a[i >> 5] & (1U << (i & 31))) {
         for (int j = 2 * i * (i + 1); j < nMaxSieveHalf; j += i + i + 1) {
@@ -38,9 +38,10 @@ class PrimeTable {
   }
 };
 
-// x = prod_{i=0..k-1} r[i].firsr ^ r[i].second
-void factor (const vector<int> &primes, int x, vector<pair<int, int> > &r) {
-  vector<pair<int, int> > a;
+using Factorization = vector<pair<int, int> >;
+// x = prod_{i=0..k-1} r[i].first ^ r[i].second
+Factorization factorization (const vector<int> &primes, int x) {
+  Factorization a;
   for (const auto j : primes) {
     if (j * j > x) break;
     if (!(x % j)) {
@@ -55,10 +56,10 @@ void factor (const vector<int> &primes, int x, vector<pair<int, int> > &r) {
   if (x > 1) {
     a.emplace_back (x, 1);
   }
-  a.swap (r);
+  return a;
 }
 
-void factors_rec (int y, const vector<pair<int, int> > &c, size_t depth, vector<int> &o) {
+void factors_rec (int y, const Factorization &c, size_t depth, vector<int> &o) {
   if (depth == c.size ()) {
     o.push_back (y);
     return;
@@ -71,8 +72,9 @@ void factors_rec (int y, const vector<pair<int, int> > &c, size_t depth, vector<
   }
 }
 
-void factors (const vector<pair<int, int> > &c, vector<int> &r) {
-  r.clear ();
+vector<int> factors (const Factorization &c) {
+  vector<int> r;
   factors_rec (1, c, 0, r);
   sort (r.begin (), r.end ());
+  return r;
 }
