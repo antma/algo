@@ -15,6 +15,7 @@ class PrimeTable {
   }
   vector<int> getPrimes () const {
     vector<int> b;
+    if (n <= 2) return b;
     b.push_back (2);
     for (int i = 3; i < n; i += 2) {
       if (a[i>>6] & (1U << ((i >> 1) & 31))) {
@@ -25,12 +26,11 @@ class PrimeTable {
   }
   //generate all primes less than N (p[i] < N)
   PrimeTable (int maxN) : n (maxN), a ( (n + 63) >> 6, -1) {
-    const int nMaxSieveHalf = n / 2,
-              nMaxSqrt = (int) floor (sqrt (n) / 2 + 1e-9);
+    const int m = n / 2;
     --a[0];
-    for (int i = 1; i < nMaxSqrt; ++i) {
+    for (int i = 1; i * i < n; ++i) {
       if (a[i >> 5] & (1U << (i & 31))) {
-        for (int j = 2 * i * (i + 1); j < nMaxSieveHalf; j += i + i + 1) {
+        for (int j = 2 * i * (i + 1); j < m; j += i + i + 1) {
           a[j >> 5] &= ~(1U << (j & 31));
         }
       }
@@ -78,3 +78,34 @@ vector<int> factors (const Factorization &c) {
   sort (r.begin (), r.end ());
   return r;
 }
+
+//////////////////// UNITTEST ////////////////////
+#include <cstdint>
+#include <cassert>
+#include <iostream>
+class Unittest {
+  public:
+  Unittest() {
+    cerr << "Testing " << __FILE__ << endl;
+    PrimeTable p (1000000);
+    uint64_t s = 0;
+    vector<int> a = p.getPrimes ();
+    for (const auto i : a) s += i;
+    assert (s == UINT64_C(37550402023));
+    vector<int> primes = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199};
+    for (int n = 1; n < 200; ++n) {
+      auto r = equal_range (primes.cbegin (), primes.cend (), n);
+      assert ( (r.first == r.second) == !p.isPrime (n));
+    }
+    for (int n = 1; n < 200; ++n) {
+      PrimeTable pt (n);
+      auto it = lower_bound (primes.cbegin (), primes.cend (), n);
+      auto q = pt.getPrimes ();
+      assert (q.size () == static_cast<size_t> (it - primes.cbegin ()));
+      assert (equal (q.cbegin (), q.cend (), primes.cbegin ()));
+    }
+  }
+};
+
+Unittest unittest;
+

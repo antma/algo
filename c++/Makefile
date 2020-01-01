@@ -4,9 +4,9 @@ SOURCES := $(wildcard *.cpp)
 OBJDIR := $(WORKDIR)
 OBJECTS := $(patsubst %.cpp,%.o,$(SOURCES))
 
-CPPFLAGS := -Wall 
+CPPFLAGS := -Wall -DUNITTEST -std=c++14 -pedantic 
 
-all: $(OBJECTS)
+all: $(OBJECTS) test
 
 #.PNONY: clean
 
@@ -14,4 +14,5 @@ all: $(OBJECTS)
 	g++ $(CPPFLAGS) -c $<
 
 test: $(OBJECTS)
-	dmd $(DMDFLAGS) -of$@ $^
+	g++ $(CPPFLAGS) -o$@ $^
+
