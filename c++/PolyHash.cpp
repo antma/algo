@@ -23,13 +23,13 @@ struct HashT {
   static inline uint32_t mulm (const uint32_t x, const uint32_t y, const uint32_t m) {
     return (static_cast<uint64_t>(x) * y) % m;
   }
-  auto operator+ (const HashT rhs) const {
+  HashT operator+ (const HashT rhs) const {
     return HashT (addm (r1, rhs.r1, p1), addm (r2, rhs.r2, p2));
   }
-  auto operator- (const HashT rhs) const {
+  HashT operator- (const HashT rhs) const {
     return HashT (subm (r1, rhs.r1, p1), subm (r2, rhs.r2, p2));
   }
-  auto operator* (const HashT rhs) const {
+  HashT operator* (const HashT rhs) const {
     return HashT (mulm (r1, rhs.r1, p1), mulm (r2, rhs.r2, p2));
   }
   uint64_t get () const {

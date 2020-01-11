@@ -34,17 +34,17 @@ struct IntM {
     v = static_cast<uint32_t> ((static_cast<uint64_t> (v) * x.v) % m);
     return *this;
   }
-  auto operator+ (const IntM x) const {
+  IntM operator+ (const IntM x) const {
     uint32_t r = v + x.v;
     if (r >= m) r -= m;
     return IntM (r);
   }
-  auto operator- (const IntM x) const {
+  IntM operator- (const IntM x) const {
     uint32_t r = v - x.v;
     if (v < x.v) r += m;
     return IntM (r);
   }
-  auto operator* (const IntM x) const { return IntM (static_cast<uint32_t> ((static_cast<uint64_t> (v) * x.v) % m)); }
+  IntM operator* (const IntM x) const { return IntM (static_cast<uint32_t> ((static_cast<uint64_t> (v) * x.v) % m)); }
   IntM inversion () const {
     int x, y, g = gcdExt (m, v, x, y);
     assert (g == 1);

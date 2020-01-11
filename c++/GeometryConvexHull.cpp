@@ -58,10 +58,10 @@ template<typename T> vector<Point<T> > convexHull (const vector<Point<T> > &poin
   const auto me = *it;
   for (auto& p : x) p -= me;
   x.erase (remove (x.begin (), x.end (), Point<T>()), x.end ());
-  sort (x.begin (), x.end (), [] (const auto& u, const auto &v) {
+  sort (x.begin (), x.end (), [] (const Point<T>& u, const Point<T>& v) {
     return u.cmpAngle (v);
   });
-  x.erase (unique (x.begin (), x.end (), [] (const auto &u, const auto &v) {
+  x.erase (unique (x.begin (), x.end (), [] (const Point<T>& u, const Point<T>& v) {
     return u.zeroCrossProduct (v);
   }), x.end ());
   h.emplace_back (0, 0);
