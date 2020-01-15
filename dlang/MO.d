@@ -1,73 +1,72 @@
 import std.algorithm;
-import std.conv;
-import std.math;
-import std.typecons;
+import std.array;
+import core.bitop;
+
+alias MoResult = int;
 
 struct MoQuery {
-  int u;
-  int v;
+  int u, v;//inclusive
+  MoResult res;
 }
 
-class MoRange(R) {
-  private:
+abstract class MoState {
+  public:
+  @property
+  abstract bool fastReset () const;
+  abstract void reset ();
+  //[l, r)
+  abstract void add (int l, int r);
+  abstract void del (int l, int r);
+  abstract MoResult result () const;
+}
+
+struct MoRange {
   int l, r;
-  final void move (MoQuery q) {
-    if (l > r || l > q.v || r < q.u) {
+  bool fastReset;
+  static immutable d = [3, 0, 0, 1];
+  static long hilbert (const int x, const int y, const int k, const int a) {
+    if (k < 0) return 0L;
+    immutable int m = ~(1 << k), o = 3 & (((x >> k) ^ 3 * (y >> k)) + a);
+    immutable long b = hilbert (x & m, y & m, k - 1, a + d[o]), ss = 1L << (2 * k);
+    return ss * o + (o == 1 || o == 2 ? b : (ss - (b + 1)));
+  }
+  static size_t[] makeIdx (in MoQuery[] queries, const int t) {
+    immutable nq = queries.length;
+    auto x = uninitializedArray!(long[])(nq);
+    foreach (i, const ref q; queries) {
+      x[i] = hilbert (q.u, q.v, t, 0);
+    }
+    auto idx = uninitializedArray!(size_t[])(nq);
+    makeIndex (x, idx);
+    return idx;
+  }
+  void move (MoState s, ref MoQuery q) {
+    if (l > r || (fastReset && (l > q.v || r < q.u))) {
       l = q.u;
-      r = q.u - 1;
-      clear ();
+      r = l - 1;
+      s.reset ();
     }
     if (r < q.v) {
-      add (r + 1, q.v + 1);
+      s.add (r + 1, q.v + 1);
       r = q.v;
     } else if (r > q.v) {
-      del (q.v + 1, r + 1);
+      s.del (q.v + 1, r + 1);
       r = q.v;
     }
     if (l > q.u) {
-      add (q.u, l);
+      s.add (q.u, l);
       l = q.u;
     } else if (l < q.u) {
-      del (l, q.u);
+      s.del (l, q.u);
       l = q.u;
     }
+    q.res = s.result ();
   }
-  protected:
-  abstract void clear ();
-  abstract void add (int a, int e);
-  abstract void del (int a, int e);
-  abstract R query () const;
-  public:
-  final R[] processQueries (in MoQuery[] queries) {
-    l = 0;
-    r = -1;
-    immutable nq = queries.length;
-    immutable n = queries.fold! ( (x, y) => max (x, y.v)) (int.min);
-    immutable k = max (1, (sqrt ((n+1).to!double) + 0.5).to!int);
-    alias P = Tuple!(int, int);
-    auto x = new P[nq];
-    foreach (int i, ref q; queries) {
-      int o = q.u / k;
-      if (o & 1) {
-        x[i][0] = (o << 20) - q.v;
-      } else {
-        x[i][0] = (o << 20) + q.v;
-      }
-      x[i][1] = i;
+  void processQueries (MoState s, MoQuery[] queries) {
+    l = 0; r = -1; fastReset = s.fastReset;
+    auto idx = makeIdx (queries, bsr (reduce!max(0, queries.map!(t => t.v)) + 1));
+    foreach (j; idx) {
+      move (s, queries[j]);
     }
-    x.sort!"a[0] < b[0]";
-    auto res = new R[nq];
-    foreach (i, ref p; x) {
-      int j = p[1];
-      move (queries[j]);
-      res[j] = query ();
-    }
-    return res;
-  }
-}
-
-unittest {
-  class MoTest : MoRange!int {
-  
   }
 }
