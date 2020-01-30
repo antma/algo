@@ -7,14 +7,15 @@ using namespace std;
 class BigInt {
   private:
   vector<short> v;
-  void incrementFrom (int k, int c) {
-    const int n = v.size ();
+  void incrementFrom (int k, short c) {
+    const int n = static_cast<int> (v.size ());
     for (; k < n && c; ++k) {
-      v[k] += c;
-      if (v[k] >= 10000) {
+      const int x = v[k] + c;
+      if (x >= 10000) {
         v[k] = 0;
         c = 1;
       } else {
+        v[k] = static_cast<short> (x);
         c = 0;
       }
     }
@@ -22,14 +23,15 @@ class BigInt {
       v.push_back (1);
     }
   }
-  void decrementFrom (int k, int c) {
-    const int n = v.size ();
+  void decrementFrom (int k, short c) {
+    const int n = static_cast<int> (v.size ());
     for (; k < n && c; ++k) {
-      v[k] -= c;
-      if (v[k] < 0) {
-        v[k] += 10000;
+      const int x = v[k] - c;
+      if (x < 0) {
+        v[k] = static_cast<short> (x + 10000);
         c = 1;
       } else {
+        v[k] = static_cast<short> (x);
         c = 0;
       }
     }
@@ -42,7 +44,7 @@ class BigInt {
   /*0 <= a < 10000 */
   BigInt (const string &s) {
     //int l = s.length ();
-    int i = s.length ();
+    int i = static_cast<int> (s.length ());
     while (i > 0) {
       int j = i - 4;
       if (j < 0) j = 0;
@@ -52,7 +54,7 @@ class BigInt {
       if (i > 1) d += (s[i-2] - '0') * 10;
       d += s[i-1] - '0';
       i = j;
-      v.push_back (d);
+      v.push_back (static_cast<short> (d));
     }
     if (v.empty ()) v.push_back (0);
   }
@@ -82,8 +84,8 @@ class BigInt {
       } else {
         c = 0;
       }
-      if (k < (int) v.size ()) v[k] = x;
-      else v.push_back (x);
+      if (k < (int) v.size ()) v[k] = static_cast<short> (x);
+      else v.push_back (static_cast<short> (x));
     }
     if (c > 0) {
       incrementFrom (k, 1);
@@ -91,26 +93,27 @@ class BigInt {
     return *this;
   }
   BigInt& operator*= (short a) {
-    int c = 0, n = v.size ();
+    int c = 0, n = static_cast<int> (v.size ());
     for (int i = 0; i < n; ++i) {
       c += ((int) a) * ((int) v[i]);
-      v[i] = c % 10000;
+      v[i] = static_cast<short> (c % 10000);
       c /= 10000;
     }
     if (c) {
-      v.push_back ((short) c);
+      v.push_back (static_cast<short> (c));
     }
     return *this;
   }
   BigInt& operator/= (short a) {
     int d = 0, k;
-    for (k = v.size() - 1; k >= 0; --k) {
+    const int n = static_cast<int> (v.size ());
+    for (k = n - 1; k >= 0; --k) {
       d *= 10000;
       d += v[k];
-      v[k] = d / a;
-      d -= v[k] * a;
+      v[k] = static_cast<short> (d / a);
+      d %= a;
     }
-    k = v.size ();
+    k = n;
     for (;;) {
       --k;
       if (!k) break;
@@ -121,7 +124,7 @@ class BigInt {
     return *this;
   }
   void print (ostream &o) const {
-    const int n = v.size();
+    const int n = static_cast<int> (v.size ());
     o << v[n-1];
     for(int i = n- 2;i >= 0; --i) {
       o.width (4);
