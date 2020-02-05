@@ -38,3 +38,27 @@ template <typename T, class O> class SegmentTree {
     build ();
   }
 };
+
+template <typename T> class SegmentTreeSliceIncrement {
+  vector<T> t;
+  size_t n;
+  public:
+  SegmentTreeSliceIncrement (size_t _n) : t (2 * _n, 0), n (_n) {}
+  void update (size_t l, size_t r, const T v) {
+    for (l += n, r += n; l < r; l >>= 1, r >>= 1) {
+      if (l & 1) {
+        t[l++] += v;
+      }
+      if (r & 1) {
+        t[--r] += v;
+      }
+    }
+  }
+  T operator[] (size_t index) const {
+    T res = 0;
+    for (index += n; index > 0; index >>= 1) {
+      res += t[index];
+    }
+    return res;
+  }
+};
