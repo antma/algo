@@ -83,9 +83,9 @@ vector<int> factors (const Factorization &c) {
 #include <cstdint>
 #include <cassert>
 #include <iostream>
-class Unittest {
+class PrimeTableUnittest {
   public:
-  Unittest() {
+  PrimeTableUnittest() {
     cerr << "Testing " << __FILE__ << endl;
     PrimeTable p (1000000);
     uint64_t s = 0;
@@ -107,5 +107,5 @@ class Unittest {
   }
 };
 
-Unittest unittest;
+PrimeTableUnittest primetable_unittest;
 
