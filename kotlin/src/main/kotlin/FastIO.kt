@@ -12,7 +12,7 @@ class FastScanner(private val input: InputStream) {
   private var n = 0
   private var pos = 0
   private var eof = false
-  fun read ():Boolean {
+  private fun read ():Boolean {
     if (eof) {
       return false
     }
@@ -22,6 +22,20 @@ class FastScanner(private val input: InputStream) {
       eof = true
     }
     return n > 0
+  }
+  private fun nextByte(): Byte {
+    if (pos >= n && !read ()) {
+      return 0
+    }
+    val r = b[pos]
+    ++pos
+    return r
+  }
+  private fun skipBlanks(): Byte {
+    while(true) {
+      val b = nextByte()
+      if(b > 33 || b < 1) return b
+    }
   }
   fun nextLine(k: Int = -1): String? {
     val sb = if(k >= 0) StringBuilder(k) else StringBuilder()
@@ -40,19 +54,19 @@ class FastScanner(private val input: InputStream) {
       sb.append(b.toChar())
     }
   }
-  fun nextByte(): Byte {
-    if (pos >= n && !read ()) {
-      return 0
+  fun nextToken(k: Int = -1): String {
+    val sb = if(k >= 0) StringBuilder(k) else StringBuilder()
+    var b = skipBlanks()
+    check(b > 0)
+    while(b > 33) {
+      sb.append(b.toChar())
+      b = nextByte()
     }
-    val r = b[pos]
-    ++pos
-    return r
+    return sb.toString()
   }
   fun nextInt():Int {
-    var b:Byte
-    do {
-      b = nextByte ()
-    } while (b <= 32)
+    var b = skipBlanks()
+    check(b > 0)
     if (b < 48) {
       var t = 0
       while (true) {
