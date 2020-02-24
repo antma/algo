@@ -1,6 +1,9 @@
 ## Binary Search
 - [Subset Sums](https://www.spoj.com/problems/SUBSUMS)
 
+## Convex Hull
+- [Wall](https://acm.timus.ru/problem.aspx?num=1185)
+
 ## DisjointSet
 - [Two Flowers](https://www.codechef.com/problems/TWOFL)
 - [The Value of Friendship](https://www.hackerrank.com/challenges/value-of-friendship/)
