@@ -87,4 +87,27 @@ class FastScanner(private val input: InputStream) {
       }
     }
   }
+  fun nextLong():Long {
+    var b = skipBlanks()
+    check(b > 0)
+    if (b < 48) {
+      var t = 0L
+      while (true) {
+        b = nextByte ()
+        if (b <= 32) {
+          return t
+        }
+        t = 10 * t - (b - 48)
+      }
+    } else {
+      var t = (b - 48).toLong()
+      while (true) {
+        b = nextByte ()
+        if (b <= 32) {
+          return t
+        }
+        t = 10 * t + (b - 48)
+      }
+    }
+  }
 }
