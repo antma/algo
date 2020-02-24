@@ -34,7 +34,7 @@ class FastScanner(private val input: InputStream) {
   private fun skipBlanks(): Byte {
     while(true) {
       val b = nextByte()
-      if(b > 33 || b < 1) return b
+      if(b > 32 || b < 1) return b
     }
   }
   fun nextLine(k: Int = -1): String? {
@@ -58,7 +58,7 @@ class FastScanner(private val input: InputStream) {
     val sb = if(k >= 0) StringBuilder(k) else StringBuilder()
     var b = skipBlanks()
     check(b > 0)
-    while(b > 33) {
+    while(b > 32) {
       sb.append(b.toChar())
       b = nextByte()
     }
