@@ -10,9 +10,7 @@ class IntQueue(bits: Int) {
     right = 0
   }
   fun add (x: Int) {
-    if (left < right && (((right xor left) and mask) == 0)) {
-      throw IllegalStateException("queue overflow")
-    }
+    check((((right xor left) and mask) != 0) || left == right){"queue overflow"}
     q[(right++) and mask] = x
   }
   fun isEmpty() = left == right
