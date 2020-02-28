@@ -38,6 +38,24 @@ class PrimeTable {
   }
 };
 
+vector<int> sieveArray (int n) {
+  int i;
+  vector<int> a (n);
+  for (i = 1; i < n; ++i) {
+    a[i] = (i & 1) ? i : 2;
+  }
+  for (i = 3; i * i < n; i += 2) {
+    if (a[i] == i) {
+      for (int o = i * i; o < n; o += 2 * i) {
+        if (a[o] == o) {
+          a[o] = i;
+        }
+      }
+    }
+  }
+  return a;
+}
+
 using Factorization = vector<pair<int, int> >;
 // x = prod_{i=0..k-1} r[i].first ^ r[i].second
 Factorization factorization (const vector<int> &primes, int x) {
@@ -57,6 +75,28 @@ Factorization factorization (const vector<int> &primes, int x) {
     a.emplace_back (x, 1);
   }
   return a;
+}
+
+Factorization factorizationSieveArray (int x, const vector<int> &sa) {
+  Factorization f;
+  int last = 0, c;
+  while (x > 1) {
+    int p = sa[x];
+    if (last != p) {
+      if (last) {
+        f.push_back (make_pair (last, c));
+      }
+      c = 1;
+      last = p;
+    } else {
+      ++c;
+    }
+    x /= p;
+  }
+  if (last) {
+    f.push_back (make_pair (last, c));
+  }
+  return f;
 }
 
 void factors_rec (int y, const Factorization &c, size_t depth, vector<int> &o) {
