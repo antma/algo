@@ -1,14 +1,15 @@
 #include <cassert>
 #include <vector>
+#include <numeric>
 
 using namespace std;
 
 template<class T> class Heap {
   private:
-    vector<T> a;
-    vector<int> h, g;
     int n;
     int size;
+    vector<T> a;
+    vector<int> h, g;
   void heapifyFront (int k) {
     const int he = h[k];
     int i = k, j = i << 1;
@@ -51,6 +52,13 @@ template<class T> class Heap {
     g[i] = size;
     heapifyBack (size);
   }
+  void erase (int pos) {
+    if (pos <= --size) {
+      h[pos] = h[size+1];
+      g[h[pos]] = pos;
+      heapifyFront (pos);
+    }
+  }
   public:
   void decreaseKey (int k, T value) {
     assert (k >= 0 && k < n);
@@ -64,16 +72,37 @@ template<class T> class Heap {
       heapifyBack (pos);
     }
   }
+  int pollMin () const {
+    return h[1];
+  }
   int extractMin () {
     assert (size > 0);
     const int he = h[1];
     g[he] = -1;
-    h[1] = h[size--];
-    g[h[1]] = 1;
-    if (size) {
-      heapifyFront (1);
-    }
+    erase (1);
     return he;
+  }
+  bool removeKey (int k) {
+    assert (k >= 0 && k < n);
+    const int pos = g[k];
+    if (pos < 0) return false;
+    g[k] = -1;
+    erase (pos);
+    return true;
+  }
+  void updateKey (int k, T value) {
+    assert (k >= 0 && k < n);
+    const int pos = g[k];
+    if (pos < 0) {
+      a[k] = value;
+      insert (k);
+    } else if (value < a[k]) {
+      a[k] = value;
+      heapifyBack (pos);
+    } else if (value > a[k]) {
+      a[k] = value;
+      heapifyFront (pos);
+    }
   }
 
   T operator[] (int index) const {
@@ -82,11 +111,19 @@ template<class T> class Heap {
 
   inline bool empty () const { return size == 0; }
 
-  Heap (int n_, T default_value) {
-    n = n_;
-    size = 0;
-    a.assign (n, default_value);
-    h.assign (n + 1, 0);
-    g.assign (n, -1);
+  Heap (int _n, T default_value, bool empty = true) :
+    n (_n),
+    a (n, default_value),
+    h (n + 1),
+    g (n)
+  {
+    if (empty) {
+      size = 0;
+      fill (g.begin (), g.end (), -1);
+    } else {
+      size = n;
+      iota (h.begin () + 1, h.end (), 0);
+      iota (g.begin (), g.end (), 1);
+    }
   }
 };
