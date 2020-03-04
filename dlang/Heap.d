@@ -113,6 +113,108 @@ final class Heap(T) {
   }
 }
 
+final class ImplicitKeyHeap(alias less) {
+  private:
+    int[] h, g;
+    int n, size;
+  pure nothrow @nogc
+  void heapifyFront (const int k) {
+    const he = h[k];
+    int i = k, j = i << 1;
+    while (j <= size) {
+      if (j < size && binaryFun!less (h[j+1], h[j])) {
+        j++;
+      }
+      if (!binaryFun!less (h[j], he)) {
+        break;
+      }
+      h[i] = h[j];
+      g[h[i]] = i;
+      i = j;
+      j = i << 1;
+    }
+    if (i != k) {
+      h[i] = he;
+      g[he] = i;
+    }
+  }
+  pure nothrow @nogc
+  void heapifyBack (const int k) {
+    const he = h[k];
+    int i = k;
+    while (i > 1) {
+      int j = i >> 1;
+      if (!binaryFun!less (he, h[j])) {
+        break;
+      }
+      h[i] = h[j];
+      g[h[i]] = i;
+      i = j;
+    }
+    if (i != k) {
+      h[i] = he;
+      g[he] = i;
+    }
+  }
+  pure nothrow @nogc
+  void insert (const int i) {
+    h[++size] = i;
+    g[i] = size;
+    heapifyBack (size);
+  }
+  pure nothrow @nogc
+  void erase (const int pos) {
+    if (pos <= --size) {
+      const he = h[pos];
+      h[pos] = h[size+1];
+      g[h[pos]] = pos;
+      if (binaryFun!less (he, h[pos])) {
+        heapifyFront (pos);
+      } else if (binaryFun!less (h[pos], he)) {
+        heapifyBack (pos);
+      }
+    }
+  }
+  public:
+  pure nothrow @nogc
+  int extractMin () {
+    assert (size > 0);
+    const int he = h[1];
+    g[he] = 0;
+    erase (1);
+    return he;
+  }
+  pure nothrow @nogc
+  void insertKey (const int key) {
+    assert (key >= 0 && key < n);
+    assert (g[key] == 0);
+    insert (key);
+  }
+  pure nothrow @nogc
+  void removeKey (const int key) {
+    assert (key >= 0 && key < n);
+    int pos = g[key];
+    assert (pos > 0);
+    g[key] = 0;
+    erase (pos);
+  }
+
+  @property pure nothrow @nogc
+  bool empty () const { return size == 0; }
+
+  @property pure nothrow @nogc
+  int min () const {
+    assert (size > 0);
+    return h[1];
+  }
+
+  this (int _n) {
+    n = _n;
+    h = uninitializedArray!(int[])(n + 1);
+    g = new int[n];
+  }
+}
+
 unittest {
   import std.stdio, std.conv, std.algorithm;
   writeln ("Testing ", __FILE__, " ...");
