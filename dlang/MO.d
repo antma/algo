@@ -15,8 +15,10 @@ abstract class MoState {
   abstract bool fastReset () const;
   abstract void reset ();
   //[l, r)
-  abstract void add (int l, int r);
-  abstract void del (int l, int r);
+  abstract void addLeft (int l, int r);
+  abstract void addRight (int l, int r);
+  abstract void delLeft (int l, int r);
+  abstract void delRight (int l, int r);
   abstract MoResult result () const;
 }
 
@@ -41,23 +43,31 @@ struct MoRange {
     return idx;
   }
   void move (MoState s, ref MoQuery q) {
-    if (l > r || (fastReset && (l > q.v || r < q.u))) {
+    if (l > r) {
       l = q.u;
       r = l - 1;
       s.reset ();
+    } else if (l > q.v || r < q.u) {
+      if (fastReset) {
+        s.reset ();
+      } else {
+        s.delLeft (l, r + 1);
+      }
+      l = q.u;
+      r = l - 1;
     }
     if (r < q.v) {
-      s.add (r + 1, q.v + 1);
+      s.addRight (r + 1, q.v + 1);
       r = q.v;
     } else if (r > q.v) {
-      s.del (q.v + 1, r + 1);
+      s.delRight (q.v + 1, r + 1);
       r = q.v;
     }
     if (l > q.u) {
-      s.add (q.u, l);
+      s.addLeft (q.u, l);
       l = q.u;
     } else if (l < q.u) {
-      s.del (l, q.u);
+      s.delLeft (l, q.u);
       l = q.u;
     }
     q.res = s.result ();
