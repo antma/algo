@@ -54,16 +54,21 @@ template<class T> class Heap {
   }
   void erase (int pos) {
     if (pos <= --size) {
+      const int he = h[pos];
       h[pos] = h[size+1];
       g[h[pos]] = pos;
-      heapifyFront (pos);
+      if (a[he] < h[pos]) {
+        heapifyFront (pos);
+      } else if (a[h[pos]] < a[he]) {
+        heapifyBack (pos);
+      }
     }
   }
   public:
   void decreaseKey (int k, T value) {
     assert (k >= 0 && k < n);
     int pos = g[k];
-    if (pos < 0) {
+    if (pos == 0) {
       a[k] = value;
       insert (k);
     } else {
@@ -78,22 +83,22 @@ template<class T> class Heap {
   int extractMin () {
     assert (size > 0);
     const int he = h[1];
-    g[he] = -1;
+    g[he] = 0;
     erase (1);
     return he;
   }
   bool removeKey (int k) {
     assert (k >= 0 && k < n);
     const int pos = g[k];
-    if (pos < 0) return false;
-    g[k] = -1;
+    if (pos == 0) return false;
+    g[k] = 0;
     erase (pos);
     return true;
   }
   void updateKey (int k, T value) {
     assert (k >= 0 && k < n);
     const int pos = g[k];
-    if (pos < 0) {
+    if (pos == 0) {
       a[k] = value;
       insert (k);
     } else if (value < a[k]) {
@@ -119,7 +124,7 @@ template<class T> class Heap {
   {
     if (empty) {
       size = 0;
-      fill (g.begin (), g.end (), -1);
+      fill (g.begin (), g.end (), 0);
     } else {
       size = n;
       iota (h.begin () + 1, h.end (), 0);
