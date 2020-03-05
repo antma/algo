@@ -17,7 +17,7 @@ template<class T> class Heap {
       if (j < size && a[h[j+1]] < a[h[j]]) {
         j++;
       }
-      if (a[h[j]] >= a[he]) {
+      if (!(a[h[j]] < a[he])) {
         break;
       }
       h[i] = h[j];
@@ -35,7 +35,7 @@ template<class T> class Heap {
     int i = k;
     while (i > 1) {
       int j = i >> 1;
-      if (a[he] >= a[h[j]]) {
+      if (!(a[he] < a[h[j]])) {
         break;
       }
       h[i] = h[j];
@@ -57,7 +57,7 @@ template<class T> class Heap {
       const int he = h[pos];
       h[pos] = h[size+1];
       g[h[pos]] = pos;
-      if (a[he] < h[pos]) {
+      if (a[he] < a[h[pos]]) {
         heapifyFront (pos);
       } else if (a[h[pos]] < a[he]) {
         heapifyBack (pos);
