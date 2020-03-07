@@ -296,6 +296,7 @@ final class ImplicitKeyTreap(Value, Extra=void, alias relax_op="", alias push_op
       t = p;
       _relax (t);
     } else {
+      static if (has_push) if (t) push_op (t);
       int ls;
       if (t.left) ls = t.left.sz;
       if (pos <= ls) {
@@ -362,11 +363,12 @@ final class ImplicitKeyTreap(Value, Extra=void, alias relax_op="", alias push_op
     }
   }
 
-  private static inout(Node*) _get (inout(Node*) t, int pos) in {
+  private static Node* _get (Node* t, int pos) in {
     assert (pos >= 0);
     assert (pos < _size (t));
     assert (t);
   } body {
+    static if (has_push) push_op (t);
     if (t.left) {
       if (pos < t.left.sz) {
         return _get (t.left, pos);
@@ -412,7 +414,7 @@ final class ImplicitKeyTreap(Value, Extra=void, alias relax_op="", alias push_op
     _replace (root, pos, value);
   }
 
-  Value get (int pos) const in {
+  Value get (int pos) in {
     assert (pos < size ());
   } body {
     return _get (root, pos).value;
