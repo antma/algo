@@ -1,10 +1,10 @@
 //Origin: https://codeforces.com/blog/entry/17507
-#include <vector>
 #include <algorithm>
-#include <random>
 #include <cstdint>
 #include <ctime>
 #include <random>
+#include <utility>
+#include <vector>
 
 using namespace std;
 
@@ -44,10 +44,12 @@ class PolyHash {
   const string::size_type n;
   vector<HashT> h, d;
   public:
-  PolyHash (const string s, mt19937 &rnd) : n (s.size ()), h (n + 1), d (n + 1) {
-    auto n = s.size ();
+  static pair<int, int> randomBase (mt19937 &rnd) {
     uniform_int_distribution<int> uid (256, 0x7fffffff);
-    const HashT p (uid (rnd), uid (rnd));
+    return { uid (rnd), uid (rnd) };
+  }
+  PolyHash (const string s, pair<int, int> base) : n (s.size ()), h (n + 1), d (n + 1) {
+    const HashT p (base.first, base.second);
     h[0] = HashT (0, 0);
     d[0] = HashT (1, 1);
     for (unsigned i = 0; i < n; ++i) {
