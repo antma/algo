@@ -63,3 +63,66 @@ template<typename T> class LazyPropagationMinIncrement {
     d (n, T (0))
   {}
 };
+
+template<typename T> class LazyPropagationSumIncrement {
+  const int n, h;
+  vector<T> t, d;
+
+  void calc (int p, int k) {
+    t[p] = t[p<<1] + t[(p<<1) | 1] + k * d[p];
+  }
+
+  void apply (int p, T value, int k) {
+    t[p] += value * k;
+    if (p < n) d[p] += value;
+  }
+
+  void build (int l, int r) {
+    int k = 2;
+    for (l += n, r += n - 1; l > 1; k <<= 1) {
+      l >>= 1;
+      r >>= 1;
+      for (int i = r; i >= l; --i) calc (i, k);
+    }
+  }
+
+  void push (int l, int r) {
+    int s = h, k = 1 << (h-1);
+    for (l += n, r += n - 1; s > 0; --s, k >>= 1) {
+      for (int i = l >> s; i <= r >> s; ++i) if (d[i] != 0) {
+        apply (i<<1, d[i], k);
+        apply ((i<<1) | 1, d[i], k);
+        d[i] = 0;
+      }
+    }
+  }
+
+  public:
+  void increment (int l, int r, T value) {
+    if (value == 0) return;
+    push (l, l + 1);
+    push (r - 1, r);
+    int l0 = l, r0 = r, k = 1;
+    for (l += n, r += n; l < r; l >>= 1, r >>= 1, k <<= 1) {
+      if (l & 1) apply (l++, value, k);
+      if (r & 1) apply (--r, value, k);
+    }
+    build (l0, l0 + 1);
+    build (r0 - 1, r0);
+  }
+  T sum (int l, int r) {
+    push (l, l + 1);
+    push (r - 1, r);
+    T res = 0;
+    for (l += n, r += n; l < r; l >>= 1, r >>= 1) {
+      if (l & 1) res += t[l++];
+      if (r & 1) res += t[--r];
+    }
+    return res;
+  }
+  LazyPropagationSumIncrement (int _n) :
+    n (_n), h (static_cast<int> (sizeof(int) * 8 - __builtin_clz (n))),
+    t (2 * n, T (0)),
+    d (n, T (0))
+  {}
+};
