@@ -21,7 +21,7 @@ struct HashT {
     return (x < y) ? (r + m) : r;
   }
   static inline uint32_t mulm (const uint32_t x, const uint32_t y, const uint32_t m) {
-    return (static_cast<uint64_t>(x) * y) % m;
+    return static_cast<uint32_t>((static_cast<uint64_t>(x) * y) % m);
   }
   HashT operator+ (const HashT rhs) const {
     return HashT (addm (r1, rhs.r1, p1), addm (r2, rhs.r2, p2));
