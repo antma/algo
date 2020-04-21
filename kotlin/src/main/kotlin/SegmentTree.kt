@@ -30,3 +30,28 @@ class IntSegmentTree(a: IntArray, private val op: (Int, Int) -> Int, private val
     return res
   }
 }
+
+class IntSegmentTreeSliceIncrement(val n: Int) {
+  private val t = IntArray(2 * n) { 0 }
+  fun update(l0: Int, r0: Int, v: Int) {
+    if (l0 < r0) {
+      var l = l0 + n
+      var r = r0 + n
+      while(l < r) {
+        if (0 != l and 1) t[l++] += v
+        l = l ushr 1
+        if (0 != r and 1) t[--r] += v;
+        r = r ushr 1
+      }
+    }
+  }
+  operator fun get(index: Int): Int {
+    var res = 0
+    var i = index + n
+    while (i > 0) {
+      res += t[i]
+      i = i ushr 1
+    }
+    return res
+  }
+}
