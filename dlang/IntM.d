@@ -111,7 +111,7 @@ struct IntM(int q = 1_000_000_007) {
   }
   pure nothrow
   string toString() const { return v.text; }
-  //a ^ x = this (mod q)
+  //a ^ x = this (mod q), q - prime
   pure
   int discreteLogarithm (in N a) const {
     immutable int n = ceil (sqrt (q.to!double)).to!int;
@@ -119,7 +119,6 @@ struct IntM(int q = 1_000_000_007) {
     int[int] h;
     N cur = an;
     foreach (p; 1 .. n + 1) {
-      auto ptr = cur.v !in h;
       if (cur.v !in h) {
         h[cur.v] = p;
       }
