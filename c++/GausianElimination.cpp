@@ -19,8 +19,9 @@ vector<double> linsolve (vector<vector<double> >& a, vector<double>& b, const do
     for (auto x = i; x < n; ++x) {
       const auto k = p[x];
       for (auto l = j; l < m; ++l) {
-        if (v < abs (a[l][k])) {
-          v = abs (a[l][k]);
+        const double w = abs (a[l][k]);
+        if (v < w) {
+          v = w;
           bi = x;
           bj = l;
         }
@@ -34,11 +35,13 @@ vector<double> linsolve (vector<vector<double> >& a, vector<double>& b, const do
       swap (a[j], a[bj]);
       swap (b[j], b[bj]);
     }
-    v = 1.0 / a[j][p[i]];
+    const auto& c = a[j];
+    v = 1.0 / c[p[i]];
     for (auto l = j + 1; l < m; ++l) {
-      double w = v * a[l][p[i]];
+      const double w = v * a[l][p[i]];
+      auto& d = a[l];
       for (auto k = i; k < n; ++k) {
-        a[l][p[k]] -= a[j][p[k]] * w;
+        d[p[k]] -= c[p[k]] * w;
       }
       b[l] -= b[j] * w;
     }
