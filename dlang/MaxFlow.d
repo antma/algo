@@ -45,8 +45,8 @@ final class PushRelabelMaxFlowGraph(C,E) {
     }
     h[0] = n;
     foreach (ref p; edges[0]) {
-      immutable i = p.v;
-      if (!e[i] && i && i < n - 1) {
+      const i = p.v;
+      if (i && i < n - 1 && !e[i]) {
         insert (0, i);
       }
       e[i] += p.f = p.c;
@@ -55,9 +55,8 @@ final class PushRelabelMaxFlowGraph(C,E) {
     gc[0] = n - 1;
   }
   void push (int i, ref Edge edge) {
-    immutable j = edge.v;
-    E d = edge.c - edge.f;
-    if (d > e[i]) d = e[i];
+    const E d = min (e[i], edge.c - edge.f);
+    const j = edge.v;
     edge.f += d;
     edges[j][edge.e].f = -edge.f;
     e[i] -= d;
@@ -73,7 +72,6 @@ final class PushRelabelMaxFlowGraph(C,E) {
     h[i] = m + 1;
   }
   void discharge (int i) {
-    //int nh = INT_MAX;
     while (e[i] > 0) {
       if (current[i].empty) {
         current[i] = edges[i];
@@ -104,12 +102,12 @@ final class PushRelabelMaxFlowGraph(C,E) {
           }
         }
       } else {
-        auto p = &current[i][0];
-        immutable j = p.v;
+        auto p = &current[i].front;
+        const j = p.v;
         if (h[i] == h[j] + 1 && p.f < p.c) {
-          immutable aj = e[j] > 0;
+          const aj = e[j] <= 0;
           push (i, *p);
-          if (!aj && j && j < n - 1 && e[j] > 0) {
+          if (aj && j && j < n - 1 && e[j] > 0) {
             insert (maxh - 1, j);
             if (nl[maxh] != maxh - 1) {
               nl[maxh-1] = nl[maxh];
@@ -130,7 +128,7 @@ final class PushRelabelMaxFlowGraph(C,E) {
   }
   public:
   void addEdge (int i, int j, C w1, C w2) {
-    immutable ei = edges[i].length.to!int, ej = edges[j].length.to!int;
+    const ei = edges[i].length.to!int, ej = edges[j].length.to!int;
     edges[i] ~= Edge (w1, j, ej);
     edges[j] ~= Edge (w2, i, ei);
   }
@@ -138,7 +136,7 @@ final class PushRelabelMaxFlowGraph(C,E) {
   this (int _n) {
     n = _n;
     edges = new Edge[][n];
-    current = new Edge[][n];
+    current = uninitializedArray!(Edge[][])(n);
     h = new int[n];
     nl = uninitializedArray!(int[]) (n);
     nl[] = -1;
@@ -148,9 +146,7 @@ final class PushRelabelMaxFlowGraph(C,E) {
   }
   E maxFlow () {
     initPreflow ();
-    foreach (i; 1 .. n - 1) {
-      current[i] = edges[i];
-    }
+    current[1 .. n - 1][] = edges[1 .. n - 1][];
     maxh = 0;
     while (maxh >= 0) {
       int v = dl[maxh + n].next;
@@ -159,7 +155,7 @@ final class PushRelabelMaxFlowGraph(C,E) {
       }
       discharge (v);
     }
-    return e[n-1];
+    return e.back;
   }
 }
 
