@@ -1,3 +1,4 @@
+//LIS, Kadane
 //generic algorithms on integral sequences
 import std.algorithm;
 import std.range;
@@ -5,18 +6,18 @@ import std.typecons;
 import std.traits;
 
 //LIS
-int longestIncreasingSequenceLength(R, bool strict=true) (R range)
+size_t longestIncreasingSequenceLength(R, bool strict=true) (R range)
   if (isInputRange!R && isIntegral!(ElementType!R) && hasLength!R) {
   alias T = ElementType!R;
-  auto p = new T[range.length];
-  int m = 1;
+  auto p = new T[range.length + 2];
+  size_t m = 1;
   p[0] = T.min;
   p[1] = T.max;
   foreach (i; range) {
     static if (strict) {
-      immutable j = i;
+      const j = i;
     } else {
-      immutable j = i + 1;
+      const j = i + 1;
     }
     auto k = p[0 .. m].assumeSorted.lowerBound (j).length;
     if (i < p[k]) {
@@ -40,13 +41,15 @@ long maximumSubArraySum(R) (R range) if (isInputRange!R && isIntegral!(ElementTy
     if (t.cur < 0) t.cur = 0;
     return t;
   }
-  return reduce!next (tuple!("best", "cur") (long.min, 0L), range).best;
+  return reduce!next (S (long.min, 0L), range).best;
 }
 
 unittest {
   import std.stdio;
   writeln ("Testing ", __FILE__, " ...");
   assert (longestIncreasingSequenceLength ([2, 7, 4, 3, 8]) == 3);
+  assert (longestIncreasingSequenceLength ([3, 2, 1]) == 1);
+  assert (longestIncreasingSequenceLength ([1, 2, 3]) == 3);
   assert (maximumSubArraySum ([5, -2 , 1]) == 5L);
 }
 
