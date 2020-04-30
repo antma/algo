@@ -35,9 +35,12 @@ final class PolyHash {
   private:
   HashT[] h, d;
   public:
-  this (in string s) {
+  static HashT randomBase () {
+    return HashT (uniform (256, int.max), uniform (256, int.max));
+  }
+  this (in string s, in HashT p) {
     immutable n = s.length.to!int;
-    auto p = HashT (uniform (256, int.max), uniform (256, int.max));
+    //auto p = HashT (uniform (256, int.max), uniform (256, int.max));
     h = uninitializedArray!(HashT[]) (n + 1);
     d = uninitializedArray!(HashT[]) (n + 1);
     h[0] = HashT (0, 0);
