@@ -95,7 +95,7 @@ struct IntM(int q = 1_000_000_007) {
   }
   pure nothrow @nogc
   N opBinary (string op : "^^")(in ulong rhs) const {
-    return genericPower! ("a * b", N, ulong) (this, rhs);
+    return genericPower! ("a * b", N, ulong) (this, rhs, N (1));
   }
   pure nothrow @nogc
   int opCast(T : int)() const { return v; }

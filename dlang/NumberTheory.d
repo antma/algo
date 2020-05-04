@@ -25,14 +25,20 @@ T gcdext(T) (T a, T b, ref T x, ref T y) {
 }
 
 pure
-X genericPower(alias mul, X, Y) (X x, Y y, X one = 1.to!X)
-  if (isUnsigned!Y) {
-  X a = one, b = x;
-  while (y > 0) {
+X genericPower(alias mul, X, Y) (X x, Y y, X one) if (isUnsigned!Y) {
+  if (!y) return one;
+  X b = x;
+  while (!(y & 1)) {
+    b = binaryFun!mul (b, b);
+    y >>>= 1;
+  }
+  X a = b;
+  y >>>= 1;
+  while (y) {
+    b = binaryFun!mul (b, b);
     if (y & 1) {
       a = binaryFun!mul (a, b);
     }
-    b = binaryFun!mul (b, b);
     y >>>= 1;
   }
   return a;
@@ -284,7 +290,7 @@ final class PrimalityTest32 {
   private static bool witness (uint a, uint n) {
     immutable n1 = n - 1;
     immutable m = bsf (n1);
-    uint x = genericPower!( (a, b) => ((a.to!ulong * b) % n).to!uint, uint, uint) (a, n1 >>> m);
+    uint x = genericPower!( (a, b) => ((a.to!ulong * b) % n).to!uint, uint, uint) (a, n1 >>> m, 1U);
     foreach (i; 0 .. m) {
       uint y = (x.to!ulong * x) % n;
       if (y == 1 && x != 1 && x != n1) {
