@@ -62,8 +62,8 @@ Point!T[] convexHull(T) (const Point!(T)[] v) {
   if (v.empty) {
     return x;
   }
-  immutable me = x.enumerate.minElement!"a.value";
-  x.length -= x.filter!(a => a != me.value).map!(a => a - me.value).copy(x).length;
+  immutable me = minElement (x);
+  x.length -= x.filter!(a => a != me).map!(a => a - me).copy(x).length;
   x.sort!(cmpAngle);
   x.length -= x.uniq! ((a, b) => !tcmp (a.y * b.x, b.y * a.x)).copy (x).length;
   h ~= Point!T (0, 0);
@@ -83,7 +83,7 @@ Point!T[] convexHull(T) (const Point!(T)[] v) {
     ++m;
   }
   foreach (i; 0 .. m) {
-    h[i] += me.value;
+    h[i] += me;
   }
   return h[0 .. m].dup;
 }
