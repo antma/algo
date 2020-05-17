@@ -53,6 +53,19 @@ final class Heap(T) {
     g[i] = size;
     heapifyBack (size);
   }
+  pure nothrow @nogc
+  void erase (int pos) {
+    if (pos <= --size) {
+      const int he = h[pos];
+      h[pos] = h[size+1];
+      g[h[pos]] = pos;
+      if (a[he] < a[h[pos]]) {
+        heapifyFront (pos);
+      } else if (a[h[pos]] < a[he]) {
+        heapifyBack (pos);
+      }
+    }
+  }
   public:
   pure nothrow @nogc
   void decreaseKey (int k, T value) in {
@@ -68,7 +81,16 @@ final class Heap(T) {
     }
   }
   pure nothrow @nogc
-  void update (int k, T value) in {
+  bool removeKey (int k) {
+    assert (k >= 0 && k < n);
+    const int pos = g[k];
+    if (!pos) return false;
+    g[k] = 0;
+    erase (pos);
+    return true;
+  }
+  pure nothrow @nogc
+  void updateKey (int k, T value) in {
     assert (k >= 0 && k < n);
   } body {
     immutable pos = g[k];
@@ -84,15 +106,12 @@ final class Heap(T) {
     }
   }
   pure nothrow @nogc
-  int extractMin () {
+  int extractMin () in {
     assert (size > 0);
-    immutable he = h[1];
+  } body {
+    const he = h[1];
     g[he] = 0;
-    if (--size) {
-      h[1] = h[size+1];
-      g[h[1]] = 1;
-      heapifyFront (1);
-    }
+    erase (1);
     return he;
   }
   pure nothrow @nogc
@@ -103,12 +122,12 @@ final class Heap(T) {
   @property pure nothrow @nogc
   bool empty () const { return size == 0; }
 
-  this (int n_, T default_value = T.init) {
-    n = n_;
+  this (int _n, T default_value = T.init) {
+    n = _n;
     size = 0;
     a = uninitializedArray! (T[]) (n);
     a[] = default_value;
-    h = new int[n+1];
+    h = uninitializedArray! (int[]) (n + 1);
     g = new int[n];
   }
 }
@@ -220,13 +239,13 @@ unittest {
   writeln ("Testing ", __FILE__, " ...");
   auto h = new Heap!int (5, 239);
   assert (h.empty);
-  h.update (0, 10);
+  h.updateKey (0, 10);
   int i = h.extractMin;
   assert (i == 0);
   assert (h.empty);
-  h.update (4, 8);
-  h.update (1, 7);
-  h.update (2, 9);
+  h.updateKey (4, 8);
+  h.updateKey (1, 7);
+  h.updateKey (2, 9);
   i = h.extractMin;
   assert (i == 1);
   i = h.extractMin;
