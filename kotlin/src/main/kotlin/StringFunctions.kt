@@ -1,5 +1,21 @@
 import kotlin.math.min
 
+fun computePrefixFunction(s: String): IntArray {
+  val n = s.length
+  val p = IntArray(n)
+  var k = 0
+  for (q in 1 until n) {
+    while (k > 0 && s[k] != s[q]) {
+      k = p[k-1]
+    }
+    if (s[k] == s[q]) {
+      ++k
+    }
+    p[q] = k
+  }
+  return p
+}
+
 fun computeZFunction(s: String): IntArray {
   val n = s.length
   val z = IntArray(n)
