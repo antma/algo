@@ -1,3 +1,6 @@
+import scala.annotation.tailrec
+import scala.collection.mutable.StringBuilder
+
 object FastScanner {
   val zero = 0.toByte
   val cr = '\r'.toByte
@@ -34,6 +37,16 @@ class FastScanner(private val input: java.io.InputStream) {
   private def skipBlanks(): Byte = {
     val b = nextByte()
     if(b > 32 || b < 1) b else skipBlanks()
+  }
+  def nextToken(k: Int = -1): String = {
+    val sb = if(k >= 0) new StringBuilder(k) else new StringBuilder()
+    var b = skipBlanks()
+    assert(b > 0)
+    while(b > 32) {
+      sb.append(b.toChar)
+      b = nextByte()
+    }
+    sb.toString
   }
   def nextInt():Int = {
     val b = skipBlanks()
