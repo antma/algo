@@ -58,4 +58,14 @@ class FastScanner(private val input: java.io.InputStream) {
     require(b > 0)
     if (b < 48) -f(0) else f(b - 48)
   }
+  def nextLong():Long = {
+    val b = skipBlanks()
+    @tailrec
+    def f(t: Long): Long = {
+      val b = nextByte ()
+      if (b <= 32) t else f(10 * t + (b - 48))
+    }
+    require(b > 0)
+    if (b < 48) -f(0) else f(b - 48)
+  }
 }
