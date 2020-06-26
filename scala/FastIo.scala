@@ -48,6 +48,22 @@ class FastScanner(private val input: java.io.InputStream) {
     }
     sb.toString
   }
+  def nextDouble(): Double = {
+    @tailrec
+    def g(t: Double, x: Double): Double = {
+      val b = nextByte ()
+      if (b <= 32) t * x else g(10 * t + (b - 48), x * 0.1)
+    }
+    @tailrec
+    def f(t: Double): Double = {
+      val b = nextByte ()
+      if(b == 46) g(t, 1.0)
+      else if (b <= 32) t else f(10 * t + (b - 48))
+    }
+    val b = skipBlanks()
+    require(b > 0)
+    if (b < 48) -f(0) else f(b - 48)
+  }
   def nextInt():Int = {
     val b = skipBlanks()
     @tailrec
