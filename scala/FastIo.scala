@@ -38,7 +38,7 @@ class FastScanner(private val input: java.io.InputStream) {
     val b = nextByte()
     if(b > 32 || b < 1) b else skipBlanks()
   }
-  def nextToken(k: Int = -1): String = {
+  final def nextToken(k: Int = -1): String = {
     val sb = if(k >= 0) new StringBuilder(k) else new StringBuilder()
     var b = skipBlanks()
     assert(b > 0)
@@ -48,7 +48,7 @@ class FastScanner(private val input: java.io.InputStream) {
     }
     sb.toString
   }
-  def nextDouble(): Double = {
+  final def nextDouble(): Double = {
     @tailrec
     def g(t: Double, x: Double): Double = {
       val b = nextByte ()
@@ -64,7 +64,7 @@ class FastScanner(private val input: java.io.InputStream) {
     require(b > 0)
     if (b < 48) -f(0) else f(b - 48)
   }
-  def nextInt():Int = {
+  final def nextInt():Int = {
     val b = skipBlanks()
     @tailrec
     def f(t: Int): Int = {
@@ -74,7 +74,7 @@ class FastScanner(private val input: java.io.InputStream) {
     require(b > 0)
     if (b < 48) -f(0) else f(b - 48)
   }
-  def nextLong():Long = {
+  final def nextLong():Long = {
     val b = skipBlanks()
     @tailrec
     def f(t: Long): Long = {
