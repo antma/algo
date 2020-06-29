@@ -1,3 +1,5 @@
+package org.github.antma.cpalgo
+
 import scala.annotation.tailrec
 import scala.collection.mutable.StringBuilder
 

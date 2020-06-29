@@ -1,3 +1,5 @@
+package org.github.antma.cpalgo
+
 object Gcd {
   def gcdext (a: Int, b: Int): (Int, Int, Int) = {
     if (b == 0) (a, 1, 0)

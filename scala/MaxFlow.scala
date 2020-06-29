@@ -1,3 +1,5 @@
+package org.github.antma.cpalgo
+
 //0 - sink, (n - 1) - target
 class MaxFlow (_n: Int) {
   type EdgeCost = Int
@@ -9,7 +11,7 @@ class MaxFlow (_n: Int) {
   val e = Array.fill (n) (0)
   val current = Array.ofDim[List[Int]] (n)
 
-  def addEdge (i: Int, j: Int, w: EdgeCost) = {
+  def addEdge (i: Int, j: Int, w: EdgeCost): Unit = {
     c(i)(j) = w
   }
 
@@ -19,7 +21,7 @@ class MaxFlow (_n: Int) {
     }
   }
 
-  private def initPreflow () = {
+  private def initPreflow (): Unit = {
     h(0) = n
     for (i <- edges(0)) {
       f(0)(i) = c(0)(i)
@@ -27,7 +29,7 @@ class MaxFlow (_n: Int) {
       e(i) = c(0)(i)
     }
   }
-  private def push (i: Int, j: Int) = {
+  private def push (i: Int, j: Int): Unit = {
     val d = e(i).min (c(i)(j) - f(i)(j))
     f(i)(j) += d
     f(j)(i) = -f(i)(j)
@@ -56,7 +58,7 @@ class MaxFlow (_n: Int) {
     initPreflow ()
     val next = Array.ofDim[Int] (n)
     val prev = Array.ofDim[Int] (n)
-    def addLink (u: Int, v: Int) {
+    def addLink (u: Int, v: Int): Unit = {
       next (u) = v
       prev (v) = u
     }

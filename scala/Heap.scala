@@ -1,3 +1,5 @@
+package org.github.antma.cpalgo
+
 class Heap[T : reflect.ClassTag] (_n: Int, value: T, o: Ordering[T]) {
   private val n = _n
   private var size = 0

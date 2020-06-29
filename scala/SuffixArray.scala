@@ -1,11 +1,16 @@
-import scala.collection.SeqView
+package org.github.antma.cpalgo
+
+import annotation.tailrec
+
+sealed class SAFindResult
+case class SASuffix(val o: Int) extends SAFindResult
+case class SAInterval(val d: Int, f: Int) extends SAFindResult
 
 class SuffixArray (_s: String) {
   val s = _s :+ 0.toChar
   val n = _s.length
-  val alphabet_size = (_s.fold (0.toChar) ( (x, y) => x.max (y))).toInt + 1
-
-  private def counting_sort (m: Int, c: Array[Int], p: Seq[Int], o: Array[Int]): Unit = {
+  private val sigma = (_s.fold (0.toChar) ( (x, y) => x.max (y))).toInt + 1
+  private def countingSort (m: Int, c: Array[Int], p: Array[Int], o: Array[Int]): Unit = {
     val cnt:Array[Int] = Array.ofDim (m)
     p.foreach (pi => cnt(c(pi)) = cnt(c(pi)) + 1)
     (1 until m).foreach (i => cnt(i) = cnt(i) + cnt(i-1))
@@ -19,7 +24,7 @@ class SuffixArray (_s: String) {
     var p: Array[Int] = Array.ofDim (l)
     var c = s.map (c => c.toInt).toArray
     var q: Array[Int] = Array.ofDim (l)
-    counting_sort (alphabet_size, c, (0 until l), p)
+    countingSort (sigma, c, (0 until l).toArray, p)
     c(p(0)) = 0
     var m = 0
     for (i <- 1 until l) {
@@ -31,7 +36,7 @@ class SuffixArray (_s: String) {
     m = m + 1
     var step = 1
     while (step < l) {
-      counting_sort (m, c, p.map (v => (v + l - step) % l), q)
+      countingSort (m, c, p.map{v => (v + l - step) % l}, q)
       val t1 = p; p = q; q = t1
       q(p(0)) = 0
       m = 0
@@ -47,20 +52,20 @@ class SuffixArray (_s: String) {
     }
     p.slice (1, l)
   }
-  val o = build
-  private def lcp_table (a: Array[Int], l: Int, r: Int): Int = {
+  val o = build()
+  private def lcpTable (a: Array[Int], l: Int, r: Int): Int = {
     if (r - l == 1) {
       a(r)
     } else {
       val m = (l + r) >> 1
-      val res = Math.min (lcp_table (a, l, m), lcp_table (a, m, r))
+      val res = Math.min (lcpTable (a, l, m), lcpTable (a, m, r))
       a(n + 1 + m) = res
       res
     }
   }
-  private def lcp_build () = {
-    var q: Array[Int] = Array.ofDim (2 * n + 1)
-    val r: Array[Int] = Array.ofDim (n)
+  private def lcpBuild () = {
+    val q = Array.ofDim[Int](2 * n + 1)
+    val r = Array.ofDim[Int](n)
     (0 until n).foreach (i => r(o(i)) = i)
     var l = 0
     for (j <- 0 until n) {
@@ -76,27 +81,25 @@ class SuffixArray (_s: String) {
       }
       q(i) = l
     }
-    val t = lcp_table (q, -1, n)
+    lcpTable (q, -1, n)
     q
   }
-  val lcp = lcp_build
-  def find (x: SeqView[Char, String]) : (Int, Int) = {
+  val lcp = lcpBuild()
+  def find (x: String): SAFindResult = {
     def l (l: Int, r: Int): Int = if (r - l == 1) lcp (r) else lcp (n + 1 + ((l + r) >> 1))
-    def cl (u: Int, l: Int): Int = {
-      if (u < 0 || u >= n) 0
-      else {
-        val s1 = x.slice (l, x.length)
-        val s2 = s.view (o (u) + l, n)
-        l + s1.zip (s2).takeWhile ( t => t._1 == t._2).length
+    def pl(l: Int, o: Int): Int = {
+      @tailrec
+      def loop(k: Int): Int = {
+        if(k >= x.length || k + o >= n || x(k) != s(k + o)) k else loop(k+1)
       }
+      loop(l)
     }
-    def f (u: Int, lu: Int, v: Int, lv: Int): (Int, Int) = {
+    @tailrec
+    def f (u: Int, lu: Int, v: Int, lv: Int): SAFindResult = {
       if (u + 1 >= v) {
-       // (-1, Math.max (cl (u, lu), cl (v, lv)))
-        (-1, Math.max (lu, lv))
+        SAInterval(u, v)
       } else {
         val m = (u + v) >> 1
-
         if (lu <= l (m, v) && l (m, v) < lv) {
           f (m, l (m, v), v, lv)
         } else if (lu <= lv && lv < l (m, v)) {
@@ -106,14 +109,12 @@ class SuffixArray (_s: String) {
         } else if (lv <= lu && lu < l (u, m)) {
           f (m, lu, v, lv)
         } else {
-          val k = Math.max (lu, lv)
-          val s1 = x.slice (k, x.length)
-          val lm = n - o (m)
-          val s2 = s.view (o(m) + k, n)
-          val l = k + s1.zip (s2).takeWhile ( t => t._1 == t._2).length
+          val om = o(m)
+          val lm = n - om
+          val l = pl(lu.max(lv), o(m))
           if (l == x.length && l == lm) {
-            (m, l)
-          } else if ((l == lm) || (l != x.length && s(o(m)+l) < x(l))) {
+            SASuffix(m)
+          } else if ((l == lm) || (l != x.length && s(om+l) < x(l))) {
             f (m, l, v, lv)
           } else {
             f (u, lu, m, l)

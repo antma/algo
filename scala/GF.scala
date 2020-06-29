@@ -1,3 +1,5 @@
+package org.github.antma.cpalgo
+
 object GF {
   def powmod (x: Int, k: Int, q: Int) = {
     var a = 1

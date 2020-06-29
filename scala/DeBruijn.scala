@@ -1,3 +1,5 @@
+package org.github.antma.cpalgo
+
 class DeBruijn {
   val db = 0x218A392CD3D5DBFL
   val t = Array.ofDim[Int] (64)

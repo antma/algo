@@ -1,3 +1,5 @@
+package org.github.antma.cpalgo
+
 object FenwickTree {
   class IterA (start: Int, n: Int) extends Iterator[Int] {
     var i = start
@@ -21,14 +23,14 @@ object FenwickTree {
 
 class FenwickTree[T : reflect.ClassTag] (n: Int, op: (T, T) => T, zero: T) {
   val a = Array.fill (n) (zero)
-  def add (x: Int, v: T) {
+  final def add (x: Int, v: T): Unit = {
     var i = x
     while (i < n) {
       a(i) = op (a(i), v)
       i |= i + 1
     }
   }
-  def reduce (x: Int): T = {
+  final def reduce (x: Int): T = {
     var r = zero
     var i = x
     while (i >= 0) {
@@ -41,12 +43,12 @@ class FenwickTree[T : reflect.ClassTag] (n: Int, op: (T, T) => T, zero: T) {
 
 class FenwickTree2D[T : reflect.ClassTag] (dx: Int, dy:Int, op: (T, T) => T, zero: T) {
   val a = Array.fill (dx, dy) (zero)
-  def add (x: Int, y: Int, v: T) {
+  final def add (x: Int, y: Int, v: T): Unit = {
     for (i <- new FenwickTree.IterA (x, dx); j <- new FenwickTree.IterA (y, dy)) {
       a(i)(j) = op (a(i)(j), v)
     }
   }
-  def reduce (x: Int, y: Int): T = {
+  final def reduce (x: Int, y: Int): T = {
     var r = zero
     for (i <- new FenwickTree.IterR (x); j <- new FenwickTree.IterR (y)) {
       r = op (r, a(i)(j))

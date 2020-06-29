@@ -1,3 +1,5 @@
+package org.github.antma.cpalgo
+
 import scala.collection.mutable.BitSet
 
 class PrimeTable (n: Int) { //finding primes < n

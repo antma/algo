@@ -1,3 +1,5 @@
+package org.github.antma.cpalgo
+
 class DisjointSet (n: Int) {
   val p = (0 until n).toArray
   val h = Array.ofDim[Int] (n)

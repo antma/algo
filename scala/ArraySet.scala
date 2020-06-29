@@ -1,3 +1,5 @@
+package org.github.antma.cpalgo
+
 class ArraySet (_a: Array[Int]) {
   val a = _a
   val n = a.length
@@ -63,7 +65,7 @@ class ArraySet (_a: Array[Int]) {
   def count (from: Int, to: Int): Int = {
     var l = binsearch (from)
     if (l < 0 || a(l) != from) l += 1
-    var r = binsearch (to) + 1
+    val r = binsearch (to) + 1
     r - l
   }
   override def toString = a.toList.toString
