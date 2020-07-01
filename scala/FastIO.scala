@@ -81,8 +81,8 @@ object FastIO {
     }
   }
   final def newScanner(input: java.io.InputStream) = new Scanner(input)
-  final def newWriter() = {
-    val osw = new java.io.OutputStreamWriter(System.out, java.nio.charset.StandardCharsets.US_ASCII)
+  final def newWriter(output: java.io.OutputStream) = {
+    val osw = new java.io.OutputStreamWriter(output, java.nio.charset.StandardCharsets.US_ASCII)
     val bw = new java.io.BufferedWriter(osw, BUFFER_SIZE)
     new java.io.PrintWriter(bw, false)
   }
