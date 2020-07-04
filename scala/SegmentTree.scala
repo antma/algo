@@ -1,4 +1,4 @@
-package org.github.antma.cpalgo
+package com.github.antma.cpalgo
 //Origin: http://codeforces.com/blog/entry/18051
 
 import annotation.tailrec

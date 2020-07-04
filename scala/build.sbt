@@ -1,6 +1,6 @@
 name := "cpalgo"
 
-organization := "org.github.antma"
+organization := "com.github.antma"
 
 version := "1.0"
 

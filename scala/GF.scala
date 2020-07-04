@@ -1,4 +1,4 @@
-package org.github.antma.cpalgo
+package com.github.antma.cpalgo
 
 object GF {
   def powmod (x: Int, k: Int, q: Int) = {

@@ -1,4 +1,4 @@
-package org.github.antma.cpalgo
+package com.github.antma.cpalgo
 
 class DisjointSet (n: Int) {
   val p = (0 until n).toArray

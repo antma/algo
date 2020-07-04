@@ -1,4 +1,4 @@
-package org.github.antma.cpalgo
+package com.github.antma.cpalgo
 
 object Gcd {
   def gcdext (a: Int, b: Int): (Int, Int, Int) = {

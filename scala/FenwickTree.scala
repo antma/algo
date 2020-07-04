@@ -1,4 +1,4 @@
-package org.github.antma.cpalgo
+package com.github.antma.cpalgo
 
 object FenwickTree {
   class IterA (start: Int, n: Int) extends Iterator[Int] {

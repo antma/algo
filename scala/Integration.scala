@@ -1,4 +1,4 @@
-package org.github.antma.cpalgo
+package com.github.antma.cpalgo
 object Integration {
   def simpson(a: Double, b: Double, eps: Double, f : Double => Double): Double = {
     val fa = f(a)

@@ -1,4 +1,4 @@
-package org.github.antma.cpalgo
+package com.github.antma.cpalgo
 
 class ArraySet (_a: Array[Int]) {
   val a = _a

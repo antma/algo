@@ -1,4 +1,4 @@
-package org.github.antma.cpalgo
+package com.github.antma.cpalgo
 
 //0 - sink, (n - 1) - target
 class MaxFlow (_n: Int) {

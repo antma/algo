@@ -1,4 +1,4 @@
-package org.github.antma.cpalgo
+package com.github.antma.cpalgo
 import org.specs2.mutable.Specification
 import scala.math.{sin, cos}
 
