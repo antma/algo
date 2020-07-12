@@ -1,6 +1,7 @@
 import std.algorithm;
 import std.array;
 import std.conv;
+import std.range;
 
 import SegmentTree : SegmentTree;
 
@@ -41,7 +42,10 @@ class HeavyLightDecompositionTree {
   PtrIEdge[][] e;
   LCANode[] order;
   LCASegmentTree stLCA;
+  int[][] paths;
+  Node[] a;
   int timestamp;
+  bool edge_disjoint;
   final void go (int i, int depth, int parent) {
     a[i].h = depth;
     a[i].parent = parent;
@@ -65,18 +69,43 @@ class HeavyLightDecompositionTree {
     a[i].has_heavy = 2 * max_child_size >= a[i].subtree_size;
     a[i].v = timestamp++;
   }
-  protected:
-  int[][] paths;
-  Node[] a;
-  public:
-  final int lca (in int i, in int j) const {
+  int lca (in int i, in int j) const {
     int x = a[i].first, y = a[j].first;
     if (x > y) {
       swap (x, y);
     }
     return stLCA.reduce (x, y + 1).best;
   }
-  this (in int n, in Edge[] _edges, in int root) in {
+  void updateUpEdgeDisjoint (in int u, in int v, void delegate (in int, in int, in int) op) {
+    int l = a[u].h - a[v].h;
+    if (!l) return;
+    int x = u;
+    while (true) {
+      const k = a[x].path;
+      const i = a[x].k;
+      const t = (paths[k].length - i - 1).to!int;
+      const m = min (t, l);
+      op (k, i, i + m);
+      l -= m;
+      if (!l) break;
+      x = paths[k].back;
+    }
+  }
+  public:
+  void updateEdgeDisjoint (in int u, in int v, void delegate (in int pathid, in int u, in int v) op) {
+    assert (edge_disjoint);
+    const w = lca (u, v);
+    if (v == w) {
+      updateUpEdgeDisjoint (u, w, op);
+    } else if (u == w) {
+      updateUpEdgeDisjoint (v, w, op);
+    } else {
+      updateUpEdgeDisjoint (u, w, op);
+      updateUpEdgeDisjoint (v, w, op);
+    }
+  }
+
+  this (in int n, in Edge[] _edges, in int root, in bool edge_disjoint) in {
     assert (_edges.length == n - 1);
   } body {
     edges = _edges.idup;
@@ -111,10 +140,10 @@ class HeavyLightDecompositionTree {
           if (y < 0) {
             break;
           }
-          if (2 * a[x].subtree_size < a[y].subtree_size) {
-            break;
-          }
+          const light_edge = 2 * a[x].subtree_size < a[y].subtree_size;
+          if (!edge_disjoint && light_edge) break;
           path ~= y;
+          if (light_edge) break;
           x = y;
         }
         paths ~= path;
@@ -122,12 +151,21 @@ class HeavyLightDecompositionTree {
     }
     foreach (i, p; paths) {
       int path = i.to!int;
-      foreach (k, x; p) {
-        assert (a[x].path < 0);
-        a[x].path = path;
-        a[x].k = k.to!int;
+      auto q = p;
+      if (edge_disjoint) q = dropBackOne (q);
+      foreach (k, x; q) {
+        if (a[x].path < 0) {
+          a[x].path = path;
+          a[x].k = k.to!int;
+        } else {
+          assert (true);
+        }
       }
     }
-    assert (a.all! (x => x.path >= 0));
+    if (!edge_disjoint) {
+      assert (a.all! ((const ref x) => x.path >= 0));
+    }
+    this.edge_disjoint = edge_disjoint;
   }
 }
+
