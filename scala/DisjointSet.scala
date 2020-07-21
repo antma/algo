@@ -2,7 +2,7 @@ package com.github.antma.cpalgo
 
 final class DisjointSet(n: Int) {
   val p = Array.range(0, n)
-  val h = Array.ofDim[Int] (n)
+  val h = Array.ofDim[Int](n)
   def findSet(x: Int): Int = {
     if (p(x) == x) x
     else {

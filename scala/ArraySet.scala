@@ -1,10 +1,10 @@
 package com.github.antma.cpalgo
 
-class ArraySet (_a: Array[Int]) {
+class ArraySet(_a: Array[Int]) {
   val a = _a
   val n = a.length
-  def union (that: ArraySet): ArraySet = {
-    val b = Array.ofDim[Int] (n + that.n);
+  def union(that: ArraySet): ArraySet = {
+    val b = Array.ofDim[Int](n + that.n)
     var i = 0
     var j = 0
     var k = 0
@@ -34,9 +34,9 @@ class ArraySet (_a: Array[Int]) {
       j += 1
       k += 1
     }
-    new ArraySet (b.slice (0, k))
+    new ArraySet(b.slice(0, k))
   }
-  private def binsearch (v: Int) = {
+  private def binsearch(v: Int) = {
     var l = -1
     var r = n
     while (r - l > 1) {
@@ -45,27 +45,27 @@ class ArraySet (_a: Array[Int]) {
     }
     l
   }
-  def upper (v: Int): Int = {
-    val l = binsearch (v)
+  def upper(v: Int): Int = {
+    val l = binsearch(v)
     if (l < 0) a(0)
     else if (l >= n) Int.MaxValue
     else if (a(l) > v) a(l)
     else if (l + 1 < n) a(l + 1)
     else Int.MaxValue
   }
-  def lower (v: Int): Int = {
-    val l = binsearch (v)
+  def lower(v: Int): Int = {
+    val l = binsearch(v)
     if (l < 0) Int.MinValue
     else if (l >= n) a(n - 1)
     else if (a(l) < v) a(l)
-    else if (l > 0) a (l - 1)
+    else if (l > 0) a(l - 1)
     else Int.MinValue
   }
   //[from, to]
-  def count (from: Int, to: Int): Int = {
-    var l = binsearch (from)
+  def count(from: Int, to: Int): Int = {
+    var l = binsearch(from)
     if (l < 0 || a(l) != from) l += 1
-    val r = binsearch (to) + 1
+    val r = binsearch(to) + 1
     r - l
   }
   override def toString = a.toList.toString
