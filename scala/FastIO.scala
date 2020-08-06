@@ -8,9 +8,9 @@ object FastIO {
   private val cr          = '\r'.toInt
   private val nl          = '\n'.toInt
   class Scanner private[FastIO] (input: java.io.InputStream) {
-    private val r = new java.io.BufferedInputStream(input, BUFFER_SIZE)
+    private[this] val r = new java.io.BufferedInputStream(input, BUFFER_SIZE)
     @tailrec
-    private def skipBlanks(): Int = {
+    private[this] def skipBlanks(): Int = {
       val b = r.read()
       if (b > 32 || b < 0) b else skipBlanks()
     }
