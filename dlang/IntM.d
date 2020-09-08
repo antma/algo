@@ -49,14 +49,16 @@ struct IntM(int q = 1_000_000_007) {
     }
     return this;
   }
-  pure nothrow @nogc
   ref N opOpAssign (string op : "+")(in N rhs) {
-    v = (v + rhs.v) % q;
+    uint x = (cast(uint) v) + (cast(uint) rhs.v);
+    if (x >= q) x -= q;
+    v = x;
     return this;
   }
   pure nothrow @nogc
   ref N opOpAssign (string op : "-")(in N rhs) {
-    v = (v - rhs.v + q) % q;
+    v -= rhs.v;
+    if (v < 0) v += q;
     return this;
   }
   pure nothrow @nogc
@@ -197,4 +199,8 @@ unittest {
   assert(N(ulong.max) == N(582344007));
   assert(N(long.max) == N(291172003));
   assert(N(18446744073127207607UL) == N(-1));
+
+  alias N2 = IntM!0x7fffffff;
+  assert(N2(0) - N2(1) == N2(0x7ffffffe));
+  assert(N2(0x7ffffffd) == N2(0x7ffffffe) + N2(0x7ffffffe));
 }
