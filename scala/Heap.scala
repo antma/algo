@@ -7,6 +7,7 @@ final class Heap[T: reflect.ClassTag](private val n: Int, value: T)(implicit o: 
   private val g    = Array.fill(n)(-1)
   private def heapifyFront(k: Int) = {
     val he = h(k)
+    @scala.annotation.tailrec
     def f(i: Int): Int = {
       val l = i << 1
       if (l <= size) {
@@ -26,6 +27,7 @@ final class Heap[T: reflect.ClassTag](private val n: Int, value: T)(implicit o: 
   }
   private def heapifyBack(k: Int) = {
     val he = h(k)
+    @scala.annotation.tailrec
     def f(i: Int): Int = {
       if (i > 1) {
         val j = i >> 1
@@ -87,4 +89,39 @@ final class Heap[T: reflect.ClassTag](private val n: Int, value: T)(implicit o: 
   def apply(k: Int) = a(k)
   def nonEmpty      = size > 0
   def isEmpty       = size == 0
+}
+
+final class SimpleHeap[T: reflect.ClassTag](h: Array[T])(implicit n: math.Numeric[T]) {
+  private[this] var size = h.size
+  private[this] def heapifyFront(k: Int) = {
+    val he = h(k)
+    @scala.annotation.tailrec
+    def f(i: Int): Int = {
+      val l = (i << 1) + 1
+      if (l < size) {
+        val j = if (l + 1 < size && n.compare(h(l + 1), h(l)) < 0) l + 1 else l
+        if (n.compare(h(j), he) < 0) {
+          h(i) = h(j)
+          f(j)
+        } else i
+      } else i
+    }
+    val i = f(k)
+    if (i != k) {
+      h(i) = he
+    }
+  }
+  for (i <- (0 to ((size - 2) >> 1)).reverse) heapifyFront(i)
+  def extractMin(): T = {
+    require(size > 0)
+    val he = h(0)
+    size -= 1
+    if (size > 0) {
+      h(0) = h(size)
+      heapifyFront(0)
+    }
+    he
+  }
+  def nonEmpty = size > 0
+  def isEmpty  = size == 0
 }
