@@ -1,5 +1,6 @@
 pub mod bigint;
 pub mod maxflow;
+pub mod kuhn;
 
 #[cfg(test)]
 mod tests {
