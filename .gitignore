@@ -1,2 +1,4 @@
 kotlin/build.xml
 kotlin/environment_vars.py
+rust/target
+rust/Cargo.lock
