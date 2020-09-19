@@ -1,6 +1,7 @@
-type T = i32;
-const INF: T = T::MAX / 2;
-pub struct AssignmentProblem {
+use std::cmp::{Ord, PartialOrd};
+use std::ops::{AddAssign, Mul, Neg, Shr, SubAssign};
+
+pub struct AssignmentProblem<T> {
   n: usize,
   g: Vec<Vec<T>>,
   s: Vec<bool>,
@@ -10,8 +11,20 @@ pub struct AssignmentProblem {
   b: Vec<i32>,
 }
 
-impl AssignmentProblem {
-  pub fn new(n: usize, g: Vec<Vec<T>>) -> Self {
+impl<T> AssignmentProblem<T>
+where
+  T: Copy
+    + From<i32>
+    + PartialOrd<i32>
+    + AddAssign
+    + SubAssign
+    + Mul<Output = T>
+    + Neg<Output = T>
+    + Ord
+    + Shr<Output = T>,
+{
+  pub fn new(g: Vec<Vec<T>>) -> Self {
+    let n = g.len();
     AssignmentProblem {
       n,
       g,
@@ -69,15 +82,24 @@ impl AssignmentProblem {
     }
     c
   }
-  pub fn minimize(&mut self) -> T {
+  pub fn maximize(&mut self, infinity: T) -> T {
+    for i in 0..self.n {
+      for x in &mut self.g[i] {
+        *x = -*x;
+      }
+    }
+    -self.minimize(infinity)
+  }
+  pub fn minimize(&mut self, infinity: T) -> T {
     let n = self.n;
-    let mut res: T = 0;
-    let mut v = INF;
+    let inf = infinity >> T::from(1);
+    let mut res: T = T::from(0);
+    let mut v = inf;
     for i in 0..n {
       v = std::cmp::min(v, *self.g[i].iter().min().unwrap());
     }
     if v < 0 {
-      res += v * (n as T);
+      res += v * (T::from(n as i32));
       for i in 0..n {
         for x in self.g[i].iter_mut() {
           *x -= v;
@@ -108,7 +130,7 @@ impl AssignmentProblem {
       if c == n {
         break;
       }
-      let mut min_g = INF;
+      let mut min_g = inf;
       for i in 0..n {
         if !self.d[i] {
           for j in 0..n {
@@ -118,7 +140,7 @@ impl AssignmentProblem {
           }
         }
       }
-      res += min_g * ((n - c) as T);
+      res += min_g * (T::from((n - c) as i32));
       for i in 0..n {
         if self.d[i] {
           for x in &mut self.g[i] {
