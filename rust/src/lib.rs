@@ -1,6 +1,7 @@
+pub mod assignment_problem;
 pub mod bigint;
-pub mod maxflow;
 pub mod kuhn;
+pub mod maxflow;
 
 #[cfg(test)]
 mod tests {

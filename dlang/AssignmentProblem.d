@@ -1,4 +1,5 @@
 import std.conv;
+import std.algorithm;
 
 pure
 auto assignmentProblemMinimize(T) (const T[][] a) {
@@ -29,6 +30,13 @@ auto assignmentProblemMinimize(T) (const T[][] a) {
     return false;
   }
   T res;
+  const v = minElement(a.map!(t => minElement(t)).cache);
+  if (v < 0) {
+    res += v * n;
+    foreach (i; 0 .. n) {
+      G[i][] -= v;
+    }
+  }
   while (true) {
     foreach (i; 0 .. n) {
       T min = inf;
@@ -122,4 +130,5 @@ unittest {
        [287,63,343,169,583],
        [627,343,773,959,943],
        [767,473,103,699,303]]) == 3315);
+  assert (assignmentProblemMinimize( [ [0, 0], [0, -1]]) == -1);
 }

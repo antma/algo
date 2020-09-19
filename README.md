@@ -1,3 +1,6 @@
+## Assignment Problem (Hungarian algorithm)
+- [Task](https://acm.timus.ru/problem.aspx?num=1076)
+
 ## Binary Search
 - [Subset Sums](https://www.spoj.com/problems/SUBSUMS)
 
@@ -32,6 +35,7 @@
 
 ## PolyHash
 - [Shifted Palindrome](https://www.codechef.com/problems/SHIFTPAL)
+- [String Tale](https://acm.timus.ru/problem.aspx?space=1&num=1423)
 
 ## Segment Tree
 - [Cloudy Day](https://www.hackerrank.com/challenges/cloudy-day/problem)
