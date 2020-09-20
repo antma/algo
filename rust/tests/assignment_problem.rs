@@ -9,6 +9,21 @@ mod tests {
       vec![767, 473, 103, 699, 303],
     ];
     let mut g = algo::assignment_problem::AssignmentProblem::new(a);
-    assert_eq!(g.maximize(i32::MAX), 3315);
+    assert_eq!(g.maximize(), 3315);
+  }
+  #[test]
+  fn minimal() {
+    let a = vec![vec![1, 2], vec![2, 4]];
+    let mut g = algo::assignment_problem::AssignmentProblem::new(a);
+    assert_eq!(g.maximize(), 5);
+    let a = vec![vec![1, 2], vec![2, 4]];
+    let mut g = algo::assignment_problem::AssignmentProblem::new(a);
+    assert_eq!(g.minimize(), 4);
+    let a = vec![vec![1]];
+    let mut g = algo::assignment_problem::AssignmentProblem::new(a);
+    assert_eq!(g.minimize(), 1);
+    let a = vec![vec![1]];
+    let mut g = algo::assignment_problem::AssignmentProblem::new(a);
+    assert_eq!(g.maximize(), 1);
   }
 }

@@ -82,22 +82,21 @@ where
     }
     c
   }
-  pub fn maximize(&mut self, infinity: T) -> T {
+  pub fn maximize(&mut self) -> T {
     for i in 0..self.n {
       for x in &mut self.g[i] {
         *x = -*x;
       }
     }
-    -self.minimize(infinity)
+    -self.minimize()
   }
-  pub fn minimize(&mut self, infinity: T) -> T {
+  pub fn minimize(&mut self) -> T {
     let n = self.n;
-    let inf = infinity >> T::from(1);
     let mut res: T = T::from(0);
-    let mut v = inf;
-    for i in 0..n {
-      v = std::cmp::min(v, *self.g[i].iter().min().unwrap());
-    }
+    let v = (0..n)
+      .map(|i| *self.g[i].iter().min().unwrap())
+      .min()
+      .unwrap();
     if v < 0 {
       res += v * (T::from(n as i32));
       for i in 0..n {
@@ -107,7 +106,6 @@ where
       }
     }
     loop {
-      //eprintln!("res = {}", res);
       for i in 0..n {
         let min = *self.g[i].iter().min().unwrap();
         if min > 0 {
@@ -130,16 +128,18 @@ where
       if c == n {
         break;
       }
-      let mut min_g = inf;
-      for i in 0..n {
-        if !self.d[i] {
-          for j in 0..n {
-            if !self.e[j] && min_g > self.g[i][j] {
-              min_g = self.g[i][j];
-            }
+      let min_g = (0..n)
+        .filter_map(|i| {
+          if !self.d[i] {
+            (0..n)
+              .filter_map(|j| if !self.e[j] { Some(self.g[i][j]) } else { None })
+              .min()
+          } else {
+            None
           }
-        }
-      }
+        })
+        .min()
+        .unwrap();
       res += min_g * (T::from((n - c) as i32));
       for i in 0..n {
         if self.d[i] {
