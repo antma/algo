@@ -1,5 +1,5 @@
 use std::cmp::{Ord, PartialOrd};
-use std::ops::{AddAssign, Mul, Neg, Shr, SubAssign};
+use std::ops::{AddAssign, Mul, Neg, SubAssign};
 
 pub struct AssignmentProblem<T> {
   n: usize,
@@ -20,8 +20,7 @@ where
     + SubAssign
     + Mul<Output = T>
     + Neg<Output = T>
-    + Ord
-    + Shr<Output = T>,
+    + Ord,
 {
   pub fn new(g: Vec<Vec<T>>) -> Self {
     let n = g.len();
