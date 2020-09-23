@@ -2,6 +2,7 @@ pub mod assignment_problem;
 pub mod bigint;
 pub mod kuhn;
 pub mod maxflow;
+pub mod polyhash;
 
 pub use crate::bigint::BigInt;
 
