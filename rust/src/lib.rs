@@ -3,6 +3,8 @@ pub mod bigint;
 pub mod kuhn;
 pub mod maxflow;
 
+pub use crate::bigint::BigInt;
+
 #[cfg(test)]
 mod tests {
   #[test]

@@ -1,7 +1,9 @@
+use algo::bigint::BigInt;
+
 mod tests {
   #[test]
   fn hand1() {
-    let mut a = algo::bigint::BigInt::one();
+    let mut a = super::BigInt::one();
     a *= 123456789;
     assert_eq!(a.to_string(), "123456789");
     let mut b = a.clone();
@@ -15,8 +17,8 @@ mod tests {
     assert_eq!(d.to_string(), b.to_string());
   }
   #[test]
-  fn fibs_test() {
-    let mut a = algo::bigint::BigInt::one();
+  fn fibs() {
+    let mut a = super::BigInt::one();
     let mut b = a.clone();
     for _i in 2..=99 {
       let c = b.clone();
@@ -39,5 +41,13 @@ mod tests {
       b = c;
     }
     assert_eq!(b.to_string(), FIB99);
+  }
+  #[test]
+  fn factorial() {
+    let mut a = super::BigInt::one();
+    for i in 2..=100 {
+      a *= i;
+    }
+    assert_eq!(a.to_string(), "93326215443944152681699238856266700490715968264381621468592963895217599993229915608941463976156518286253697920827223758251185210916864000000000000000000000000");
   }
 }
