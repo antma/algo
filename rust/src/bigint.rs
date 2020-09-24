@@ -1,4 +1,4 @@
-use std::ops::{AddAssign, MulAssign, SubAssign};
+use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
 
 #[derive(Clone)]
 pub struct BigInt {
@@ -27,6 +27,17 @@ impl BigInt {
     }
     if carry > 0 {
       self.a.push(carry);
+    }
+  }
+  fn remove_leading_zeros(&mut self) {
+    let n = self.a.len();
+    let mut k = n - 1;
+    while k > 0 && self.a[k] == 0 {
+      k -= 1;
+    }
+    k += 1;
+    if k < n {
+      self.a.truncate(k);
     }
   }
 }
@@ -89,24 +100,36 @@ impl SubAssign<&BigInt> for BigInt {
       }
     }
     assert!(carry >= 0);
-    while self.a.len() > 1 && self.a[self.a.len() - 1] == 0 {
-      self.a.pop();
-    }
+    self.remove_leading_zeros();
   }
 }
 
 impl MulAssign<u32> for BigInt {
   fn mul_assign(&mut self, rhs: u32) {
     assert!(rhs < 1_000_000_000);
-    let mut carry = 0u32;
+    let mut carry = 0u64;
     let x64 = rhs as u64;
-    for i in 0..self.a.len() {
-      let c: u64 = (carry as u64) + (x64 * (self.a[i] as u64));
-      self.a[i] = (c % 1_000_000_000u64) as u32;
-      carry = (c / 1_000_000_000u64) as u32;
+    for x in self.a.iter_mut() {
+      carry += x64 * (*x as u64);
+      *x = (carry % 1_000_000_000) as u32;
+      carry /= 1_000_000_000;
     }
     if carry > 0 {
-      self.a.push(carry);
+      self.a.push(carry as u32);
     }
+  }
+}
+
+impl DivAssign<u32> for BigInt {
+  fn div_assign(&mut self, rhs: u32) {
+    assert!(rhs < 1_000_000_000);
+    let mut d: u64 = 0;
+    for x in self.a.iter_mut().rev() {
+      d *= 1_000_000_000;
+      d += *x as u64;
+      *x = (d / (rhs as u64)) as u32;
+      d -= (*x as u64) * (rhs as u64);
+    }
+    self.remove_leading_zeros();
   }
 }
