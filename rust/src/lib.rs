@@ -1,6 +1,8 @@
 pub mod assignment_problem;
 pub mod bigint;
 pub mod disjoint_set;
+pub mod geometry;
+pub mod integration;
 pub mod kuhn;
 pub mod maxflow;
 pub mod polyhash;
