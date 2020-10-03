@@ -7,6 +7,7 @@ pub mod kuhn;
 pub mod maxflow;
 pub mod polyhash;
 pub mod segment_tree;
+pub mod splay_tree;
 
 pub use crate::assignment_problem::AssignmentProblem;
 pub use crate::bigint::BigInt;
