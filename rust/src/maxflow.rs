@@ -1,5 +1,4 @@
-type C = i32;
-type E = i32;
+use std::ops::{AddAssign, Neg, Sub, SubAssign};
 
 #[derive(Clone, Debug)]
 struct DListEntry {
@@ -8,42 +7,54 @@ struct DListEntry {
 }
 
 #[derive(Clone, Debug)]
-struct Edge {
+struct Edge<C> {
   v: usize,
   e: usize,
   f: C,
   c: C,
 }
 
-impl Edge {
+impl<C> Edge<C>
+where
+  C: From<i32>,
+{
   fn new(v: usize, e: usize, c: C) -> Self {
-    Edge { v, e, f: 0, c }
+    Edge {
+      v,
+      e,
+      f: C::from(0),
+      c,
+    }
   }
   fn zero() -> Self {
-    Self::new(0, 0, 0)
+    Self::new(0, 0, C::from(0))
   }
 }
 
-pub struct PushRelabelMaxFlowGraph {
-  edges: Vec<Vec<Edge>>,
+pub struct PushRelabelMaxFlowGraph<C> {
+  edges: Vec<Vec<Edge<C>>>,
   current: Vec<usize>,
   h: Vec<i32>,
   nl: Vec<i32>,
-  e: Vec<E>,
+  e: Vec<C>,
   dl: Vec<DListEntry>,
   gc: Vec<i32>,
   n: usize,
   maxh: i32,
 }
 
-impl PushRelabelMaxFlowGraph {
+impl<C> PushRelabelMaxFlowGraph<C>
+where
+  C:
+    From<i32> + Copy + Clone + Eq + Ord + AddAssign + SubAssign + Neg<Output = C> + Sub<Output = C>,
+{
   pub fn new(n: usize) -> Self {
     PushRelabelMaxFlowGraph {
       edges: vec![vec![Edge::zero(); 0]; n],
       current: vec![std::usize::MAX; n],
       h: vec![0; n],
       nl: vec![-1; n],
-      e: vec![0; n],
+      e: vec![C::from(0); n],
       dl: vec![DListEntry { prev: 0, next: 0 }; 2 * n],
       gc: vec![0; n],
       n,
@@ -74,7 +85,7 @@ impl PushRelabelMaxFlowGraph {
       let c = p.c;
       let e = p.e;
       p.f = c;
-      if i > 0 && i < n - 1 && 0 == self.e[i] {
+      if i > 0 && i < n - 1 && C::from(0) == self.e[i] {
         self.insert(0, i);
       }
       self.e[i] += c;
@@ -103,7 +114,7 @@ impl PushRelabelMaxFlowGraph {
   }
   fn discharge(&mut self, i: usize) {
     let n = self.n;
-    while self.e[i] > 0 {
+    while self.e[i] > C::from(0) {
       if self.current[i] >= self.edges[i].len() {
         self.current[i] = 0;
         self.gc[self.maxh as usize] -= 1;
@@ -145,16 +156,16 @@ impl PushRelabelMaxFlowGraph {
         let pf = p.f;
         let pc = p.c;
         if self.h[i] == self.h[j] + 1 && pf < pc {
-          let aj = self.e[j] <= 0;
+          let aj = self.e[j] <= C::from(0);
           self.push(i, e);
-          if aj && j > 0 && j < n - 1 && self.e[j] > 0 {
+          if aj && j > 0 && j < n - 1 && self.e[j] > C::from(0) {
             self.insert((self.maxh - 1) as usize, j);
             if self.nl[self.maxh as usize] != self.maxh - 1 {
               self.nl[(self.maxh - 1) as usize] = self.nl[self.maxh as usize];
               self.nl[self.maxh as usize] = self.maxh - 1;
             }
           }
-          if self.e[i] <= 0 {
+          if self.e[i] <= C::from(0) {
             self.remove(i);
             if self.dl[(self.maxh as usize) + n].next >= n {
               self.maxh = self.nl[self.maxh as usize];
@@ -172,7 +183,7 @@ impl PushRelabelMaxFlowGraph {
     self.edges[i].push(Edge::new(j, ej, w1));
     self.edges[j].push(Edge::new(i, ei, w2));
   }
-  pub fn max_flow(&mut self) -> E {
+  pub fn max_flow(&mut self) -> C {
     let n = self.n;
     self.init_preflow();
     for i in 1..n - 1 {
