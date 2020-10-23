@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
 
 #[derive(Clone)]
@@ -133,3 +134,36 @@ impl DivAssign<u32> for BigInt {
     self.remove_leading_zeros();
   }
 }
+
+impl Ord for BigInt {
+  fn cmp(&self, other: &BigInt) -> Ordering {
+    if self.a.len() > other.a.len() {
+      return Ordering::Greater;
+    }
+    if self.a.len() < other.a.len() {
+      return Ordering::Less;
+    }
+    for i in (0..self.a.len()).rev() {
+      if self.a[i] > other.a[i] {
+        return Ordering::Greater;
+      }
+      if self.a[i] < other.a[i] {
+        return Ordering::Less;
+      }
+    }
+    Ordering::Equal
+  }
+}
+
+impl PartialOrd for BigInt {
+  fn partial_cmp(&self, other: &BigInt) -> Option<Ordering> {
+    Some(self.cmp(other))
+  }
+}
+
+impl PartialEq for BigInt {
+  fn eq(&self, other: &BigInt) -> bool {
+    self.a == other.a
+  }
+}
+impl Eq for BigInt {}

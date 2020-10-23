@@ -61,3 +61,14 @@ fn binomial() {
   //binomial(100, 50)
   assert_eq!(a.to_string(), "100891344545564193334812497256");
 }
+#[test]
+fn comparision() {
+  assert!(BigInt::one() == BigInt::one());
+  assert!(BigInt::one() > BigInt::zero());
+  assert!(BigInt::zero() < BigInt::one());
+  let mut x = BigInt::one();
+  for _ in 0..20 {
+    x *= 10;
+    assert!(BigInt::one() < x);
+  }
+}
