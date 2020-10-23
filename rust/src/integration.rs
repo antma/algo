@@ -1,4 +1,4 @@
-pub fn simpson<F>(a: f64, b: f64, eps: f64, f: F) -> f64
+pub fn simpson<F>(a: f64, b: f64, maxn: u32, eps: f64, f: F) -> f64
 where
   F: Fn(f64) -> f64,
 {
@@ -20,7 +20,7 @@ where
       x += step;
     }
     let i = l3 * invn * (avg + s1 + 2.0 * s2);
-    if (i - pi).abs() < eps {
+    if (i - pi).abs() < eps || n >= maxn {
       break i;
     }
     n *= 2;
