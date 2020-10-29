@@ -30,4 +30,24 @@ fn hand1() {
       P { x: 200, y: 400 }
     ]
   );
+  let w = vec![P { x: 1, y: 2 }];
+  assert_eq!(hull(&w), w);
+}
+#[test]
+fn square() {
+  let mut q = Vec::new();
+  for x in -10..=10 {
+    for y in -10..=10 {
+      q.push(P { x, y });
+    }
+  }
+  assert_eq!(
+    hull(&q),
+    vec![
+      P { x: -10, y: -10 },
+      P { x: 10, y: -10 },
+      P { x: 10, y: 10 },
+      P { x: -10, y: 10 },
+    ]
+  );
 }
