@@ -1,9 +1,18 @@
 use std::ops::{Add, Mul, Sub};
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy)]
 pub struct Point<T> {
-  x: T,
-  y: T,
+  pub x: T,
+  pub y: T,
+}
+
+impl<T: Clone> Clone for Point<T> {
+  fn clone(&self) -> Self {
+    Self {
+      x: self.x.clone(),
+      y: self.y.clone(),
+    }
+  }
 }
 
 impl<T: Add<Output = T>> Add for Point<T> {
@@ -23,6 +32,12 @@ impl<T: Sub<Output = T>> Sub for Point<T> {
       x: self.x - other.x,
       y: self.y - other.y,
     }
+  }
+}
+
+impl<T: PartialEq> PartialEq for Point<T> {
+  fn eq(&self, other: &Point<T>) -> bool {
+    self.x == other.x && self.y == other.y
   }
 }
 
