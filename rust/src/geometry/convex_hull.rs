@@ -2,13 +2,18 @@ use crate::geometry::plane::Point;
 use std::cmp::Ordering;
 use std::ops::{Add, Mul, Sub};
 
-fn left<T>(a: &Point<T>, b: &Point<T>, c: &Point<T>) -> bool
+fn left<T>(a: &Point<T>, b: &Point<T>, c: &Point<T>, minimal: bool) -> bool
 where
   T: Copy + Ord + Sub<Output = T> + Mul<Output = T>,
 {
   let c1 = (c.x - a.x) * (b.y - a.y);
   let c2 = (b.x - a.x) * (c.y - a.y);
-  c1.cmp(&c2) == Ordering::Less
+  let c = c1.cmp(&c2);
+  if minimal {
+    c == Ordering::Less
+  } else {
+    c != Ordering::Greater
+  }
 }
 
 fn angle_cmp<T>(a: &Point<T>, b: &Point<T>) -> Ordering
@@ -20,19 +25,13 @@ where
   c1.cmp(&c2)
 }
 
-pub fn hull<T>(v: &Vec<Point<T>>) -> Vec<Point<T>>
+pub fn hull<T>(v: &Vec<Point<T>>, minimal: bool) -> Vec<Point<T>>
 where
-  T: Clone
-    + Copy
-    + Ord
-    + PartialEq
-    + From<i32>
-    + Add<Output = T>
-    + Sub<Output = T>
-    + Mul<Output = T>,
+  T:
+    Clone + Copy + Ord + PartialEq + From<i8> + Add<Output = T> + Sub<Output = T> + Mul<Output = T>,
 {
-  if v.is_empty() {
-    return Vec::new();
+  if v.len() <= 2 {
+    return v.clone();
   }
   let me = v
     .iter()
@@ -61,9 +60,12 @@ where
     }
   });
   let mut x = Vec::new();
+  let mut d = Vec::new();
   for p in q {
     if x.is_empty() || angle_cmp(&x.last().unwrap(), &p) != Ordering::Equal {
       x.push(p);
+    } else {
+      d.push(p);
     }
   }
   let mut h = Vec::new();
@@ -71,12 +73,31 @@ where
     x: T::from(0),
     y: T::from(0),
   });
-  for i in 0..2.min(x.len()) {
-    h.push(x[i]);
-  }
+  let s = if minimal {
+    let s = 2.min(x.len());
+    for i in 0..s {
+      h.push(x[i]);
+    }
+    s
+  } else {
+    let mut i = 0;
+    while i < d.len() && angle_cmp(&x[0], &d[i]) == Ordering::Equal {
+      i += 1;
+    }
+    for o in (0..i).rev() {
+      h.push(d[o]);
+    }
+    h.push(x[0]);
+    if i == 0 && x.len() > 1 {
+      h.push(x[1]);
+      2
+    } else {
+      1
+    }
+  };
   let mut m = h.len();
-  for xi in x.into_iter().skip(2) {
-    while !left(&h[m - 2], &h[m - 1], &xi) {
+  for xi in x.into_iter().skip(s) {
+    while !left(&h[m - 2], &h[m - 1], &xi, minimal) {
       m -= 1;
     }
     if m < h.len() {
@@ -87,6 +108,13 @@ where
     m += 1;
   }
   h.truncate(m);
+  if !minimal && m > 2 && angle_cmp(&h[1], &h[m - 1]) != Ordering::Equal {
+    let mut i = d.len();
+    while i > 0 && angle_cmp(&h[m - 1], &d[i - 1]) == Ordering::Equal {
+      i -= 1;
+    }
+    h.extend_from_slice(&d[i..]);
+  }
   for p in h.iter_mut() {
     *p = (*p) + me.clone();
   }
