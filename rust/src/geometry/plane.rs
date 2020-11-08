@@ -91,7 +91,7 @@ impl Line<f64> {
     } else {
       Some(
         Point {
-          x: self.c - other.b - other.c * self.b,
+          x: self.c * other.b - other.c * self.b,
           y: self.a * other.c - other.a * self.c,
         } * (1.0 / d),
       )
