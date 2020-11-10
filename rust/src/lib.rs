@@ -1,6 +1,7 @@
 pub mod assignment_problem;
 pub mod bigint;
 pub mod disjoint_set;
+pub mod fht;
 pub mod geometry;
 pub mod integration;
 pub mod intm;
