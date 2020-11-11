@@ -41,6 +41,7 @@ impl FHT {
     }
     let mut r = 0;
     let mut x = 1;
+    let n1 = self.n - 1;
     while x < self.h {
       r += self.h;
       a.swap(x, r);
@@ -48,7 +49,7 @@ impl FHT {
       r = self.revbin_update(r);
       if r > x {
         a.swap(x, r);
-        a.swap(self.n - 1 - x, self.n - 1 - r);
+        a.swap(n1 - x, n1 - r);
       }
       x += 1;
     }
@@ -66,18 +67,19 @@ impl FHT {
       let mut b = mh;
       let mut r = 0;
       while r < self.n {
+        let d = &mut a[b..];
         for j in 1..m4 {
-          let u = a[b + j];
-          let v = a[b + mh - j];
+          let u = d[j];
+          let v = d[mh - j];
           let (s, c) = ((j as f64) * delta).sin_cos();
-          a[b + j] = c * u + s * v;
-          a[b + mh - j] = s * u - c * v;
+          d[j] = c * u + s * v;
+          d[mh - j] = s * u - c * v;
         }
-        for j in 0..mh {
-          let v = a[b + j];
-          let u = a[b + j - mh];
-          a[b + j - mh] += v;
-          a[b + j] = u - v;
+        for j in b..mh + b {
+          let v = a[j];
+          let u = a[j - mh];
+          a[j - mh] += v;
+          a[j] = u - v;
         }
         r += m;
         b += m;
