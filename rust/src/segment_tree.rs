@@ -1,14 +1,11 @@
-pub struct SegmentTree<T, F> {
+pub struct SegmentTree<T> {
   n: usize,
-  f: F,
+  f: fn(&T, &T) -> T,
   t: Vec<T>,
 }
 
-impl<T: Copy, F> SegmentTree<T, F>
-where
-  F: Fn(&T, &T) -> T,
-{
-  pub fn new(mut a: Vec<T>, f: F) -> Self {
+impl<T: Clone> SegmentTree<T> {
+  pub fn new(mut a: Vec<T>, f: fn(&T, &T) -> T) -> Self {
     let n = a.len();
     let mut t = a.clone();
     t.append(&mut a);
@@ -22,9 +19,9 @@ where
       self.t[i] = (self.f)(&self.t[k], &self.t[k + 1]);
     }
   }
-  pub fn update(&mut self, q: usize, v: &T) {
+  pub fn update(&mut self, q: usize, v: T) {
     let mut p = q + self.n;
-    self.t[p] = *v;
+    self.t[p] = v;
     while p > 1 {
       self.t[p >> 1] = (self.f)(&self.t[p], &self.t[p ^ 1]);
       p >>= 1;
