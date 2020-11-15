@@ -81,6 +81,21 @@ impl<T: Copy + Add<Output = T> + Sub<Output = T> + Mul<Output = T>> Line<T> {
       c: a * p.x + b * p.y,
     }
   }
+  pub fn value(&self, p: &Point<T>) -> T {
+    self.a * p.x + self.b * p.y - self.c
+  }
+}
+
+impl<T> Line<T>
+where
+  T: Copy + Add<Output = T> + Sub<Output = T> + Mul<Output = T> + From<i8> + Ord,
+{
+  pub fn one_side(&self, p1: &Point<T>, p2: &Point<T>) -> bool {
+    let z = T::from(0);
+    let v1 = self.value(p1);
+    let v2 = self.value(p2);
+    (v1 > z && v2 > z) || (v1 < z && v2 < z)
+  }
 }
 
 impl Line<f64> {
@@ -121,5 +136,53 @@ impl Circle<f64> {
       c: p,
       r: p.dist(p1),
     })
+  }
+}
+
+pub struct Segment<T> {
+  p1: Point<T>,
+  p2: Point<T>,
+  l: Line<T>,
+  pmin: Point<T>,
+  pmax: Point<T>,
+}
+
+impl<T> Segment<T>
+where
+  T: Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Copy + Ord,
+{
+  pub fn new(p1: &Point<T>, p2: &Point<T>) -> Self {
+    Self {
+      p1: *p1,
+      p2: *p2,
+      l: Line::new(p1, p2),
+      pmin: Point {
+        x: p1.x.min(p2.x),
+        y: p1.y.min(p2.y),
+      },
+      pmax: Point {
+        x: p1.x.max(p2.x),
+        y: p1.y.max(p2.y),
+      },
+    }
+  }
+}
+
+impl<T> Segment<T>
+where
+  T: Copy + Ord + Add<Output = T> + Sub<Output = T> + Mul<Output = T> + From<i8>,
+{
+  pub fn intersect(&self, other: &Self) -> bool {
+    let ux = self.pmin.x.max(other.pmin.x);
+    let vx = self.pmax.x.min(other.pmax.x);
+    if ux > vx {
+      return false;
+    }
+    let uy = self.pmin.y.max(other.pmin.y);
+    let vy = self.pmax.y.min(other.pmax.y);
+    if uy > vy {
+      return false;
+    }
+    !(self.l.one_side(&other.p1, &other.p2) || other.l.one_side(&self.p1, &self.p2))
   }
 }
