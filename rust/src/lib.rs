@@ -9,6 +9,7 @@ pub mod kuhn;
 pub mod math;
 pub mod maxflow;
 pub mod polyhash;
+pub mod primes;
 pub mod random;
 pub mod segment_tree;
 pub mod sieve;
