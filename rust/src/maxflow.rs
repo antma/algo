@@ -178,6 +178,7 @@ where
     }
   }
   pub fn add_edge(&mut self, i: usize, j: usize, w1: C, w2: C) {
+    debug_assert!(w1 > C::from(0));
     let ei = self.edges[i].len();
     let ej = self.edges[j].len();
     self.edges[i].push(Edge::new(j, ej, w1));
