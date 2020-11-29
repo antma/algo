@@ -1,7 +1,7 @@
 use std::cmp::Ordering;
 use std::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BigInt {
   a: Vec<u32>,
 }
@@ -167,3 +167,27 @@ impl PartialEq for BigInt {
   }
 }
 impl Eq for BigInt {}
+
+impl std::str::FromStr for BigInt {
+  type Err = String;
+  fn from_str(s: &str) -> Result<Self, Self::Err> {
+    let c = s.as_bytes();
+    for (i, k) in c.iter().enumerate() {
+      if *k < 48 || *k > 57 {
+        return Err(format!(
+          "illegal character {} at {} position",
+          *k as char, i
+        ));
+      }
+    }
+    let l = c.len();
+    let mut a = Vec::with_capacity((l + 8) / 9);
+    let mut i = l;
+    while i > 0 {
+      let j = if i >= 9 { i - 9 } else { 0 };
+      a.push(u32::from_str(&s[j..i]).unwrap());
+      i = j;
+    }
+    Ok(BigInt { a })
+  }
+}

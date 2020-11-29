@@ -1,4 +1,5 @@
 use algo::bigint::BigInt;
+use std::str::FromStr;
 
 #[test]
 fn hand1() {
@@ -40,6 +41,7 @@ fn fibs() {
     b = c;
   }
   assert_eq!(b.to_string(), FIB99);
+  assert_eq!(b, BigInt::from_str(FIB99).unwrap());
 }
 #[test]
 fn factorial() {
