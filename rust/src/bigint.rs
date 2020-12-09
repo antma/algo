@@ -43,13 +43,13 @@ impl BigInt {
   }
 }
 
-impl std::string::ToString for BigInt {
-  fn to_string(&self) -> String {
-    let mut s = self.a.last().unwrap().to_string();
-    for i in (0..self.a.len() - 1).rev() {
-      s.push_str(&format!("{:09}", self.a[i])[..]);
+impl std::fmt::Display for BigInt {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    write!(f, "{}", self.a.last().unwrap())?;
+    for p in self.a.iter().rev().skip(1) {
+      write!(f, "{:09}", *p)?;
     }
-    s
+    Ok(())
   }
 }
 
