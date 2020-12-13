@@ -6,7 +6,7 @@ pub struct PrimeTable {
 impl PrimeTable {
   pub fn new(n: usize) -> Self {
     let m = n / 2;
-    let mut a = vec![u32::MAX; (n + 63) >> 6];
+    let mut a = vec![0xffffffffu32; (n + 63) >> 6];
     a[0] -= 1;
     let mut i = 1usize;
     while i * i < n {

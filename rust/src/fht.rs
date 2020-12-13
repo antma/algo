@@ -13,14 +13,14 @@ impl FHT {
       ldn += 1;
     }
     Self {
-      tbl: vec![u32::MAX; n],
+      tbl: vec![0xffffffffu32; n],
       n,
       h,
       ldn,
     }
   }
   fn revbin_update(&mut self, k: usize) -> usize {
-    if self.tbl[k] != u32::MAX {
+    if self.tbl[k] != 0xffffffffu32 {
       return self.tbl[k] as usize;
     }
     let mut r = k;

@@ -51,7 +51,7 @@ where
   pub fn new(n: usize) -> Self {
     PushRelabelMaxFlowGraph {
       edges: vec![vec![Edge::zero(); 0]; n],
-      current: vec![std::usize::MAX; n],
+      current: vec![0xffffffffusize; n],
       h: vec![0; n],
       nl: vec![-1; n],
       e: vec![C::from(0); n],
@@ -104,7 +104,7 @@ where
     self.e[j] += d;
   }
   fn lift(&mut self, i: usize) {
-    let mut m = i32::MAX;
+    let mut m = 0x7fffffffi32;
     for p in &self.edges[i] {
       if p.f < p.c && m > self.h[p.v] {
         m = self.h[p.v];
