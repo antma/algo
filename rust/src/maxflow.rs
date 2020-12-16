@@ -1,5 +1,4 @@
 use std::ops::{AddAssign, Neg, Sub, SubAssign};
-
 #[derive(Clone, Debug)]
 struct DListEntry {
   prev: usize,
@@ -66,11 +65,15 @@ where
     self.dl[v].prev = u;
   }
   fn insert(&mut self, ht: usize, v: usize) {
-    self.add_link(self.dl[self.n + ht].prev, v);
-    self.add_link(v, self.n + ht);
+    let n = self.n;
+    let u = self.dl[n + ht].prev;
+    self.add_link(u, v);
+    self.add_link(v, n + ht);
   }
   fn remove(&mut self, i: usize) {
-    self.add_link(self.dl[i].prev, self.dl[i].next);
+    let u = self.dl[i].prev;
+    let v = self.dl[i].next;
+    self.add_link(u, v);
   }
   fn init_preflow(&mut self) {
     let n = self.n;
@@ -80,11 +83,8 @@ where
     }
     self.h[0] = n as i32;
     for k in 0..self.edges[0].len() {
-      let p = &mut self.edges[0][k];
-      let i = p.v;
-      let c = p.c;
-      let e = p.e;
-      p.f = c;
+      let Edge { v: i, c, e, .. } = self.edges[0][k];
+      self.edges[0][k].f = c;
       if i > 0 && i < n - 1 && C::from(0) == self.e[i] {
         self.insert(0, i);
       }
@@ -94,12 +94,10 @@ where
     self.gc[0] = (n - 1) as i32;
   }
   fn push(&mut self, i: usize, e: usize) {
-    let p = &mut self.edges[i][e];
-    let j = p.v;
-    let d = std::cmp::min(self.e[i], p.c - p.f);
-    let pe = p.e;
-    p.f += d;
-    self.edges[j][pe].f = -p.f;
+    let Edge { v: j, c, e: pe, f } = self.edges[i][e];
+    let d = std::cmp::min(self.e[i], c - f);
+    self.edges[i][e].f += d;
+    self.edges[j][pe].f -= d;
     self.e[i] -= d;
     self.e[j] += d;
   }
@@ -133,10 +131,11 @@ where
           let maxh = self.maxh;
           self.lift(i);
           self.remove(i);
-          if self.h[i] < (n as i32) {
-            self.gc[self.h[i] as usize] += 1;
-            self.insert(self.h[i] as usize, i);
-            self.nl[self.h[i] as usize] = if self.dl[maxh as usize + n].next >= n {
+          let hi = self.h[i] as usize;
+          if hi < n {
+            self.gc[hi] += 1;
+            self.insert(hi, i);
+            self.nl[hi] = if self.dl[maxh as usize + n].next >= n {
               self.nl[maxh as usize]
             } else {
               maxh
@@ -151,24 +150,24 @@ where
         }
       } else {
         let e = self.current[i];
-        let p = &self.edges[i][e];
-        let j = p.v;
-        let pf = p.f;
-        let pc = p.c;
+        let Edge {
+          v: j, f: pf, c: pc, ..
+        } = self.edges[i][e];
         if self.h[i] == self.h[j] + 1 && pf < pc {
           let aj = self.e[j] <= C::from(0);
           self.push(i, e);
+          let maxh = self.maxh as usize;
           if aj && j > 0 && j < n - 1 && self.e[j] > C::from(0) {
-            self.insert((self.maxh - 1) as usize, j);
-            if self.nl[self.maxh as usize] != self.maxh - 1 {
-              self.nl[(self.maxh - 1) as usize] = self.nl[self.maxh as usize];
-              self.nl[self.maxh as usize] = self.maxh - 1;
+            self.insert(maxh - 1, j);
+            if self.nl[maxh] != (maxh - 1) as i32 {
+              self.nl[maxh - 1] = self.nl[maxh];
+              self.nl[maxh] = (maxh - 1) as i32;
             }
           }
           if self.e[i] <= C::from(0) {
             self.remove(i);
-            if self.dl[(self.maxh as usize) + n].next >= n {
-              self.maxh = self.nl[self.maxh as usize];
+            if self.dl[maxh + n].next >= n {
+              self.maxh = self.nl[maxh];
             }
           }
         } else {
