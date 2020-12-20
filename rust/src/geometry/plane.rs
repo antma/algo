@@ -137,6 +137,51 @@ impl Circle<f64> {
       r: p.dist(p1),
     })
   }
+  pub fn intersect_with_line(&self, l: &Line<f64>, eps: f64) -> Vec<Point<f64>> {
+    let c0 = l.c - (l.a * self.c.x + l.b * self.c.y);
+    let idp = 1.0 / (l.a * l.a + l.b * l.b);
+    let e = c0 * idp;
+    let x0 = l.a * e;
+    let y0 = l.b * e;
+    let d = x0.hypot(y0);
+    let r = self.r;
+    if (r - d).abs() < eps {
+      vec![Point { x: x0, y: y0 }]
+    } else if r < d {
+      Vec::new()
+    } else {
+      let m = ((r * r - c0 * c0 * idp) * idp).sqrt();
+      vec![
+        Point {
+          x: x0 + l.b * m,
+          y: y0 - l.a * m,
+        },
+        Point {
+          x: x0 - l.b * m,
+          y: y0 + l.a * m,
+        },
+      ]
+    }
+    .into_iter()
+    .map(|q| q + self.c)
+    .collect()
+  }
+  pub fn intersect_with_circle(&self, other: &Self, eps: f64) -> Vec<Point<f64>> {
+    let p = other.c - self.c;
+    let l = Line {
+      a: 2.0 * p.x,
+      b: 2.0 * p.y,
+      c: (p.dot_product(&p) + self.r * self.r) - other.r * other.r,
+    };
+    let t = Circle {
+      c: Point { x: 0.0, y: 0.0 },
+      r: self.r,
+    };
+    t.intersect_with_line(&l, eps)
+      .into_iter()
+      .map(|q| q + self.c)
+      .collect()
+  }
 }
 
 pub struct Segment<T> {
