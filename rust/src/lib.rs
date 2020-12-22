@@ -6,6 +6,7 @@ pub mod geometry;
 pub mod integration;
 pub mod intm;
 pub mod kuhn;
+pub mod linear_sieve;
 pub mod math;
 pub mod maxflow;
 pub mod polyhash;
