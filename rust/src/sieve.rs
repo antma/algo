@@ -13,9 +13,10 @@ where
       v.push(c);
     } else {
       let mut cur = c;
-      for _ in 0..=self.0[k].1 {
-        self.go(v, cur, k + 1);
+      self.go(v, cur, k + 1);
+      for _ in 1..=self.0[k].1 {
         cur *= self.0[k].0;
+        self.go(v, cur, k + 1);
       }
     }
   }
