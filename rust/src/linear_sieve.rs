@@ -1,6 +1,4 @@
-use std::ops::Mul;
-
-fn linear_sieve<T: From<i8> + Clone + Copy + Mul<Output = T>>(
+fn linear_sieve<T: From<i8> + Clone + Copy + std::ops::Mul<Output = T>>(
   n: usize,
   prime: fn(i32) -> T,
   divides: fn(T, i32) -> T,
@@ -37,4 +35,43 @@ pub fn mus(n: usize) -> Vec<i8> {
 
 pub fn totients(n: usize) -> Vec<i32> {
   linear_sieve(n, |p| p - 1, |acc, j| acc * j)
+}
+
+//sum_{1<=k<=n} = f(floor(n / k))
+pub struct HarmonicSeries<T> {
+  n: T,
+  cur: T,
+  front: T,
+}
+
+impl<T: From<u8> + Copy> HarmonicSeries<T> {
+  pub fn new(n: T) -> Self {
+    Self {
+      n,
+      cur: n,
+      front: T::from(1),
+    }
+  }
+}
+
+impl<
+    T: From<u8> + PartialOrd + std::ops::Add<Output = T> + std::ops::Div<Output = T> + Ord + Copy,
+  > std::iter::Iterator for HarmonicSeries<T>
+{
+  type Item = (std::ops::Range<T>, T);
+  fn next(&mut self) -> Option<Self::Item> {
+    if self.front > self.n {
+      None
+    } else {
+      let f = self.front;
+      let c = self.cur;
+      self.front = T::from(1) + (self.n / c);
+      if f > self.n {
+        self.front = self.n + T::from(1);
+      } else {
+        self.cur = self.n / self.front;
+      }
+      Some((f..self.front, c))
+    }
+  }
 }
