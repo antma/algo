@@ -1,6 +1,6 @@
 use std::ops::Mul;
 
-fn linear_sieve<T: From<u8> + Clone + Copy + Mul<Output = T>>(
+fn linear_sieve<T: From<i8> + Clone + Copy + Mul<Output = T>>(
   n: usize,
   prime: fn(i32) -> T,
   divides: fn(T, i32) -> T,
@@ -29,6 +29,10 @@ fn linear_sieve<T: From<u8> + Clone + Copy + Mul<Output = T>>(
     }
   }
   f
+}
+
+pub fn mus(n: usize) -> Vec<i8> {
+  linear_sieve(n, |_| -1, |_, _| 0)
 }
 
 pub fn totients(n: usize) -> Vec<i32> {
