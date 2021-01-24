@@ -121,6 +121,24 @@ impl MulAssign<u32> for BigInt {
   }
 }
 
+impl MulAssign<&BigInt> for BigInt {
+  fn mul_assign(&mut self, rhs: &BigInt) {
+    let mut r = BigInt::zero();
+    for (i, j) in rhs.a.iter().enumerate() {
+      if *j == 0 {
+        continue;
+      }
+      let mut v = vec![0u32; i];
+      let mut x = self.clone();
+      v.append(&mut x.a);
+      x.a = v;
+      x *= *j;
+      r += &x;
+    }
+    self.a = r.a;
+  }
+}
+
 impl DivAssign<u32> for BigInt {
   fn div_assign(&mut self, rhs: u32) {
     assert!(rhs < 1_000_000_000);
