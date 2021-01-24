@@ -24,6 +24,16 @@ fn mus() {
   assert_eq!(m1, m2);
 }
 
+#[test]
+fn numdivs() {
+  let nd2 = vec![1, 2, 2, 3, 2, 4, 2, 4, 3, 4, 2, 6, 2, 4, 4, 5, 2, 6, 2, 6];
+  let nd1: Vec<_> = algo::linear_sieve::numdivs(21)
+    .into_iter()
+    .skip(1)
+    .collect();
+  assert_eq!(nd1, nd2);
+}
+
 fn harm_slow(n: u32, f: fn(u32) -> u32) -> u32 {
   (1..=n).map(|i| f(n / i)).sum()
 }
