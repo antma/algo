@@ -2,6 +2,7 @@ pub mod assignment_problem;
 pub mod bigint;
 pub mod bits;
 pub mod disjoint_set;
+pub mod fenwick_tree;
 pub mod fht;
 pub mod geometry;
 pub mod integration;
