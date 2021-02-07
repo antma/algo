@@ -26,3 +26,15 @@ pub fn square_equation(a: f64, b: f64, c: f64, eps: f64) -> Vec<f64> {
   }
   t
 }
+
+pub fn sqrtint(x: u64) -> u32 {
+  const M: u64 = 0xffff_ffff;
+  let mut t = ((x as f64).sqrt().floor() as u64).min(M);
+  while t < M && (t + 1) * (t + 1) <= x {
+    t += 1;
+  }
+  while t * t > x {
+    t -= 1;
+  }
+  t as u32
+}
