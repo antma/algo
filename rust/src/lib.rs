@@ -14,6 +14,7 @@ pub mod maxflow;
 pub mod polyhash;
 pub mod primes;
 pub mod random;
+pub mod ratio;
 pub mod segment_tree;
 pub mod sieve;
 pub mod splay_tree;
