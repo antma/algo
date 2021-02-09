@@ -20,7 +20,7 @@ pub mod sieve;
 pub mod splay_tree;
 
 pub use crate::assignment_problem::AssignmentProblem;
-pub use crate::bigint::BigInt;
+pub use crate::bigint::ubigint::UBigInt;
 pub use crate::disjoint_set::DisjointSetWithSize;
 
 #[cfg(test)]

@@ -1,9 +1,9 @@
-use algo::bigint::BigInt;
+use algo::bigint::ubigint::UBigInt;
 use std::str::FromStr;
 
 #[test]
 fn hand1() {
-  let mut a = BigInt::one();
+  let mut a = UBigInt::one();
   a *= 123456789;
   assert_eq!(a.to_string(), "123456789");
   let mut b = a.clone();
@@ -18,7 +18,7 @@ fn hand1() {
 }
 #[test]
 fn fibs() {
-  let mut a = BigInt::one();
+  let mut a = UBigInt::one();
   let mut b = a.clone();
   for _i in 2..=99 {
     let c = b.clone();
@@ -41,11 +41,11 @@ fn fibs() {
     b = c;
   }
   assert_eq!(b.to_string(), FIB99);
-  assert_eq!(b, BigInt::from_str(FIB99).unwrap());
+  assert_eq!(b, UBigInt::from_str(FIB99).unwrap());
 }
 #[test]
 fn factorial() {
-  let mut a = BigInt::one();
+  let mut a = UBigInt::one();
   for i in 2..=100 {
     a *= i;
   }
@@ -53,7 +53,7 @@ fn factorial() {
 }
 #[test]
 fn binomial() {
-  let mut a = BigInt::one();
+  let mut a = UBigInt::one();
   for i in 51..=100 {
     a *= i;
   }
@@ -65,12 +65,12 @@ fn binomial() {
 }
 #[test]
 fn comparision() {
-  assert!(BigInt::one() == BigInt::one());
-  assert!(BigInt::one() > BigInt::zero());
-  assert!(BigInt::zero() < BigInt::one());
-  let mut x = BigInt::one();
+  assert!(UBigInt::one() == UBigInt::one());
+  assert!(UBigInt::one() > UBigInt::zero());
+  assert!(UBigInt::zero() < UBigInt::one());
+  let mut x = UBigInt::one();
   for _ in 0..20 {
     x *= 10;
-    assert!(BigInt::one() < x);
+    assert!(UBigInt::one() < x);
   }
 }
