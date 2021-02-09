@@ -1,3 +1,4 @@
+use algo::bigint::bigint::BigInt;
 use algo::bigint::ubigint::UBigInt;
 use std::str::FromStr;
 
@@ -73,4 +74,27 @@ fn comparision() {
     x *= 10;
     assert!(UBigInt::one() < x);
   }
+}
+
+#[test]
+fn test_signed_bigint() {
+  let one = BigInt::from_str("1").unwrap();
+  let neg_two = BigInt::from_str("-2").unwrap();
+  let neg_one = BigInt::from_str("-1").unwrap();
+  let two = BigInt::from_str("2").unwrap();
+  assert_eq!(one.clone() + neg_two.clone(), neg_one.clone());
+  assert_eq!(one.clone() + one.clone(), two.clone());
+  assert_eq!(neg_one.clone() + neg_one.clone(), neg_two.clone());
+  assert_eq!(neg_two.clone() + one.clone(), neg_one.clone());
+  assert_eq!(one.clone() - two.clone(), neg_one.clone());
+  assert_eq!(two.clone() - one.clone(), one.clone());
+  assert_eq!(
+    neg_two.clone() * two.clone(),
+    BigInt::from_str("-4").unwrap()
+  );
+  assert_eq!(two.clone() * two.clone(), BigInt::from_str("4").unwrap());
+  assert_eq!(
+    neg_two.clone() * neg_two.clone(),
+    BigInt::from_str("4").unwrap()
+  );
 }
