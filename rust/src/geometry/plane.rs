@@ -48,19 +48,19 @@ impl Point<f64> {
   }
 }
 
-impl<T: Mul<Output = T> + Copy> Mul<T> for Point<T> {
+impl<T: Mul<Output = T> + Clone> Mul<T> for Point<T> {
   type Output = Self;
   fn mul(self, other: T) -> Self::Output {
     Self {
-      x: self.x * other,
-      y: self.y * other,
+      x: self.x.clone() * other.clone(),
+      y: self.y.clone() * other,
     }
   }
 }
 
-impl<T: Copy + Add<Output = T> + Sub<Output = T> + Mul<Output = T>> Point<T> {
-  fn dot_product(&self, other: &Self) -> T {
-    self.x * other.x + self.y * other.y
+impl<T: Clone + Add<Output = T> + Sub<Output = T> + Mul<Output = T>> Point<T> {
+  pub fn dot_product(&self, other: &Self) -> T {
+    self.x.clone() * other.x.clone() + self.y.clone() * other.y.clone()
   }
 }
 
@@ -71,26 +71,26 @@ pub struct Line<T> {
   c: T,
 }
 
-impl<T: Copy + Add<Output = T> + Sub<Output = T> + Mul<Output = T>> Line<T> {
+impl<T: Clone + Add<Output = T> + Sub<Output = T> + Mul<Output = T>> Line<T> {
   pub fn new(p: &Point<T>, q: &Point<T>) -> Self {
-    let a = p.y - q.y;
-    let b = q.x - p.x;
+    let a = p.y.clone() - q.y.clone();
+    let b = q.x.clone() - p.x.clone();
     Self {
+      c: a.clone() * p.x.clone() + b.clone() * p.y.clone(),
       a,
       b,
-      c: a * p.x + b * p.y,
     }
   }
   pub fn value(&self, p: &Point<T>) -> T {
-    self.a * p.x + self.b * p.y - self.c
+    self.a.clone() * p.x.clone() + self.b.clone() * p.y.clone() - self.c.clone()
   }
 }
 
 impl<T> Line<T>
 where
-  T: Copy + Add<Output = T> + Sub<Output = T> + Mul<Output = T> + From<i8> + Ord,
+  T: Clone + Add<Output = T> + Sub<Output = T> + Mul<Output = T> + From<i8> + Ord,
 {
-  pub fn one_side(&self, p1: &Point<T>, p2: &Point<T>) -> bool {
+  fn one_side(&self, p1: &Point<T>, p2: &Point<T>) -> bool {
     let z = T::from(0);
     let v1 = self.value(p1);
     let v2 = self.value(p2);
@@ -194,20 +194,20 @@ pub struct Segment<T> {
 
 impl<T> Segment<T>
 where
-  T: Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Copy + Ord,
+  T: Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Clone + Ord,
 {
   pub fn new(p1: &Point<T>, p2: &Point<T>) -> Self {
     Self {
-      p1: *p1,
-      p2: *p2,
+      p1: p1.clone(),
+      p2: p2.clone(),
       l: Line::new(p1, p2),
       pmin: Point {
-        x: p1.x.min(p2.x),
-        y: p1.y.min(p2.y),
+        x: p1.x.clone().min(p2.x.clone()),
+        y: p1.y.clone().min(p2.y.clone()),
       },
       pmax: Point {
-        x: p1.x.max(p2.x),
-        y: p1.y.max(p2.y),
+        x: p1.x.clone().max(p2.x.clone()),
+        y: p1.y.clone().max(p2.y.clone()),
       },
     }
   }
@@ -215,16 +215,16 @@ where
 
 impl<T> Segment<T>
 where
-  T: Copy + Ord + Add<Output = T> + Sub<Output = T> + Mul<Output = T> + From<i8>,
+  T: Clone + Ord + Add<Output = T> + Sub<Output = T> + Mul<Output = T> + From<i8>,
 {
   pub fn intersect(&self, other: &Self) -> bool {
-    let ux = self.pmin.x.max(other.pmin.x);
-    let vx = self.pmax.x.min(other.pmax.x);
+    let ux = self.pmin.x.clone().max(other.pmin.x.clone());
+    let vx = self.pmax.x.clone().min(other.pmax.x.clone());
     if ux > vx {
       return false;
     }
-    let uy = self.pmin.y.max(other.pmin.y);
-    let vy = self.pmax.y.min(other.pmax.y);
+    let uy = self.pmin.y.clone().max(other.pmin.y.clone());
+    let vy = self.pmax.y.clone().min(other.pmax.y.clone());
     if uy > vy {
       return false;
     }
