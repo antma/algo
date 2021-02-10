@@ -7,6 +7,22 @@ pub struct BigInt {
   x: UBigInt,
 }
 
+impl From<i8> for BigInt {
+  fn from(i: i8) -> Self {
+    if i >= 0 {
+      Self {
+        negative: false,
+        x: UBigInt::from(i),
+      }
+    } else {
+      Self {
+        negative: true,
+        x: UBigInt::from(i.abs()),
+      }
+    }
+  }
+}
+
 impl Ord for BigInt {
   fn cmp(&self, other: &BigInt) -> std::cmp::Ordering {
     if self.negative && !other.negative {

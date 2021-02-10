@@ -6,6 +6,12 @@ pub struct UBigInt {
   a: Vec<u32>,
 }
 
+impl From<i8> for UBigInt {
+  fn from(i: i8) -> Self {
+    Self { a: vec![i as u32] }
+  }
+}
+
 impl UBigInt {
   pub fn zero() -> Self {
     UBigInt { a: vec![0u32] }

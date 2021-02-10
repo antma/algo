@@ -77,6 +77,13 @@ fn comparision() {
 }
 
 #[test]
+fn test_from_i8() {
+  assert_eq!(BigInt::from(127) + BigInt::from(-127), BigInt::from(0));
+  assert_eq!(BigInt::from(127) + BigInt::from(-126), BigInt::from(1));
+  assert_eq!(BigInt::from(126) + BigInt::from(-127), BigInt::from(-1));
+}
+
+#[test]
 fn test_signed_bigint() {
   let one = BigInt::from_str("1").unwrap();
   let neg_two = BigInt::from_str("-2").unwrap();
