@@ -124,3 +124,32 @@ where
     }
   }
 }
+
+impl<T> Ord for Ratio<T>
+where
+  T: Copy + Mul<Output = T> + Ord,
+{
+  fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+    let ad = self.num * other.den;
+    let bc = self.den * other.num;
+    ad.cmp(&bc)
+  }
+}
+
+impl<T> PartialOrd for Ratio<T>
+where
+  T: Copy + Mul<Output = T> + Ord,
+{
+  fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+    Some(self.cmp(other))
+  }
+}
+
+impl<T> From<i8> for Ratio<T>
+where
+  T: Copy + PartialOrd + From<i8> + Rem<Output = T> + Neg<Output = T> + Div<Output = T>,
+{
+  fn from(x: i8) -> Self {
+    Self::new(T::from(x), T::from(1))
+  }
+}
