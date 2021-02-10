@@ -135,3 +135,12 @@ impl std::str::FromStr for BigInt {
     Ok(t)
   }
 }
+
+impl std::fmt::Display for BigInt {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    if self.negative {
+      write!(f, "-")?;
+    }
+    self.x.fmt(f)
+  }
+}

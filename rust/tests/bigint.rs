@@ -84,6 +84,14 @@ fn test_from_i8() {
 }
 
 #[test]
+fn test_display() {
+  assert_eq!(
+    (BigInt::from_str("-857").unwrap() * BigInt::from_str("14405693").unwrap()).to_string(),
+    "-12345678901"
+  );
+}
+
+#[test]
 fn test_signed_bigint() {
   let one = BigInt::from_str("1").unwrap();
   let neg_two = BigInt::from_str("-2").unwrap();
