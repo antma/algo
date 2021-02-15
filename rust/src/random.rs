@@ -53,6 +53,19 @@ impl KnuthRandom {
   pub fn next_f64(&mut self) -> f64 {
     (self.next() as f64) * (1.0f64 / 2147483647.0f64)
   }
+  pub fn shuffle<T>(&mut self, a: &mut [T]) {
+    let n = a.len();
+    if n == 0 {
+      return;
+    }
+    for i in 0..n - 1 {
+      let m = n - i;
+      let j = i + (self.next_f64() * m as f64) as usize;
+      if i != j {
+        a.swap(i, j);
+      }
+    }
+  }
   pub fn normal(&mut self, mean: f64, sigma: f64) -> f64 {
     loop {
       let u1 = self.next_f64();
