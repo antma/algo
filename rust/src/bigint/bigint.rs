@@ -114,6 +114,24 @@ impl Mul for BigInt {
   }
 }
 
+impl Mul<i32> for BigInt {
+  type Output = Self;
+  fn mul(self, rhs: i32) -> Self {
+    if rhs == 0 {
+      BigInt::from(0)
+    } else {
+      Self {
+        negative: self.negative != (rhs < 0),
+        x: {
+          let mut w = self.x;
+          w *= rhs.abs() as u32;
+          w
+        },
+      }
+    }
+  }
+}
+
 impl std::str::FromStr for BigInt {
   type Err = String;
   fn from_str(s: &str) -> Result<Self, Self::Err> {
