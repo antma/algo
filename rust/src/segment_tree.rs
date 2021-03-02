@@ -46,3 +46,51 @@ impl<T: Clone> SegmentTree<T> {
     return res;
   }
 }
+
+//modification on range, query in index
+impl<T: Clone> SegmentTree<T> {
+  pub fn update_range(&mut self, u: usize, v: usize, value: T) {
+    let mut l = u + self.n;
+    let mut r = v + self.n;
+    while l < r {
+      if (l & 1) != 0 {
+        self.t[l] = (self.f)(&self.t[l], &value);
+        l += 1;
+      }
+      if (r & 1) != 0 {
+        r -= 1;
+        self.t[r] = (self.f)(&self.t[r], &value);
+      }
+      l >>= 1;
+      r >>= 1;
+    }
+  }
+  pub fn index(&self, zero: T, index: usize) -> T {
+    let mut res = zero;
+    let mut i = index + self.n;
+    while i > 0 {
+      res = (self.f)(&res, &self.t[i]);
+      i >>= 1;
+    }
+    res
+  }
+  pub fn create(n: usize, zero: T, f: fn(&T, &T) -> T) -> Self {
+    Self {
+      n,
+      f,
+      t: vec![zero; 2 * n],
+    }
+  }
+  fn push(&mut self, zero: T) {
+    for i in 1..self.n {
+      let k = i << 1;
+      self.t[k] = (self.f)(&self.t[k], &self.t[i]);
+      self.t[k + 1] = (self.f)(&self.t[k + 1], &self.t[i]);
+      self.t[i] = zero.clone();
+    }
+  }
+  pub fn force(&mut self, zero: T) -> Vec<T> {
+    self.push(zero);
+    self.t[self.n..2 * self.n].to_vec()
+  }
+}
