@@ -27,3 +27,9 @@ fn minimal() {
   let mut g = AssignmentProblem::new(a);
   assert_eq!(g.maximize(), 1);
 }
+#[test]
+fn test_i64() {
+  let a = vec![vec![1i64, 2i64], vec![2i64, 4i64]];
+  let mut g = AssignmentProblem::new(a);
+  assert_eq!(g.maximize(), 5i64);
+}

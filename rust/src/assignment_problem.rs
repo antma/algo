@@ -1,4 +1,3 @@
-use std::cmp::{Ord, PartialOrd};
 use std::ops::{AddAssign, Mul, Neg, SubAssign};
 
 pub struct AssignmentProblem<T> {
@@ -13,14 +12,7 @@ pub struct AssignmentProblem<T> {
 
 impl<T> AssignmentProblem<T>
 where
-  T: Copy
-    + From<i32>
-    + PartialOrd<i32>
-    + AddAssign
-    + SubAssign
-    + Mul<Output = T>
-    + Neg<Output = T>
-    + Ord,
+  T: Copy + From<i32> + AddAssign + SubAssign + Mul<Output = T> + Neg<Output = T> + Ord,
 {
   pub fn new(g: Vec<Vec<T>>) -> Self {
     let n = g.len();
@@ -37,8 +29,9 @@ where
   fn rec(&mut self, i: usize) -> bool {
     if !self.s[i] {
       self.s[i] = true;
+      let z = T::from(0);
       for j in 0..self.n {
-        if self.g[i][j] == 0 && (self.b[j] < 0 || self.rec(self.b[j] as usize)) {
+        if self.g[i][j] == z && (self.b[j] < 0 || self.rec(self.b[j] as usize)) {
           self.a[i] = j as i32;
           self.b[j] = i as i32;
           return true;
@@ -96,7 +89,7 @@ where
       .map(|i| *self.g[i].iter().min().unwrap())
       .min()
       .unwrap();
-    if v < 0 {
+    if v < T::from(0) {
       res += v * (T::from(n as i32));
       for i in 0..n {
         for x in self.g[i].iter_mut() {
@@ -107,7 +100,7 @@ where
     loop {
       for i in 0..n {
         let min = *self.g[i].iter().min().unwrap();
-        if min > 0 {
+        if min > T::from(0) {
           res += min;
           for j in 0..n {
             self.g[i][j] -= min;
@@ -116,7 +109,7 @@ where
       }
       for j in 0..n {
         let min = (0..n).map(|i| self.g[i][j]).min().unwrap();
-        if min > 0 {
+        if min > T::from(0) {
           res += min;
           for i in 0..n {
             self.g[i][j] -= min;
