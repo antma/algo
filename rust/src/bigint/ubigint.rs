@@ -47,6 +47,9 @@ impl UBigInt {
       self.a.truncate(k);
     }
   }
+  pub fn is_zero(&self) -> bool {
+    self.a.len() == 1 && self.a[0] == 0
+  }
 }
 
 impl std::fmt::Display for UBigInt {

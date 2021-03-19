@@ -7,6 +7,12 @@ pub struct BigInt {
   x: UBigInt,
 }
 
+impl BigInt {
+  pub fn is_zero(&self) -> bool {
+    self.x.is_zero()
+  }
+}
+
 impl From<i8> for BigInt {
   fn from(i: i8) -> Self {
     if i >= 0 {
@@ -47,7 +53,11 @@ impl PartialOrd for BigInt {
 
 impl PartialEq for BigInt {
   fn eq(&self, other: &BigInt) -> bool {
-    self.negative == other.negative && self.x == other.x
+    if self.is_zero() && other.is_zero() {
+      true
+    } else {
+      self.negative == other.negative && self.x == other.x
+    }
   }
 }
 impl Eq for BigInt {}

@@ -112,4 +112,8 @@ fn test_signed_bigint() {
     neg_two.clone() * neg_two.clone(),
     BigInt::from_str("4").unwrap()
   );
+  assert_eq!(
+    BigInt::from_str("-0").unwrap(),
+    BigInt::from_str("-0").unwrap()
+  );
 }
