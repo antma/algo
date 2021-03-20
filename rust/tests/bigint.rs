@@ -112,8 +112,15 @@ fn test_signed_bigint() {
     neg_two.clone() * neg_two.clone(),
     BigInt::from_str("4").unwrap()
   );
-  assert_eq!(
-    BigInt::from_str("-0").unwrap(),
-    BigInt::from_str("-0").unwrap()
-  );
+  let zero = BigInt::from_str("0").unwrap();
+  assert_eq!(BigInt::from_str("-0").unwrap(), zero);
+  assert_eq!(BigInt::from_str("-0").unwrap() - zero.clone(), zero.clone());
+  assert_eq!(BigInt::from_str("-0").unwrap() + zero.clone(), zero.clone());
+  assert_eq!(zero.clone() - BigInt::from_str("-0").unwrap(), zero.clone());
+  assert_eq!(zero.clone() * BigInt::from_str("-0").unwrap(), zero.clone());
+  let m = BigInt::from_str("1000000000000000000").unwrap();
+  let m2 = BigInt::from_str("-1000000000000000000").unwrap();
+  assert_eq!(m.clone() + m2, zero.clone());
+  assert_eq!(zero.clone() * m.clone(), zero.clone());
+  assert_eq!(m * zero.clone(), zero.clone());
 }

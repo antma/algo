@@ -132,6 +132,9 @@ impl MulAssign<u32> for UBigInt {
 
 impl MulAssign<&UBigInt> for UBigInt {
   fn mul_assign(&mut self, rhs: &UBigInt) {
+    if self.is_zero() {
+      return;
+    }
     let mut r = UBigInt::zero();
     for (i, j) in rhs.a.iter().enumerate() {
       if *j == 0 {
