@@ -10,7 +10,7 @@ import Data.Maybe
 
 -------------------- Geometry --------------------
 geometry_tests :: [Test]
-geometry_tests = [_test1, _test2, _test3, _test4]
+geometry_tests = [_test1, _test2, _test3, _test4, _test5]
   where
     p1 = Geometry.Point 0.0 0.0
     p2 = Geometry.Point 1.0 1.0
@@ -30,11 +30,18 @@ geometry_tests = [_test1, _test2, _test3, _test4]
     Just (Geometry.Circle p7 r7) = Geometry.circumcircle p1 p3 p4 eps
     _test3 = TestCase (assertBool "segment intersected" (Geometry.richSegmentsIntersects s1 s2))
     _test4 = TestCase (assertBool "circumcircle" $ abs (r7 - 0.5 * sqrt 2.0) < eps && (abs (Geometry.dist p7 (Geometry.Point 0.5 0.5))< 1e-6))
+    c1 = Geometry.Circle (Geometry.Point 1.0 2.0) 4.0
+    c2 = Geometry.Circle (Geometry.Point 4.0 2.0) 5.0
+    c1_c2 = Geometry.circleCircleIntersection c1 c2 1e-10
+    p8 = Geometry.Point 1.0 6.0
+    p9 = Geometry.Point 1.0 (-2.0)
+    _test5 = TestCase (assertBool "circle-circle intersection"
+      (any ((<1e-6). (Geometry.dist p8)) c1_c2 && any ((<1e-6). (Geometry.dist p9)) c1_c2))
 
 maket :: [Int32] -> Int32 -> TreapSet.TreapSet
 maket l seed = foldl (\acc (i, j) -> TreapSet.tsInsert i j acc) TreapSet.Nil $ zip l (Random.randoms seed)
 
-test1 :: Test
+test1, test2, test3 :: Test
 test1 = TestCase (assertEqual "" (map (\i -> TreapSet.tsCount i t) [1,2,3,4]) [0,1,2,3])
   where
     t = maket [1,2,3] 7777

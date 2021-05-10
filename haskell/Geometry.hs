@@ -8,6 +8,8 @@ module Geometry (
   linesIntersection,
   circumcircle,
   minimalEnclosingBall,
+  circleCircleIntersection,
+  dotProduct, origin, heron,
   (.+.), (.-.), (.*.), richSegment, richSegmentsIntersects, richSegmentContainsPoint
 ) where
 
@@ -42,6 +44,12 @@ minp p' p'' = pop min p' p''
 
 maxp :: Ord a => Point a -> Point a -> Point a
 maxp p' p'' = pop max p' p''
+
+dotProduct :: Num a => Point a -> Point a -> a
+dotProduct (Point x' y') (Point x'' y'') = x' * x'' + y' * y''
+
+origin :: Num a => Point a
+origin = Point (fromInteger 0) (fromInteger 0)
 
 infixl 6 .+., .-.
 
@@ -87,6 +95,32 @@ linesIntersection (Line a1 b1 c1) (Line a2 b2 c2) eps
     d = a1 * b2 - a2 * b1
     p = Point (c2 * b1 - c1 * b2) (a2 * c1 - a1 * c2)
 
+circleLineIntersection :: Ord a => Floating a => Circle a -> Line a -> a -> [Point a]
+circleLineIntersection (Circle c@(Point cx cy) r) (Line la lb lc) eps
+  | abs (r - d) < eps = move [ Point x0 y0 ]
+  | r < d = []
+  | otherwise =
+      let m = sqrt $ (r * r - c0 * c0 * idp) * idp in
+      move [ Point (x0 + lb * m) (y0 - la * m),
+             Point (x0 - lb * m) (y0 + la * m)]
+  where
+    c0 = negate $ lc + la * cx + lb * cy
+    idp = recip $ la * la + lb * lb
+    e = c0 * idp
+    x0 = la * e
+    y0 = lb * e
+    d = sqrt $ x0 * x0 + y0 * y0
+    move = map (.+. c)
+
+circleCircleIntersection :: Ord a => Floating a => Circle a -> Circle a -> a -> [Point a]
+circleCircleIntersection (Circle p' r') (Circle p'' r'') eps =
+  map (.+. p') $ circleLineIntersection t l eps
+  where
+    p = p'' .-. p'
+    (Point qx qy) = p .+. p
+    l = Line qx qy (r'' * r'' - (dotProduct p p  + r' * r'))
+    t = Circle origin r'
+
 circle :: Point Double -> Point Double -> Circle Double
 circle p1@(Point x1 y1) (Point x2 y2) = Circle p (dist p p1)
   where
@@ -119,3 +153,6 @@ minimalEnclosingBall q rnds eps = let (c, _, _) = foldl' f (circle p1 p2, [p1,p2
   where
     ( (p1 : p2 : ps), rnds') = randomShuffle q rnds
     f (c, l, r) p = if pointInCircle p c eps then (c, p:l, r) else let (c', r') = minimalEnclosingBallP1 l p r eps in (c', p:l, r')
+
+heron :: Floating a => a -> a -> a -> a
+heron a b c = let p = (a + b + c) * 0.5 in sqrt $ p * (p - a) * (p - b) * (p - c)
