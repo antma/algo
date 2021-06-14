@@ -24,7 +24,8 @@ impl BipartiteMatching {
       self.used[i] = true;
       for k in 0..self.a[i].len() {
         let j = self.a[i][k] as usize;
-        if self.girls[j] < 0 || self.go(self.girls[j] as usize) {
+        let g = self.girls[j];
+        if g < 0 || self.go(g as usize) {
           self.boys[i] = j as i32;
           self.girls[j] = i as i32;
           return true;
