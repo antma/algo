@@ -19,10 +19,10 @@ fn min_test() {
   let st = SegmentTree::new(a.clone(), f);
   for i in 0..m {
     let mut acc = a[i];
-    assert_eq!(st.reduce(i8::MAX, i, i + 1), a[i]);
+    assert_eq!(st.reduce(0x7fi8, i, i + 1), a[i]);
     for j in i + 1..m {
       acc = acc.min(a[j]);
-      assert_eq!(st.reduce(i8::MAX, i, j + 1), acc);
+      assert_eq!(st.reduce(0x7fi8, i, j + 1), acc);
     }
   }
 }
