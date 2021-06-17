@@ -1,29 +1,30 @@
-pub struct BitIterator {
-  u: u32,
-}
+pub struct BitIterator(u32);
 
 impl Iterator for BitIterator {
   type Item = u32;
   fn next(&mut self) -> Option<Self::Item> {
-    if self.u == 0 {
+    if self.0 == 0 {
       None
     } else {
-      let i = self.u.trailing_zeros();
-      self.u ^= 1 << i;
+      let i = self.0.trailing_zeros();
+      self.0 ^= 1 << i;
       Some(i)
     }
+  }
+}
+
+pub struct Bits(u32);
+impl IntoIterator for Bits {
+  type Item = u32;
+  type IntoIter = BitIterator;
+  fn into_iter(self) -> Self::IntoIter {
+    BitIterator(self.0)
   }
 }
 
 pub struct SubmasksIterator {
   s: u32,
   m: u32,
-}
-
-impl SubmasksIterator {
-  pub fn new(m: u32) -> Self {
-    Self { s: m, m }
-  }
 }
 
 impl Iterator for SubmasksIterator {
@@ -35,6 +36,18 @@ impl Iterator for SubmasksIterator {
       let o = Some(self.s);
       self.s = (self.s - 1) & self.m;
       o
+    }
+  }
+}
+
+pub struct Submasks(u32);
+impl IntoIterator for Submasks {
+  type Item = u32;
+  type IntoIter = SubmasksIterator;
+  fn into_iter(self) -> Self::IntoIter {
+    SubmasksIterator {
+      s: self.0,
+      m: self.0,
     }
   }
 }
