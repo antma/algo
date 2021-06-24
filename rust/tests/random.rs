@@ -21,3 +21,14 @@ fn hand() {
     ]
   );
 }
+
+#[test]
+fn random_randrange() {
+  let mut r = KnuthRandom::new(12345);
+  for _ in 0..100_000 {
+    let x = r.randrange(0..0xffff_ffffu32);
+    assert!(x < 0xffff_ffffu32);
+    let x = r.randrange(-0x8000_0000i32..0x7fff_ffffi32);
+    assert!(x >= -0x8000_0000i32 && x < 0x7fff_ffffi32);
+  }
+}
