@@ -17,7 +17,7 @@ fn check(mut x: Vec<f64>, mut y: Vec<f64>) {
   let mut fht = FHT::new(n);
   fht.conv(&mut x, &mut y);
   for i in 0..n {
-    assert!((f[i] - y[i]).abs() < 0.5, format!("{:?} and {:?}", f, y));
+    assert!((f[i] - y[i]).abs() < 0.5, "{:?} and {:?}", f, y);
   }
 }
 
