@@ -1,18 +1,20 @@
 //lazy propagation (increment+max)
 
-pub struct LPIncrementMax<T, F> {
+pub struct LPIncrementMax<T, U, F> {
   n: usize,
   h: u32,
-  a: Vec<T>,
+  a: Vec<U>,
   d: Vec<T>,
   combine: F,
 }
 
-impl<T, F> LPIncrementMax<T, F>
+impl<T, U, F> LPIncrementMax<T, U, F>
 where
+  for<'b> U: std::ops::AddAssign<&'b T>,
   for<'b> T: std::ops::AddAssign<&'b T>,
-  T: Default + Eq + From<i8> + Clone,
-  F: Fn(&T, &T) -> T,
+  T: Eq + From<i8> + Clone,
+  U: Default + From<T>,
+  F: Fn(&U, &U) -> U,
 {
   fn apply(&mut self, p: usize, value: &T) {
     self.a[p] += value;
@@ -61,7 +63,7 @@ where
     self.build(l0);
     self.build(r0 - 1);
   }
-  pub fn query(&mut self, start: T, l0: usize, r0: usize) -> T {
+  pub fn query(&mut self, start: U, l0: usize, r0: usize) -> U {
     let mut l = l0 + self.n;
     let mut r = r0 + self.n;
     self.push(l);
@@ -86,9 +88,11 @@ where
     let h = 8 * std::mem::size_of::<usize>() as u32 - 1 - n.leading_zeros();
     let mut a = Vec::with_capacity(2 * n);
     for _ in 0..n {
-      a.push(T::default());
+      a.push(U::default());
     }
-    a.extend(t);
+    for x in t {
+      a.push(U::from(x));
+    }
     let d = vec![T::from(0i8); n];
     for i in (1..n).rev() {
       let k = i << 1;
