@@ -11,6 +11,7 @@ pub mod integration;
 pub mod intm;
 pub mod intm_fixed;
 pub mod kuhn;
+pub mod lazy_propagation;
 pub mod linear_sieve;
 pub mod math;
 pub mod maxflow;
