@@ -73,7 +73,7 @@ where
   }
   fn push(&mut self, i: usize, e: usize) {
     let Edge { v: j, c, e: pe, f } = self.edges[i][e];
-    let d = std::cmp::min(self.e[i], c - f);
+    let d = self.e[i].min(c - f);
     self.edges[i][e].f += d;
     self.edges[j][pe].f -= d;
     self.e[i] -= d;
