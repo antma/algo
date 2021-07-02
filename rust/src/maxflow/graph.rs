@@ -21,11 +21,23 @@ pub struct Graph<C> {
   pub edges: Vec<Vec<Edge<C>>>,
 }
 
-impl<C: From<i8> + Clone + Ord> Graph<C> {
+impl<C> Graph<C>
+where
+  for<'b> C: std::ops::AddAssign<&'b C> + std::ops::SubAssign<&'b C>,
+  C: From<i8> + Clone + Ord,
+{
   pub fn new(n: usize) -> Self {
     Self {
       edges: vec![Vec::new(); n],
     }
+  }
+  pub fn add_flow(&mut self, v: usize, k: usize, delta: &C) {
+    let (u, l) = {
+      let p = &self.edges[v][k];
+      (p.v, p.e)
+    };
+    self.edges[v][k].f += delta;
+    self.edges[u][l].f -= delta;
   }
   pub fn add_edge(&mut self, i: usize, j: usize, w1: C, w2: C) {
     if w1 > C::from(0) {

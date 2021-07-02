@@ -1,7 +1,5 @@
 use crate::maxflow::graph::{Edge, Graph};
 
-use std::ops::{AddAssign, Neg, Sub, SubAssign};
-
 #[derive(Clone, Debug)]
 struct DListEntry {
   prev: usize,
@@ -9,7 +7,7 @@ struct DListEntry {
 }
 
 pub struct PushRelabelMaxFlow<C> {
-  edges: Vec<Vec<Edge<C>>>,
+  g: Graph<C>,
   current: Vec<usize>,
   h: Vec<i32>,
   nl: Vec<i32>,
@@ -22,12 +20,13 @@ pub struct PushRelabelMaxFlow<C> {
 
 impl<C> PushRelabelMaxFlow<C>
 where
-  C: From<i8> + Copy + Clone + Eq + Ord + AddAssign + SubAssign + Neg<Output = C> + Sub<Output = C>,
+  for<'b> C: std::ops::AddAssign<&'b C> + std::ops::SubAssign<&'b C>,
+  C: From<i8> + Copy + Clone + Eq + Ord + std::ops::Neg<Output = C> + std::ops::Sub<Output = C>,
 {
-  pub fn new(graph: Graph<C>) -> Self {
-    let n = graph.edges.len();
+  pub fn new(g: Graph<C>) -> Self {
+    let n = g.edges.len();
     PushRelabelMaxFlow {
-      edges: graph.edges,
+      g,
       current: vec![0xffffffffusize; n],
       h: vec![0; n],
       nl: vec![-1; n],
@@ -60,28 +59,27 @@ where
       self.dl[i].next = i;
     }
     self.h[0] = n as i32;
-    for k in 0..self.edges[0].len() {
-      let Edge { v: i, c, e, .. } = self.edges[0][k];
-      self.edges[0][k].f = c;
+    for k in 0..self.g.edges[0].len() {
+      let Edge { v: i, c, e, .. } = self.g.edges[0][k];
+      self.g.edges[0][k].f = c;
       if i > 0 && i < n - 1 && C::from(0) == self.e[i] {
         self.insert(0, i);
       }
-      self.e[i] += c;
-      self.edges[i][e].f = -c;
+      self.e[i] += &c;
+      self.g.edges[i][e].f = -c;
     }
     self.gc[0] = (n - 1) as i32;
   }
   fn push(&mut self, i: usize, e: usize) {
-    let Edge { v: j, c, e: pe, f } = self.edges[i][e];
+    let Edge { v: j, c, f, .. } = self.g.edges[i][e];
     let d = self.e[i].min(c - f);
-    self.edges[i][e].f += d;
-    self.edges[j][pe].f -= d;
-    self.e[i] -= d;
-    self.e[j] += d;
+    self.g.add_flow(i, e, &d);
+    self.e[i] -= &d;
+    self.e[j] += &d;
   }
   fn lift(&mut self, i: usize) {
     let mut m = 0x7fffffffi32;
-    for p in &self.edges[i] {
+    for p in &self.g.edges[i] {
       if p.f < p.c && m > self.h[p.v] {
         m = self.h[p.v];
       }
@@ -91,7 +89,7 @@ where
   fn discharge(&mut self, i: usize) {
     let n = self.n;
     while self.e[i] > C::from(0) {
-      if self.current[i] >= self.edges[i].len() {
+      if self.current[i] >= self.g.edges[i].len() {
         self.current[i] = 0;
         self.gc[self.maxh as usize] -= 1;
         if 0 == self.gc[self.maxh as usize] && self.maxh > 0 && self.maxh < (n as i32) {
@@ -130,7 +128,7 @@ where
         let e = self.current[i];
         let Edge {
           v: j, f: pf, c: pc, ..
-        } = self.edges[i][e];
+        } = self.g.edges[i][e];
         if self.h[i] == self.h[j] + 1 && pf < pc {
           let aj = self.e[j] <= C::from(0);
           self.push(i, e);
