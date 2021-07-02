@@ -38,33 +38,36 @@ where
     }
     self.level[n - 1] < n as u32
   }
-  fn dfs(&mut self, v: usize, pushed: C) -> C {
-    if pushed == C::from(0) {
-      return C::from(0);
-    }
+  fn dfs(&mut self, infinite_flow: C) -> C {
     let n = self.g.edges.len();
-    if v + 1 == n {
-      return pushed;
-    }
-    while self.ptr[v] < self.g.edges[v].len() {
-      let k = self.ptr[v];
-      let (pv, delta) = {
-        let p = &self.g.edges[v][k];
-        let u = p.v;
-        let delta = p.c.clone() - p.f.clone();
-        if delta < C::from(1) || self.level[v] + 1 != self.level[u] {
-          self.ptr[v] += 1;
-          continue;
+    let sink = n - 1;
+    let mut s = Vec::new();
+    s.push((0, infinite_flow));
+    while let Some((v, pushed)) = s.pop() {
+      if v == sink {
+        for (v, _) in s {
+          self.g.add_flow(v, self.ptr[v] - 1, &pushed);
         }
-        (u, delta)
-      };
-      let delta = self.dfs(pv, pushed.clone().min(delta));
-      if delta == C::from(0) {
-        self.ptr[v] += 1;
-        continue;
+        return pushed;
       }
-      self.g.add_flow(v, k, &delta);
-      return delta;
+      loop {
+        let k = self.ptr[v];
+        if k >= self.g.edges[v].len() {
+          break;
+        }
+        self.ptr[v] += 1;
+        let (pv, delta) = {
+          let p = &self.g.edges[v][k];
+          let delta = p.c.clone() - p.f.clone();
+          if delta < C::from(1) || self.level[v] + 1 != self.level[p.v] {
+            continue;
+          }
+          (p.v, delta)
+        };
+        s.push((v, pushed.clone()));
+        s.push((pv, pushed.min(delta)));
+        break;
+      }
     }
     C::from(0)
   }
@@ -83,7 +86,7 @@ where
         *p = 0;
       }
       loop {
-        let pushed = self.dfs(0, infinite_flow.clone());
+        let pushed = self.dfs(infinite_flow.clone());
         if pushed == C::from(0) {
           break;
         }
