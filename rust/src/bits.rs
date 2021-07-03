@@ -40,7 +40,8 @@ impl Iterator for SubmasksIterator {
   }
 }
 
-pub struct Submasks(u32);
+//the submask equal to zero will not be processed
+pub struct Submasks(pub u32);
 impl IntoIterator for Submasks {
   type Item = u32;
   type IntoIter = SubmasksIterator;
