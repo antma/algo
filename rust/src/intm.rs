@@ -108,3 +108,30 @@ impl BinomialsM {
     self.mul(v1, v2)
   }
 }
+
+#[derive(Clone, Copy)]
+pub struct IntM(u32, u32);
+
+impl std::ops::Add for IntM {
+  type Output = Self;
+  fn add(self, other: Self) -> Self {
+    debug_assert_eq!(self.0, other.1);
+    IntM(addm(self.0, other.0, self.1), self.1)
+  }
+}
+
+impl std::ops::Sub for IntM {
+  type Output = Self;
+  fn sub(self, other: Self) -> Self {
+    debug_assert_eq!(self.1, other.1);
+    IntM(subm(self.0, other.0, self.1), self.1)
+  }
+}
+
+impl std::ops::Mul for IntM {
+  type Output = Self;
+  fn mul(self, other: Self) -> Self {
+    debug_assert_eq!(self.1, other.1);
+    IntM(mulm(self.0, other.0, self.1), self.1)
+  }
+}
