@@ -4,6 +4,7 @@ pub mod bits;
 pub mod bitset;
 pub mod complex;
 pub mod disjoint_set;
+pub mod exponentation;
 pub mod fenwick_tree;
 pub mod fht;
 pub mod geometry;
