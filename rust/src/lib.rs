@@ -15,6 +15,7 @@ pub mod kuhn;
 pub mod lazy_propagation;
 pub mod linear_sieve;
 pub mod math;
+pub mod matrix;
 pub mod maxflow;
 pub mod polyhash;
 pub mod primes;
