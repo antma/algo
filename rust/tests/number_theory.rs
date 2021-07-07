@@ -1,4 +1,4 @@
-use algo::intm::BinomialsM;
+use algo::number_theory::intm::BinomialsM;
 #[test]
 fn intm_binomials_tests() {
   let b = BinomialsM::new(100, 1_000_000_007);

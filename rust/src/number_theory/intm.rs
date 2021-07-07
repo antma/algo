@@ -35,6 +35,32 @@ pub fn inv(n: u32, m: u32) -> u32 {
   (if x < 0 { x + m as i32 } else { x }) as u32
 }
 
+pub fn powm<P>(x: u32, mut y: P, m: u32) -> u32
+where
+  P: From<u8> + Eq + std::ops::BitAnd<Output = P> + std::ops::ShrAssign<u8> + Copy,
+{
+  let zero = P::from(0);
+  let one = P::from(1);
+  if y == zero {
+    return 1;
+  }
+  let mut b = x;
+  while zero == (y & one) {
+    b = mulm(b, b, m);
+    y >>= 1;
+  }
+  let mut a = b;
+  y >>= 1;
+  while y != zero {
+    b = mulm(b, b, m);
+    if !((y & one) == zero) {
+      a = mulm(a, b, m);
+    }
+    y >>= 1;
+  }
+  a
+}
+
 pub struct BinomialsM {
   facts: Vec<u32>,
   ifacts: Vec<u32>,
