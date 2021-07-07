@@ -87,7 +87,7 @@ pub struct IntM(u32, u32);
 impl std::ops::Add for IntM {
   type Output = Self;
   fn add(self, other: Self) -> Self {
-    debug_assert_eq!(self.0, other.1);
+    debug_assert_eq!(self.1, other.1);
     IntM(addm(self.0, other.0, self.1), self.1)
   }
 }
