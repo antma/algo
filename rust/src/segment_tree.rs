@@ -1,11 +1,11 @@
-pub struct SegmentTree<T> {
+pub struct SegmentTree<T, F> {
   n: usize,
-  f: fn(&T, &T) -> T,
+  f: F,
   t: Vec<T>,
 }
 
-impl<T: Clone> SegmentTree<T> {
-  pub fn new(mut a: Vec<T>, f: fn(&T, &T) -> T) -> Self {
+impl<T: Clone, F: Fn(&T, &T) -> T> SegmentTree<T, F> {
+  pub fn new(mut a: Vec<T>, f: F) -> Self {
     let n = a.len();
     let mut t = a.clone();
     t.append(&mut a);
@@ -48,7 +48,7 @@ impl<T: Clone> SegmentTree<T> {
 }
 
 //modification on range, query in index
-impl<T: Clone> SegmentTree<T> {
+impl<T: Clone, F: Fn(&T, &T) -> T> SegmentTree<T, F> {
   pub fn update_range(&mut self, u: usize, v: usize, value: T) {
     let mut l = u + self.n;
     let mut r = v + self.n;
@@ -74,7 +74,7 @@ impl<T: Clone> SegmentTree<T> {
     }
     res
   }
-  pub fn create(n: usize, zero: T, f: fn(&T, &T) -> T) -> Self {
+  pub fn create(n: usize, zero: T, f: F) -> Self {
     Self {
       n,
       f,
