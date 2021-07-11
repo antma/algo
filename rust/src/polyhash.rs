@@ -1,29 +1,8 @@
 use std::ops::{AddAssign, MulAssign, SubAssign};
+use crate::number_theory::intm::{addm, subm, mulm};
 
 const P1: u32 = 4294967291;
 const P2: u32 = 4294967279;
-
-fn addm(x: u32, y: u32, m: u32) -> u32 {
-  let r = x.wrapping_add(y);
-  if r < x || r >= m {
-    r.wrapping_sub(m)
-  } else {
-    r
-  }
-}
-
-fn subm(x: u32, y: u32, m: u32) -> u32 {
-  let r = x.wrapping_sub(y);
-  if x < y {
-    r.wrapping_add(m)
-  } else {
-    r
-  }
-}
-
-fn mulm(x: u32, y: u32, m: u32) -> u32 {
-  (((x as u64) * (y as u64)) % (m as u64)) as u32
-}
 
 #[derive(Clone)]
 struct HashT {
