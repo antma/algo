@@ -19,6 +19,15 @@ impl PrimeTable {
     }
     Self { n, a }
   }
+  pub fn is_prime(&self, n: u32) -> bool {
+    match n.cmp(&2) {
+      std::cmp::Ordering::Less => false,
+      std::cmp::Ordering::Equal => true,
+      std::cmp::Ordering::Greater => {
+        (n & 1) != 0 && (self.a[(n >> 6) as usize] & (1u32 << ((n >> 1) & 31))) != 0
+      }
+    }
+  }
   pub fn primes(&self) -> Vec<u32> {
     let mut b = Vec::new();
     if self.n <= 2 {
