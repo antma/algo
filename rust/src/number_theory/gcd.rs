@@ -5,11 +5,12 @@ pub struct Gcd {
 impl Gcd {
   pub fn new() -> Self {
     Self {
-      dp: vec![None; 0x10000],
+      dp: vec![None; 32896],
     }
   }
   fn gcd_u8(&mut self, x: u32, y: u32) -> u32 {
-    let idx = ((x << 8) + y) as usize;
+    let i = 0x100 - y;
+    let idx = (((i * (i - 1)) >> 1) + (x - y)) as usize;
     if let Some(t) = &self.dp[idx] {
       return t.get() as _;
     }

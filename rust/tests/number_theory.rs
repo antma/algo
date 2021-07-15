@@ -1,5 +1,6 @@
 use algo::number_theory::binomialsm::BinomialsM;
 use algo::number_theory::exponentation::pow;
+use algo::number_theory::gcd::Gcd;
 use algo::number_theory::miller::PrimalityTest32;
 use algo::number_theory::miller::PrimalityTest64;
 use algo::primes::PrimeTable;
@@ -25,6 +26,26 @@ fn number_theory_binomialsm_tests() {
   assert_eq!(b.binomial(100, 49), 273521609);
   assert_eq!(b.binomial(100, 51), 273521609);
   assert_eq!(b.binomial(100, 0), 1);
+}
+
+#[test]
+fn number_theory_gcd_tests() {
+  let mut g = Gcd::new();
+  let mut x = 1;
+  let mut y = 2;
+  for _ in 0..44 {
+    assert_eq!(g.gcd_u32(x, y), 1);
+    assert_eq!(g.gcd_u32(y, x), 1);
+    let z = x + y;
+    x = y;
+    y = z;
+  }
+  assert_eq!(g.gcd_u32(1, 0), 1);
+  assert_eq!(g.gcd_u32(0, 1), 1);
+  assert_eq!(g.gcd_u32(1 << 30, 2), 2);
+  assert_eq!(g.gcd_u32(0xffff_ffff, 239), 1);
+  assert_eq!(g.gcd_u32(255, 255), 255);
+  assert_eq!(g.gcd_u32(255, 254), 1);
 }
 
 #[test]
@@ -57,6 +78,13 @@ fn number_theory_miller_tests() {
       last = p;
     }
   };
-  check(4 * 10u64.pow(9), vec![7, 9, 19, 63, 133, 157, 163, 187, 229, 231, 241, 273, 351, 373, 387, 427, 451, 453, 483, 531, 553, 559, 561, 573, 579, 591, 597, 607, 619, 661, 663, 687, 723, 727, 733, 787, 801, 813, 831, 861, 913, 951, 981, 1003]);
+  check(
+    4 * 10u64.pow(9),
+    vec![
+      7, 9, 19, 63, 133, 157, 163, 187, 229, 231, 241, 273, 351, 373, 387, 427, 451, 453, 483, 531,
+      553, 559, 561, 573, 579, 591, 597, 607, 619, 661, 663, 687, 723, 727, 733, 787, 801, 813,
+      831, 861, 913, 951, 981, 1003,
+    ],
+  );
   check(10u64.pow(16), vec![61, 69, 79, 99, 453]);
 }
