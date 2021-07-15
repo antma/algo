@@ -4,7 +4,6 @@ use algo::number_theory::gcd::Gcd;
 use algo::number_theory::miller::PrimalityTest32;
 use algo::number_theory::miller::PrimalityTest64;
 use algo::primes::PrimeTable;
-use algo::random::KnuthRandom;
 
 #[test]
 fn number_theory_exponentation_tests() {
@@ -49,6 +48,35 @@ fn number_theory_gcd_tests() {
 }
 
 #[test]
+fn number_theory_miller_carmichael_numbers_tests() {
+  let mut miller = PrimalityTest32::new();
+  for x in [
+    561, 1105, 1729, 2465, 2821, 6601, 8911, 10585, 15841, 29341, 41041, 46657, 52633, 62745,
+    63973, 75361, 101101, 115921, 126217, 162401, 172081, 188461, 252601, 278545, 294409, 314821,
+    334153, 340561, 399001, 410041, 449065, 488881, 512461,
+  ]
+  .iter()
+  {
+    assert!(!miller.is_prime(*x));
+  }
+  let mut miller64 = PrimalityTest64::new(12345);
+  for x in [
+    825265,
+    321197185,
+    5394826801,
+    232250619601,
+    9746347772161,
+    1436697831295441,
+    60977817398996785,
+    7156857700403137441,
+  ]
+  .iter()
+  {
+    assert!(!miller64.is_prime(*x, 10));
+  }
+}
+
+#[test]
 fn number_theory_miller_tests() {
   const M: u32 = 1_000_000;
   let pt = PrimeTable::new(M as usize);
@@ -56,20 +84,19 @@ fn number_theory_miller_tests() {
   for p in 1..M {
     assert_eq!(miller.is_prime(p), pt.is_prime(p), "p = {}", p);
   }
-  let mut rnd = KnuthRandom::new(12345);
-  let mut miller64 = PrimalityTest64::new();
+  let mut miller64 = PrimalityTest64::new(12345);
   let mut check = |off: u64, big_primes: Vec<u64>| {
     let mut last = 0;
     for p in big_primes {
       assert_eq!(
-        miller64.is_prime(&mut rnd, off + p, 10),
+        miller64.is_prime(off + p, 10),
         true,
         "{} should be prime",
         off + p
       );
       for j in last + 1..p {
         assert_eq!(
-          miller64.is_prime(&mut rnd, off + j, 10),
+          miller64.is_prime(off + j, 10),
           false,
           "{} should be composite",
           off + j

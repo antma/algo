@@ -109,11 +109,17 @@ impl Montgomery64 {
   }
 }
 
-pub struct PrimalityTest64(PrimalityTest32);
+pub struct PrimalityTest64 {
+  pt32: PrimalityTest32,
+  rnd: KnuthRandom,
+}
 
 impl PrimalityTest64 {
-  pub fn new() -> Self {
-    Self(PrimalityTest32::new())
+  pub fn new(seed: i32) -> Self {
+    Self {
+      pt32: PrimalityTest32::new(),
+      rnd: KnuthRandom::new(seed),
+    }
   }
   fn witness(m: &Montgomery64, a: u64) -> bool {
     let n1 = m.n - 1;
@@ -129,13 +135,13 @@ impl PrimalityTest64 {
     }
     x != m.r_mod_n
   }
-  pub fn is_prime(&mut self, rnd: &mut KnuthRandom, n: u64, tries: u32) -> bool {
+  pub fn is_prime(&mut self, n: u64, tries: u32) -> bool {
     if n <= 0xffff_ffff {
-      return self.0.is_prime(n as u32);
+      return self.pt32.is_prime(n as u32);
     }
     const MODULO: u64 = 223092870;
     let a = n % MODULO;
-    if self.0.gcd.gcd_u32(MODULO as u32, a as u32) > 1 {
+    if self.pt32.gcd.gcd_u32(MODULO as u32, a as u32) > 1 {
       return false;
     }
     let m = Montgomery64::new(n);
@@ -148,7 +154,7 @@ impl PrimalityTest64 {
       return true;
     }
     for _ in 0..tries {
-      if PrimalityTest64::witness(&m, rnd.randrange(62..0x7fff_ffff) as u64) {
+      if PrimalityTest64::witness(&m, self.rnd.randrange(62..0x7fff_ffff) as u64) {
         return false;
       }
     }
