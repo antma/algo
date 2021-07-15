@@ -11,7 +11,7 @@ pub struct DinicMaxFlow<C> {
 impl<C> DinicMaxFlow<C>
 where
   for<'b> C: std::ops::AddAssign<&'b C> + std::ops::SubAssign<&'b C>,
-  C: std::ops::Sub<Output = C> + Ord + From<i8> + Clone + Eq,
+  C: std::ops::Sub<Output = C> + Ord + From<i8> + Copy + Eq,
 {
   pub fn new(g: Graph<C>) -> Self {
     let n = g.edges.len();
@@ -29,7 +29,7 @@ where
       let next_level = self.level[v] + 1;
       for k in 0..self.g.edges[v].len() {
         let p = &self.g.edges[v][k];
-        if p.c.clone() - p.f.clone() < C::from(1) || self.level[p.v] < n as u32 {
+        if p.c - p.f < C::from(1) || self.level[p.v] < n as u32 {
           continue;
         }
         self.level[p.v] = next_level;
@@ -58,13 +58,13 @@ where
         self.ptr[v] += 1;
         let (pv, delta) = {
           let p = &self.g.edges[v][k];
-          let delta = p.c.clone() - p.f.clone();
+          let delta = p.c - p.f;
           if delta < C::from(1) || self.level[v] + 1 != self.level[p.v] {
             continue;
           }
           (p.v, delta)
         };
-        s.push((v, pushed.clone()));
+        s.push((v, pushed));
         s.push((pv, pushed.min(delta)));
         break;
       }
@@ -86,7 +86,7 @@ where
         *p = 0;
       }
       loop {
-        let pushed = self.dfs(infinite_flow.clone());
+        let pushed = self.dfs(infinite_flow);
         if pushed == C::from(0) {
           break;
         }

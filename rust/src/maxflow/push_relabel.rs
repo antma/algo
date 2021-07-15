@@ -21,7 +21,7 @@ pub struct PushRelabelMaxFlow<C> {
 impl<C> PushRelabelMaxFlow<C>
 where
   for<'b> C: std::ops::AddAssign<&'b C> + std::ops::SubAssign<&'b C>,
-  C: From<i8> + Copy + Clone + Eq + Ord + std::ops::Neg<Output = C> + std::ops::Sub<Output = C>,
+  C: From<i8> + Copy + Eq + Ord + std::ops::Neg<Output = C> + std::ops::Sub<Output = C>,
 {
   pub fn new(g: Graph<C>) -> Self {
     let n = g.edges.len();
