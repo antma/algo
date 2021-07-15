@@ -139,8 +139,16 @@ impl PrimalityTest64 {
       return false;
     }
     let m = Montgomery64::new(n);
+    for a in vec![2, 61, 7] {
+      if PrimalityTest64::witness(&m, a) {
+        return false;
+      }
+    }
+    if n < 4759123141 {
+      return true;
+    }
     for _ in 0..tries {
-      if PrimalityTest64::witness(&m, rnd.randrange(2..0x7fff_ffff) as u64) {
+      if PrimalityTest64::witness(&m, rnd.randrange(62..0x7fff_ffff) as u64) {
         return false;
       }
     }

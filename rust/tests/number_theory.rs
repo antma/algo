@@ -37,24 +37,26 @@ fn number_theory_miller_tests() {
   }
   let mut rnd = KnuthRandom::new(12345);
   let mut miller64 = PrimalityTest64::new();
-  let off = 10u64.pow(16);
-  let big_primes = vec![61, 69, 79, 99, 453];
-  let mut last = 0;
-  for p in &big_primes {
-    assert_eq!(
-      miller64.is_prime(&mut rnd, off + *p, 10),
-      true,
-      "{} should be prime",
-      off + *p
-    );
-    for j in last + 1..*p {
+  let mut check = |off: u64, big_primes: Vec<u64>| {
+    let mut last = 0;
+    for p in big_primes {
       assert_eq!(
-        miller64.is_prime(&mut rnd, off + j, 10),
-        false,
-        "{} should be composite",
-        off + j
+        miller64.is_prime(&mut rnd, off + p, 10),
+        true,
+        "{} should be prime",
+        off + p
       );
+      for j in last + 1..p {
+        assert_eq!(
+          miller64.is_prime(&mut rnd, off + j, 10),
+          false,
+          "{} should be composite",
+          off + j
+        );
+      }
+      last = p;
     }
-    last = *p;
-  }
+  };
+  check(4 * 10u64.pow(9), vec![7, 9, 19, 63, 133, 157, 163, 187, 229, 231, 241, 273, 351, 373, 387, 427, 451, 453, 483, 531, 553, 559, 561, 573, 579, 591, 597, 607, 619, 661, 663, 687, 723, 727, 733, 787, 801, 813, 831, 861, 913, 951, 981, 1003]);
+  check(10u64.pow(16), vec![61, 69, 79, 99, 453]);
 }
