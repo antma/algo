@@ -1,4 +1,4 @@
-pub fn generic_pow<X, P, M, O>(x: X, y: P, mul: M, one: O) -> X 
+pub fn generic_pow<X, P, M, O>(x: X, y: P, mul: M, one: O) -> X
 where
   X: Clone,
   P: From<u8> + Eq + std::ops::BitAnd<Output = P> + std::ops::ShrAssign<u8> + Clone,
@@ -36,4 +36,3 @@ where
 {
   generic_pow(x, y, |u, v| u * v, one)
 }
-

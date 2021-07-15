@@ -1,5 +1,5 @@
+use crate::number_theory::intm::{addm, mulm, subm};
 use std::ops::{AddAssign, MulAssign, SubAssign};
-use crate::number_theory::intm::{addm, subm, mulm};
 
 const P1: u32 = 4294967291;
 const P2: u32 = 4294967279;
