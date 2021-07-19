@@ -5,11 +5,11 @@ pub struct FenwickTree<T> {
 
 impl<T> FenwickTree<T>
 where
-  T: std::ops::AddAssign + Copy + From<i8>,
+  T: std::ops::AddAssign + Copy + From<bool>,
 {
   pub fn new(n: usize) -> Self {
     Self {
-      a: vec![T::from(0); n],
+      a: vec![T::from(false); n],
       n,
     }
   }
@@ -23,7 +23,7 @@ where
   }
   //sum on [0, x)
   pub fn reduce(&self, x: usize) -> T {
-    let mut r = T::from(0);
+    let mut r = T::from(false);
     if x == 0 {
       return r;
     }

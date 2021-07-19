@@ -37,14 +37,14 @@ pub fn inv(n: u32, m: u32) -> u32 {
 
 pub fn powm<P>(x: u32, mut y: P, m: u32) -> u32
 where
-  P: From<u8> + Eq + std::ops::BitAnd<Output = P> + std::ops::ShrAssign<u8> + Copy,
+  P: From<bool> + Eq + std::ops::BitAnd<Output = P> + std::ops::ShrAssign<u8> + Copy,
 {
-  let zero = P::from(0);
-  let one = P::from(1);
+  let zero = P::from(false);
   if y == zero {
     return 1;
   }
   let mut b = x;
+  let one = P::from(true);
   while zero == (y & one) {
     b = mulm(b, b, m);
     y >>= 1;

@@ -6,12 +6,12 @@ pub struct Edge<C> {
   pub c: C,
 }
 
-impl<C: From<i8>> Edge<C> {
+impl<C: From<bool>> Edge<C> {
   fn new(v: usize, e: usize, c: C) -> Self {
     Edge {
       v,
       e,
-      f: C::from(0),
+      f: C::from(false),
       c,
     }
   }
@@ -24,7 +24,7 @@ pub struct Graph<C> {
 impl<C> Graph<C>
 where
   for<'b> C: std::ops::AddAssign<&'b C> + std::ops::SubAssign<&'b C>,
-  C: From<i8> + Clone + Ord,
+  C: From<bool> + Clone + Ord,
 {
   pub fn new(n: usize) -> Self {
     Self {
@@ -40,7 +40,7 @@ where
     self.edges[u][l].f -= delta;
   }
   pub fn add_edge(&mut self, i: usize, j: usize, w1: C, w2: C) {
-    if w1 > C::from(0) {
+    if w1 > C::from(false) {
       let ei = self.edges[i].len();
       let ej = self.edges[j].len();
       self.edges[i].push(Edge::new(j, ej, w1));

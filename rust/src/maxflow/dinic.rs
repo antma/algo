@@ -11,7 +11,7 @@ pub struct DinicMaxFlow<C> {
 impl<C> DinicMaxFlow<C>
 where
   for<'b> C: std::ops::AddAssign<&'b C> + std::ops::SubAssign<&'b C>,
-  C: std::ops::Sub<Output = C> + Ord + From<i8> + Copy + Eq,
+  C: std::ops::Sub<Output = C> + Ord + From<bool> + Copy + Eq,
 {
   pub fn new(g: Graph<C>) -> Self {
     let n = g.edges.len();
@@ -29,7 +29,7 @@ where
       let next_level = self.level[v] + 1;
       for k in 0..self.g.edges[v].len() {
         let p = &self.g.edges[v][k];
-        if p.c - p.f < C::from(1) || self.level[p.v] < n as u32 {
+        if p.c - p.f < C::from(true) || self.level[p.v] < n as u32 {
           continue;
         }
         self.level[p.v] = next_level;
@@ -59,7 +59,7 @@ where
         let (pv, delta) = {
           let p = &self.g.edges[v][k];
           let delta = p.c - p.f;
-          if delta < C::from(1) || self.level[v] + 1 != self.level[p.v] {
+          if delta < C::from(true) || self.level[v] + 1 != self.level[p.v] {
             continue;
           }
           (p.v, delta)
@@ -69,11 +69,11 @@ where
         break;
       }
     }
-    C::from(0)
+    C::from(false)
   }
   pub fn max_flow(&mut self, infinite_flow: C) -> C {
     let n32 = self.g.edges.len() as u32;
-    let mut f = C::from(0);
+    let mut f = C::from(false);
     loop {
       for p in &mut self.level {
         *p = n32;
@@ -87,7 +87,7 @@ where
       }
       loop {
         let pushed = self.dfs(infinite_flow);
-        if pushed == C::from(0) {
+        if pushed == C::from(false) {
           break;
         }
         f += &pushed;

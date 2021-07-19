@@ -1,11 +1,11 @@
-fn linear_sieve<T: From<i8> + Clone + Copy + std::ops::Mul<Output = T>>(
+fn linear_sieve<T: From<bool> + Copy + std::ops::Mul<Output = T>>(
   n: usize,
   prime: fn(i32) -> T,
   divides: fn(T, i32) -> T,
 ) -> Vec<T> {
   let mut composite = vec![0u32; (n + 31) >> 5];
-  let mut f = vec![T::from(0); n];
-  f[1] = T::from(1);
+  let mut f = vec![T::from(false); n];
+  f[1] = T::from(true);
   let mut primes = Vec::new();
   for i in 2..n as i32 {
     if (composite[(i >> 5) as usize] & (1 << (i & 31))) == 0 {
@@ -37,14 +37,14 @@ pub fn totients(n: usize) -> Vec<i32> {
   linear_sieve(n, |p| p - 1, |acc, j| acc * j)
 }
 
-fn linear_sieve_with_cnt<T: From<i8> + Clone + Copy + std::ops::Mul<Output = T>>(
+fn linear_sieve_with_cnt<T: From<bool> + Copy + std::ops::Mul<Output = T>>(
   n: usize,
   prime: fn(i32) -> T,
   op: fn(T, i32, u8) -> T,
 ) -> Vec<T> {
   let mut composite = vec![0u32; (n + 31) >> 5];
-  let mut f = vec![T::from(0); n];
-  f[1] = T::from(1);
+  let mut f = vec![T::from(false); n];
+  f[1] = T::from(true);
   let mut cnt = vec![0u8; n];
   let mut primes = Vec::new();
   for i in 2..n as i32 {
@@ -84,18 +84,18 @@ pub struct HarmonicSeries<T> {
   front: T,
 }
 
-impl<T: From<u8> + Copy> HarmonicSeries<T> {
+impl<T: From<bool> + Copy> HarmonicSeries<T> {
   pub fn new(n: T) -> Self {
     Self {
       n,
       cur: n,
-      front: T::from(1),
+      front: T::from(true),
     }
   }
 }
 
 impl<
-    T: From<u8> + PartialOrd + std::ops::Add<Output = T> + std::ops::Div<Output = T> + Ord + Copy,
+    T: From<bool> + PartialOrd + std::ops::Add<Output = T> + std::ops::Div<Output = T> + Ord + Copy,
   > std::iter::Iterator for HarmonicSeries<T>
 {
   type Item = (std::ops::Range<T>, T);
@@ -105,9 +105,9 @@ impl<
     } else {
       let f = self.front;
       let c = self.cur;
-      self.front = T::from(1) + (self.n / c);
+      self.front = T::from(true) + (self.n / c);
       if f > self.n {
-        self.front = self.n + T::from(1);
+        self.front = self.n + T::from(true);
       } else {
         self.cur = self.n / self.front;
       }
