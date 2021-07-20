@@ -23,6 +23,7 @@ pub mod segment_tree;
 pub mod sieve;
 pub mod splay_tree;
 pub mod string_functions;
+pub mod tree;
 
 pub use crate::assignment_problem::AssignmentProblem;
 pub use crate::bigint::ubigint::UBigInt;
