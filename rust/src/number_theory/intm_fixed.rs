@@ -1,7 +1,7 @@
 const MODULO: u32 = 1_000_000_007;
 
 #[derive(Clone, Copy)]
-pub struct IntM(u32);
+pub struct IntM(pub u32);
 
 impl std::ops::Add for IntM {
   type Output = Self;
