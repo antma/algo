@@ -1,28 +1,30 @@
+use crate::bitset::BitSet;
+
 fn linear_sieve<T: From<bool> + Copy + std::ops::Mul<Output = T>>(
   n: usize,
   prime: fn(i32) -> T,
   divides: fn(T, i32) -> T,
 ) -> Vec<T> {
-  let mut composite = vec![0u32; (n + 31) >> 5];
+  let mut composite = BitSet::new(n);
   let mut f = vec![T::from(false); n];
   f[1] = T::from(true);
   let mut primes = Vec::new();
   for i in 2..n as i32 {
-    if (composite[(i >> 5) as usize] & (1 << (i & 31))) == 0 {
+    if !composite.get(i as usize) {
       primes.push(i);
       f[i as usize] = prime(i);
     }
     for &j in &primes {
-      let k = i * j;
-      if k >= n as i32 {
+      let k = (i * j) as usize;
+      if k >= n {
         break;
       }
-      composite[(k >> 5) as usize] |= 1 << (k & 31);
+      composite.set(k);
       if (i % j) == 0 {
-        f[k as usize] = divides(f[i as usize], j);
+        f[k] = divides(f[i as usize], j);
         break;
       } else {
-        f[k as usize] = f[i as usize] * f[j as usize];
+        f[k] = f[i as usize] * f[j as usize];
       }
     }
   }
@@ -42,31 +44,31 @@ fn linear_sieve_with_cnt<T: From<bool> + Copy + std::ops::Mul<Output = T>>(
   prime: fn(i32) -> T,
   op: fn(T, i32, u8) -> T,
 ) -> Vec<T> {
-  let mut composite = vec![0u32; (n + 31) >> 5];
+  let mut composite = BitSet::new(n);
   let mut f = vec![T::from(false); n];
   f[1] = T::from(true);
   let mut cnt = vec![0u8; n];
   let mut primes = Vec::new();
   for i in 2..n as i32 {
-    if (composite[(i >> 5) as usize] & (1 << (i & 31))) == 0 {
+    if !composite.get(i as usize) {
       primes.push(i);
       f[i as usize] = prime(i);
       cnt[i as usize] = 1;
     }
     for &j in &primes {
-      let k = i * j;
-      if k >= n as i32 {
+      let k = (i * j) as usize;
+      if k >= n {
         break;
       }
-      composite[(k >> 5) as usize] |= 1 << (k & 31);
+      composite.set(k);
       if (i % j) == 0 {
-        cnt[k as usize] = cnt[i as usize] + 1;
-        f[k as usize] = op(f[i as usize], j, cnt[k as usize]);
+        cnt[k] = cnt[i as usize] + 1;
+        f[k] = op(f[i as usize], j, cnt[k as usize]);
         //f[k] = (f[i] / (op (j, cnt[i])) * op (j, ++cnt[i]);
         break;
       } else {
-        f[k as usize] = f[i as usize] * f[j as usize];
-        cnt[k as usize] = 1;
+        f[k] = f[i as usize] * f[j as usize];
+        cnt[k] = 1;
       }
     }
   }
