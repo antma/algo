@@ -32,20 +32,39 @@ fn pollard_rho(n: u64, gcd: &mut Gcd, rnd: &mut KnuthRandom) -> Option<u64> {
 
 fn pollard_factorization(
   p: u64,
-  r: &mut Vec<(u64, u8)>,
   gcd: &mut Gcd,
   rnd: &mut KnuthRandom,
   tries: u32,
-) {
+) -> std::collections::HashMap<u64, u8> {
+  let mut h = std::collections::HashMap::new();
+  if p == 1 {
+    return h;
+  }
   if is_prime64(p, gcd, rnd, tries) {
-    r.push((p, 1));
-    return;
+    h.insert(p, 1);
+    return h;
   }
   loop {
     if let Some(d) = pollard_rho(p, gcd, rnd) {
-      pollard_factorization(d, r, gcd, rnd, tries);
-      pollard_factorization(p / d, r, gcd, rnd, tries);
-      break;
+      let d = d.min(p / d);
+      let w = pollard_factorization(d, gcd, rnd, tries);
+      let mut u = p / d;
+      for q in w.iter() {
+        while u % q.0 == 0 {
+          let e = h.entry(*q.0).or_insert(0);
+          *e += 1;
+          u = u / q.0;
+        }
+      }
+      for q in w {
+        let e = h.entry(q.0).or_insert(0);
+        *e += q.1;
+      }
+      for q in pollard_factorization(u, gcd, rnd, tries) {
+        let e = h.entry(q.0).or_insert(0);
+        *e += q.1;
+      }
+      break h;
     }
   }
 }
@@ -89,14 +108,7 @@ pub fn factorization64(
       }
     }
   }
-  let mut w = Vec::new();
-  pollard_factorization(p, &mut w, gcd, rnd, tries);
-  let mut h = std::collections::HashMap::new();
-  for q in w {
-    let e = h.entry(q.0).or_insert(0);
-    *e += q.1;
-  }
-  r.extend(h.into_iter());
+  r.extend(pollard_factorization(p, gcd, rnd, tries));
   r.sort();
   Factorization(r)
 }
