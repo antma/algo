@@ -31,4 +31,17 @@ impl Gcd {
       self.gcd_u8(a, b)
     }
   }
+  pub fn gcd_u64(&mut self, x: u64, y: u64) -> u64 {
+    let (mut a, mut b) = if x >= y { (x, y) } else { (y, x) };
+    while a > 0xffff_ffff && b > 0 {
+      let c = a % b;
+      a = b;
+      b = c;
+    }
+    if b == 0 {
+      a
+    } else {
+      self.gcd_u32(a as u32, b as u32) as u64
+    }
+  }
 }
