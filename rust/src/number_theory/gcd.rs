@@ -31,7 +31,7 @@ impl Gcd {
     if a < b {
       std::mem::swap(&mut a, &mut b);
     }
-    while a > 0xff && b > 0 {
+    while a > 0xff {
       if a == b {
         return a << l;
       }
@@ -41,11 +41,7 @@ impl Gcd {
         std::mem::swap(&mut a, &mut b);
       }
     }
-    if b == 0 {
-      a << l
-    } else {
-      (self.gcd_u8(a, b) as u32) << l
-    }
+    (self.gcd_u8(a, b) as u32) << l
   }
   pub fn gcd_u64(&mut self, x: u64, y: u64) -> u64 {
     let (mut a, mut b) = if x >= y { (x, y) } else { (y, x) };
@@ -60,7 +56,7 @@ impl Gcd {
     if a < b {
       std::mem::swap(&mut a, &mut b);
     }
-    while a > 0xff && b > 0 {
+    while a > 0xff {
       if a == b {
         return a << l;
       }
@@ -70,10 +66,6 @@ impl Gcd {
         std::mem::swap(&mut a, &mut b);
       }
     }
-    if b == 0 {
-      a << l
-    } else {
-      (self.gcd_u8(a as u32, b as u32) as u64) << l
-    }
+    (self.gcd_u8(a as u32, b as u32) as u64) << l
   }
 }

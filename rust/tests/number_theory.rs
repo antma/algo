@@ -152,5 +152,10 @@ fn number_theory_factorization_test() {
   );
   assert_eq!(
     factorization64(0x7fffffffffffffff, &small_primes, &mut gcd, &mut rnd, 3).0,
-    vec![(7, 2), (73, 1), (127, 1), (337, 1), (92737, 1), (649657, 1)]);
+    vec![(7, 2), (73, 1), (127, 1), (337, 1), (92737, 1), (649657, 1)]
+  );
+  assert_eq!(
+    factorization64(998864158694426617, &small_primes, &mut gcd, &mut rnd, 3).0,
+    vec![(999055237, 1), (999808741, 1)]
+  );
 }
