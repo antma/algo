@@ -15,6 +15,7 @@ pub mod linsolve;
 pub mod math;
 pub mod matrix;
 pub mod maxflow;
+pub mod mo;
 pub mod number_theory;
 pub mod polyhash;
 pub mod primes;
