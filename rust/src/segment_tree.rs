@@ -43,7 +43,7 @@ impl<T: Clone, F: Fn(&T, &T) -> T> SegmentTree<T, F> {
       l >>= 1;
       r >>= 1;
     }
-    return res;
+    res
   }
 }
 

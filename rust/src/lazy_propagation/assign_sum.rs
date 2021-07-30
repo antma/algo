@@ -94,12 +94,12 @@ where
     r += n;
     while l < r {
       if (l & 1) != 0 {
-        res = res + S::from(self.t[l]);
+        res = res + self.t[l];
         l += 1;
       }
       if (r & 1) != 0 {
         r -= 1;
-        res = res + S::from(self.t[r]);
+        res = res + self.t[r];
       }
       l >>= 1;
       r >>= 1;

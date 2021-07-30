@@ -47,7 +47,7 @@ pub struct PolyHash {
 }
 
 impl PolyHash {
-  pub fn new(s: &str, b: &(u32, u32)) -> Self {
+  pub fn new(s: &str, b: (u32, u32)) -> Self {
     let p = HashT { r1: b.0, r2: b.1 };
     let b = s.as_bytes();
     let n = b.len();

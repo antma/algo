@@ -13,9 +13,7 @@ pub fn gauss_mod(mut a: Vec<Vec<IntM>>, mut b: Vec<IntM>) -> Option<Vec<IntM>> {
         }
       }
     }
-    if q.is_none() {
-      return None;
-    }
+    q?;
     let (i, j) = q.unwrap();
     if k < i {
       a.swap(k, i);

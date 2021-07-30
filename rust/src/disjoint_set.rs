@@ -16,7 +16,7 @@ impl DisjointSet {
       return x;
     }
     self.p[x] = self.find_set(y);
-    return self.p[x];
+    self.p[x]
   }
   pub fn merge(&mut self, x: usize, y: usize) -> bool {
     let i = self.find_set(x);
@@ -61,7 +61,7 @@ impl DisjointSetWithSize {
       return x;
     }
     self.p[x] = self.find_set(y);
-    return self.p[x];
+    self.p[x]
   }
   pub fn merge(&mut self, x: usize, y: usize) -> bool {
     let i = self.find_set(x);

@@ -84,8 +84,8 @@ pub fn is_prime64(n: u64, gcd: &mut Gcd, rnd: &mut KnuthRandom, tries: u32) -> b
     return false;
   }
   let m = Montgomery64::new(n);
-  for a in vec![2, 61, 7] {
-    if witness64(&m, a) {
+  for a in &[2, 61, 7] {
+    if witness64(&m, *a) {
       return false;
     }
   }

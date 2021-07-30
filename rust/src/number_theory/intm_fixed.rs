@@ -44,7 +44,7 @@ fn gcdext(a: i32, b: i32) -> (i32, i32, i32) {
 }
 
 impl IntM {
-  pub fn inv(&self) -> IntM {
+  pub fn inv(self) -> IntM {
     let (g, _, x) = gcdext(MODULO as i32, self.0 as i32);
     assert_eq!(g, 1);
     IntM((if x < 0 { x + MODULO as i32 } else { x }) as u32)

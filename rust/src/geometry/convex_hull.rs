@@ -31,7 +31,7 @@ where
     Clone + Copy + Ord + PartialEq + From<i8> + Add<Output = T> + Sub<Output = T> + Mul<Output = T>,
 {
   if v.len() <= 2 {
-    return v.clone();
+    return v.to_owned();
   }
   let me = v
     .iter()
@@ -46,7 +46,7 @@ where
   let mut q: Vec<Point<T>> = Vec::new();
   for p in v.iter() {
     if *p != *me {
-      q.push(p.clone() - me.clone());
+      q.push(*p - *me);
     }
   }
   q.sort_by(|a, b| {
@@ -75,9 +75,7 @@ where
   });
   let s = if minimal {
     let s = 2.min(x.len());
-    for i in 0..s {
-      h.push(x[i]);
-    }
+    h.extend(x.iter().take(s));
     s
   } else {
     let mut i = 0;
@@ -116,7 +114,7 @@ where
     h.extend_from_slice(&d[i..]);
   }
   for p in h.iter_mut() {
-    *p = (*p) + me.clone();
+    *p = *p + *me;
   }
   h
 }

@@ -14,14 +14,14 @@ fn hilbert(x: i32, y: i32, k: i32, a: i32) -> i64 {
     0
   } else {
     let m = !(1 << k);
-    let o = 3 & (((x >> k) ^ 3 * (y >> k)) + a);
+    let o = 3 & (((x >> k) ^ (3 * (y >> k))) + a);
     let b = hilbert(x & m, y & m, k - 1, a + HILBERT_D[o as usize]);
     let ss = 1i64 << (2 * k);
     (if o == 1 || o == 2 { b } else { ss - (b + 1) }) + ss * (o as i64)
   }
 }
 
-fn mo_make_idx<E>(queries: &Vec<(std::ops::Range<usize>, E)>) -> Vec<usize> {
+fn mo_make_idx<E>(queries: &[(std::ops::Range<usize>, E)]) -> Vec<usize> {
   if queries.is_empty() {
     return Vec::new();
   }
@@ -97,7 +97,7 @@ pub struct MoCountUniqueElements {
 
 impl MoState<Void, usize> for MoCountUniqueElements {
   fn fast_reset(&self) -> bool {
-    return false;
+    false
   }
   fn reset(&mut self) {
     for q in &mut self.cnt {

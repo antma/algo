@@ -59,7 +59,7 @@ fn pollard_rho(n: u64, gcd: &mut Gcd, rnd: &mut KnuthRandom) -> Option<u64> {
     x = xi;
     if i == k {
       y = xi;
-      k = 2 * k;
+      k <<= 1;
     }
   }
   None
@@ -116,7 +116,7 @@ fn factorization_large(
 
 pub fn factorization64(
   p: u64,
-  small_primes: &Vec<u32>,
+  small_primes: &[u32],
   gcd: &mut Gcd,
   rnd: &mut KnuthRandom,
   tries: u32,
@@ -138,10 +138,10 @@ pub fn factorization64(
     }
     if p % (q as u64) == 0 {
       let mut t = 1;
-      p = p / q;
+      p /= q;
       while p % (q as u64) == 0 {
         t += 1;
-        p = p / q;
+        p /= q;
       }
       r.push((q as u64, t));
       if p == 1 {
