@@ -1,4 +1,4 @@
-use crate::bigint::ubigint::UBigInt;
+use crate::bignum::ubigint::UBigInt;
 use std::ops::{Add, Mul, Sub};
 
 #[derive(Clone, Debug)]

@@ -1,5 +1,5 @@
 pub mod assignment_problem;
-pub mod bigint;
+pub mod bignum;
 pub mod bits;
 pub mod bitset;
 pub mod complex;
@@ -26,13 +26,3 @@ pub mod string_functions;
 pub mod tree;
 
 pub use crate::assignment_problem::AssignmentProblem;
-pub use crate::bigint::ubigint::UBigInt;
-pub use crate::disjoint_set::DisjointSetWithSize;
-
-#[cfg(test)]
-mod tests {
-  #[test]
-  fn it_works() {
-    assert_eq!(2 + 2, 4);
-  }
-}

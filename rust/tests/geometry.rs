@@ -1,4 +1,4 @@
-use algo::bigint::bigint::BigInt;
+use algo::bignum::bigint::BigInt;
 use algo::geometry::plane::{Point, Segment};
 
 #[test]

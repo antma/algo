@@ -13,14 +13,14 @@ impl FHT {
       ldn += 1;
     }
     Self {
-      tbl: vec![0xffffffffu32; n],
+      tbl: vec![0xffff_ffffu32; n],
       n,
       h,
       ldn,
     }
   }
   fn revbin_update(&mut self, k: usize) -> usize {
-    if self.tbl[k] != 0xffffffffu32 {
+    if self.tbl[k] != 0xffff_ffffu32 {
       return self.tbl[k] as usize;
     }
     let mut r = k;

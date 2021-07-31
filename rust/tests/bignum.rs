@@ -1,5 +1,5 @@
-use algo::bigint::bigint::BigInt;
-use algo::bigint::ubigint::UBigInt;
+use algo::bignum::bigint::BigInt;
+use algo::bignum::ubigint::UBigInt;
 use std::str::FromStr;
 
 #[test]
