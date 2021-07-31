@@ -48,49 +48,49 @@ impl<T: Clone, F: Fn(&T, &T) -> T> SegmentTree<T, F> {
 }
 
 //modification on range, query in index
-impl<T: Clone, F: Fn(&T, &T) -> T> SegmentTree<T, F> {
+impl<T: Copy + From<bool>, F: Fn(T, T) -> T> SegmentTree<T, F> {
   pub fn update_range(&mut self, u: usize, v: usize, value: T) {
     let mut l = u + self.n;
     let mut r = v + self.n;
     while l < r {
       if (l & 1) != 0 {
-        self.t[l] = (self.f)(&self.t[l], &value);
+        self.t[l] = (self.f)(self.t[l], value);
         l += 1;
       }
       if (r & 1) != 0 {
         r -= 1;
-        self.t[r] = (self.f)(&self.t[r], &value);
+        self.t[r] = (self.f)(self.t[r], value);
       }
       l >>= 1;
       r >>= 1;
     }
   }
-  pub fn index(&self, zero: T, index: usize) -> T {
-    let mut res = zero;
+  pub fn index(&self, index: usize) -> T {
+    let mut res = T::from(false);
     let mut i = index + self.n;
     while i > 0 {
-      res = (self.f)(&res, &self.t[i]);
+      res = (self.f)(res, self.t[i]);
       i >>= 1;
     }
     res
   }
-  pub fn create(n: usize, zero: T, f: F) -> Self {
+  pub fn create(n: usize, f: F) -> Self {
     Self {
       n,
       f,
-      t: vec![zero; 2 * n],
+      t: vec![T::from(false); 2 * n],
     }
   }
-  fn push(&mut self, zero: T) {
+  fn push(&mut self) {
     for i in 1..self.n {
       let k = i << 1;
-      self.t[k] = (self.f)(&self.t[k], &self.t[i]);
-      self.t[k + 1] = (self.f)(&self.t[k + 1], &self.t[i]);
-      self.t[i] = zero.clone();
+      self.t[k] = (self.f)(self.t[k], self.t[i]);
+      self.t[k + 1] = (self.f)(self.t[k + 1], self.t[i]);
+      self.t[i] = T::from(false);
     }
   }
-  pub fn force(&mut self, zero: T) -> Vec<T> {
-    self.push(zero);
+  pub fn force(&mut self) -> Vec<T> {
+    self.push();
     self.t[self.n..2 * self.n].to_vec()
   }
 }
