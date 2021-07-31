@@ -43,28 +43,3 @@ impl PrimeTable {
   }
 }
 
-pub fn factorization(mut n: u32, primes: &Vec<u32>) -> Vec<(u32, u8)> {
-  let mut f = Vec::new();
-  for i in primes
-    .iter()
-    .cloned()
-    .chain((primes.last().unwrap() + 2..).step_by(2))
-  {
-    if i * i > n {
-      break;
-    }
-    if n % i == 0 {
-      let mut c = 1;
-      n /= i;
-      while n % i == 0 {
-        n /= i;
-        c += 1;
-      }
-      f.push((i, c));
-    }
-  }
-  if n > 1 {
-    f.push((n, 1));
-  }
-  f
-}

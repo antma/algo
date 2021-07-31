@@ -1,10 +1,11 @@
-use algo::number_theory::binomialsm::BinomialsM;
-use algo::number_theory::exponentation::pow;
-use algo::number_theory::factorization::factorization64;
-use algo::number_theory::gcd::Gcd;
-use algo::number_theory::primality_test32::is_prime32;
-use algo::number_theory::primality_test64::is_prime64;
-use algo::primes::PrimeTable;
+use algo::number_theory;
+use number_theory::binomialsm::BinomialsM;
+use number_theory::exponentation::pow;
+use number_theory::factorization::factorization64;
+use number_theory::gcd::Gcd;
+use number_theory::primality_test32::is_prime32;
+use number_theory::primality_test64::is_prime64;
+use number_theory::primes::PrimeTable;
 use algo::random::KnuthRandom;
 
 #[test]

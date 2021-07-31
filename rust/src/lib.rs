@@ -18,7 +18,6 @@ pub mod maxflow;
 pub mod mo;
 pub mod number_theory;
 pub mod polyhash;
-pub mod primes;
 pub mod random;
 pub mod ratio;
 pub mod segment_tree;

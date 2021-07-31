@@ -7,6 +7,32 @@ use std::collections::HashMap;
 
 pub struct Factorization(pub Vec<(u64, u8)>);
 
+pub fn factorization32(mut n: u32, primes: &[u32]) -> Factorization {
+  let mut f = Vec::new();
+  for i in primes
+    .iter()
+    .cloned()
+    .chain((primes.last().unwrap() + 2..).step_by(2))
+  {
+    if i * i > n {
+      break;
+    }
+    if n % i == 0 {
+      let mut c = 1;
+      n /= i;
+      while n % i == 0 {
+        n /= i;
+        c += 1;
+      }
+      f.push((i as u64, c));
+    }
+  }
+  if n > 1 {
+    f.push((n as u64, 1));
+  }
+  Factorization(f)
+}
+
 impl Factorization {
   fn go(&self, v: &mut Vec<u64>, c: u64, k: usize) {
     if k == self.0.len() {

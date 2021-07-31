@@ -1,4 +1,4 @@
-use algo::primes::PrimeTable;
+use algo::number_theory::primes::PrimeTable;
 
 #[test]
 fn large() {
