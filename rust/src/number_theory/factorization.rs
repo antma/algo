@@ -7,6 +7,27 @@ use std::collections::HashMap;
 
 pub struct Factorization(pub Vec<(u64, u8)>);
 
+impl Factorization {
+  fn go(&self, v: &mut Vec<u64>, c: u64, k: usize) {
+    if k == self.0.len() {
+      v.push(c);
+    } else {
+      let mut cur = c;
+      self.go(v, cur, k + 1);
+      for _ in 1..=self.0[k].1 {
+        cur *= self.0[k].0;
+        self.go(v, cur, k + 1);
+      }
+    }
+  }
+  pub fn divisors(&self) -> Vec<u64> {
+    let mut v = Vec::new();
+    self.go(&mut v, 1, 0);
+    v.sort();
+    v
+  }
+}
+
 fn pollard_monte_carlo(
   n: u64,
   gcd: &mut Gcd,

@@ -159,3 +159,10 @@ fn number_theory_factorization_test() {
     vec![(999055237, 1), (999808741, 1)]
   );
 }
+
+#[test]
+fn number_theory_sieve_array_overflow() {
+  let sv = algo::number_theory::sieve_array::SieveArray::new(368871 + 1);
+  let f = sv.factorization(368871);
+  assert_eq!(f.divisors(), vec![1, 3, 122957, 368871]);
+}

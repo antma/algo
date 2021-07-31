@@ -22,7 +22,6 @@ pub mod primes;
 pub mod random;
 pub mod ratio;
 pub mod segment_tree;
-pub mod sieve;
 pub mod splay_tree;
 pub mod string_functions;
 pub mod tree;
