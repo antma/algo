@@ -5,12 +5,10 @@ pub fn gauss_mod(mut a: Vec<Vec<IntM>>, mut b: Vec<IntM>) -> Option<Vec<IntM>> {
   let mut p = (0..n).collect::<Vec<_>>();
   for k in 0..n {
     let mut q = None;
-    'find_pos_loop: for x in k..n {
-      for y in k..n {
-        if a[x][y].0 != 0 {
-          q = Some((x, y));
-          break 'find_pos_loop;
-        }
+    for (x, p) in a.iter().enumerate().skip(k) {
+      if let Some(y) = p.iter().skip(k).position(|q| q.0 != 0) {
+        q = Some((x, y + k));
+        break;
       }
     }
     q?;
@@ -20,8 +18,8 @@ pub fn gauss_mod(mut a: Vec<Vec<IntM>>, mut b: Vec<IntM>) -> Option<Vec<IntM>> {
       b.swap(k, i);
     }
     if k < j {
-      for x in k..n {
-        a[x].swap(k, j);
+      for q in a.iter_mut().skip(k) {
+        q.swap(k, j);
       }
       p.swap(k, j);
     }

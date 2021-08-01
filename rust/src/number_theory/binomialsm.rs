@@ -21,10 +21,9 @@ impl BinomialsM {
     facts.push(1);
     let mut t = 1;
     let mut u = 1;
-    for a in 2..=maxn {
+    for (a, w) in ifacts.iter_mut().enumerate().skip(2) {
       t = mulm(t, a as u32, modulo);
       facts.push(t);
-      let w = &mut ifacts[a];
       u = mulm(*w, u, modulo);
       *w = u;
     }

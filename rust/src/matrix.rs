@@ -8,8 +8,8 @@ pub struct Matrix<E> {
 impl<E: Clone> Matrix<E> {
   pub fn identity(n: usize, zero: E, one: E) -> Self {
     let mut a = vec![vec![zero.clone(); n]; n];
-    for i in 0..n {
-      a[i][i] = one.clone();
+    for (i, q) in a.iter_mut().enumerate() {
+      q[i] = one.clone();
     }
     Self {
       rows: n,

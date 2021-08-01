@@ -47,7 +47,7 @@ fn mo_make_idx<E>(queries: &[(std::ops::Range<usize>, E)]) -> Vec<usize> {
 
 pub fn mo_process_queries<E, R: Default + Clone, S: MoState<E, R>>(
   s: &mut S,
-  queries: &Vec<(std::ops::Range<usize>, E)>,
+  queries: &[(std::ops::Range<usize>, E)],
 ) -> Vec<R> {
   let fast_reset = s.fast_reset();
   let mut l = 0;

@@ -20,7 +20,7 @@ fn gcdext_i64(a: i64, b: i64) -> (i64, i64, i64) {
   }
 }
 
-const U64_MAX: u64 = 0xffffffffffffffff;
+const U64_MAX: u64 = 0xffff_ffff_ffff_ffff;
 
 impl Montgomery64 {
   fn new(n: u64) -> Self {
@@ -78,7 +78,7 @@ pub fn is_prime64(n: u64, gcd: &mut Gcd, rnd: &mut KnuthRandom, tries: u32) -> b
   if n <= 0xffff_ffff {
     return is_prime32(n as u32, gcd);
   }
-  const MODULO: u64 = 223092870;
+  const MODULO: u64 = 223_092_870;
   let a = n % MODULO;
   if gcd.gcd_u32(MODULO as u32, a as u32) > 1 {
     return false;
@@ -89,7 +89,7 @@ pub fn is_prime64(n: u64, gcd: &mut Gcd, rnd: &mut KnuthRandom, tries: u32) -> b
       return false;
     }
   }
-  if n < 4759123141 {
+  if n < 4_759_123_141 {
     return true;
   }
   for _ in 0..tries {

@@ -5,11 +5,11 @@ pub struct KnuthRandom {
 }
 
 impl KnuthRandom {
-  const M: i32 = 0x7fffffff;
+  const M: i32 = 0x7fff_ffff;
   const F: f64 = 1.0 / (KnuthRandom::M as f64);
   pub fn new(seed: i32) -> Self {
     let mut a = [0; 55];
-    let mut j = (0x5EED5EEDi32 >> 3)
+    let mut j = (0x5EED_5EEDi32 >> 3)
       .wrapping_sub(seed)
       .wrapping_abs()
       .max(0)
@@ -46,7 +46,7 @@ impl KnuthRandom {
     }
     let mut j = self.a[self.u] - self.a[self.v];
     if j < 0 {
-      j += 0x7fffffff;
+      j += KnuthRandom::M;
     }
     self.a[self.u] = j;
     j
@@ -88,7 +88,7 @@ impl KnuthRandom {
     loop {
       let u1 = self.random();
       let u2 = 1.0 - self.random();
-      let z = 1.7155277699214135929603792825575449562 * (u1 - 0.5) / u2;
+      let z = 1.715_527_769_921_413_593 * (u1 - 0.5) / u2;
       if z * z <= -4.0 * (u2.ln()) {
         break mean + z * sigma;
       }

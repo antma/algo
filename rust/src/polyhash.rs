@@ -1,8 +1,8 @@
 use crate::number_theory::intm::{addm, mulm, subm};
 use std::ops::{AddAssign, MulAssign, SubAssign};
 
-const P1: u32 = 4294967291;
-const P2: u32 = 4294967279;
+const P1: u32 = 4_294_967_291;
+const P2: u32 = 4_294_967_279;
 
 #[derive(Clone)]
 struct HashT {

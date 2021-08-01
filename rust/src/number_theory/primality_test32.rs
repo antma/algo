@@ -18,9 +18,9 @@ fn witness32(a: u32, n: u32) -> bool {
 
 pub fn is_prime32(n: u32, gcd: &mut Gcd) -> bool {
   if n <= 23 {
-    return ((1 << n) & 0x8a28ac) != 0;
+    return ((1 << n) & 0x008a_28ac) != 0;
   }
-  if gcd.gcd_u32(n, 223092870) > 1 {
+  if gcd.gcd_u32(n, 223_092_870) > 1 {
     return false;
   }
   if n <= 529 {
@@ -29,7 +29,7 @@ pub fn is_prime32(n: u32, gcd: &mut Gcd) -> bool {
   if witness32(2, n) || witness32(61, n) {
     return false;
   }
-  if n < 916327 {
+  if n < 916_327 {
     return true;
   }
   !witness32(7, n)

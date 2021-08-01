@@ -27,7 +27,7 @@ where
     let n = g.edges.len();
     PushRelabelMaxFlow {
       g,
-      current: vec![0xffffffffusize; n],
+      current: vec![0xffff_ffffusize; n],
       h: vec![0; n],
       nl: vec![-1; n],
       e: vec![C::from(false); n],
@@ -78,7 +78,7 @@ where
     self.e[j] += &d;
   }
   fn lift(&mut self, i: usize) {
-    let mut m = 0x7fffffffi32;
+    let mut m = 0x7fff_ffffi32;
     for p in &self.g.edges[i] {
       if p.f < p.c && m > self.h[p.v] {
         m = self.h[p.v];
