@@ -1,5 +1,5 @@
 use crate::math::sqrtint;
-use crate::number_theory::exponentation::generic_pow;
+use crate::number_theory::exponentation::pow_mul_copied;
 use crate::number_theory::gcd::Gcd;
 use crate::number_theory::primality_test64::is_prime64;
 use crate::random::KnuthRandom;
@@ -69,11 +69,11 @@ fn pollard_monte_carlo(
         break;
       }
       cur = w;
-      b = generic_pow(
+      b = pow_mul_copied(
         b,
         cur,
         |x, y| (((x as u128) * (y as u128)) % n128) as u64,
-        || 1u64,
+        1u64,
       );
       if b > 0 {
         let g = gcd.gcd_u64(n, b - 1);

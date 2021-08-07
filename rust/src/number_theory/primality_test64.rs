@@ -1,4 +1,4 @@
-use crate::number_theory::exponentation::generic_pow;
+use crate::number_theory::exponentation::pow_mul_copied;
 use crate::number_theory::gcd::Gcd;
 use crate::number_theory::primality_test32::is_prime32;
 use crate::random::KnuthRandom;
@@ -55,7 +55,7 @@ impl Montgomery64 {
     }
   }
   fn pow(&self, x: u64, y: u64) -> u64 {
-    generic_pow(x, y, |u, v| self.mul(u, v), || self.r_mod_n)
+    pow_mul_copied(x, y, |u, v| self.mul(u, v), self.r_mod_n)
   }
 }
 

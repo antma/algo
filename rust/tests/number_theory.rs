@@ -1,23 +1,23 @@
 use algo::number_theory;
+use algo::random::KnuthRandom;
 use number_theory::binomialsm::BinomialsM;
 use number_theory::exponentation::pow;
-use number_theory::factorization::{factorization32,factorization64};
+use number_theory::factorization::{factorization32, factorization64};
 use number_theory::gcd::Gcd;
 use number_theory::primality_test32::is_prime32;
 use number_theory::primality_test64::is_prime64;
 use number_theory::primes::PrimeTable;
-use algo::random::KnuthRandom;
 
 #[test]
 fn number_theory_exponentation_tests() {
   for i in 0..32 {
-    assert_eq!(pow(2u32, i, || 1u32), 1u32 << i);
+    assert_eq!(pow(2u32, i, 1u32), 1u32 << i);
   }
   for i in 0..64 {
-    assert_eq!(pow(2u64, i, || 1u64), 1u64 << i);
+    assert_eq!(pow(2u64, i, 1u64), 1u64 << i);
   }
   for i in 0..=40 {
-    assert_eq!(pow(3u64, i, || 1u64), 3u64.pow(i));
+    assert_eq!(pow(3u64, i, 1u64), 3u64.pow(i));
   }
 }
 
@@ -159,10 +159,14 @@ fn number_theory_factorization_test() {
     factorization64(998864158694426617, &small_primes, &mut gcd, &mut rnd, 3).0,
     vec![(999055237, 1), (999808741, 1)]
   );
-  assert_eq!(factorization32(1556755200, &small_primes).0,
-    vec![(2,8),(3,5),(5,2),(7,1),(11,1),(13,1)]);
-  assert_eq!(factorization64(1556755200, &small_primes, &mut gcd, &mut rnd, 1).0,
-    vec![(2,8),(3,5),(5,2),(7,1),(11,1),(13,1)]);
+  assert_eq!(
+    factorization32(1556755200, &small_primes).0,
+    vec![(2, 8), (3, 5), (5, 2), (7, 1), (11, 1), (13, 1)]
+  );
+  assert_eq!(
+    factorization64(1556755200, &small_primes, &mut gcd, &mut rnd, 1).0,
+    vec![(2, 8), (3, 5), (5, 2), (7, 1), (11, 1), (13, 1)]
+  );
 }
 
 #[test]
