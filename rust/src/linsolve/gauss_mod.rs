@@ -18,7 +18,7 @@ pub fn gauss_mod(mut a: Vec<Vec<IntM>>, mut b: Vec<IntM>) -> Option<Vec<IntM>> {
       b.swap(k, i);
     }
     if k < j {
-      for q in a.iter_mut().skip(k) {
+      for q in &mut a {
         q.swap(k, j);
       }
       p.swap(k, j);
