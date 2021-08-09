@@ -101,11 +101,11 @@ pub fn gauss_matrix_inverse(mut a: Vec<Vec<IntM>>) -> Option<Vec<Vec<IntM>>> {
     let mut x = vec![zero.clone(); n];
     for (i, pi) in p.iter().enumerate().rev() {
       let mut t = b[i][j];
-      for k in i + 1..n {
-        t = t - a[i][k] * x[p[k]];
+      for (p, q) in a[i].iter().zip(x.iter()).skip(i + 1) {
+        t = t - *p * *q;
       }
       t = t * a[i][i];
-      x[*pi] = t;
+      x[i] = t;
       c[*pi][j] = t;
     }
   }
