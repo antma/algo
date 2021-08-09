@@ -1,6 +1,12 @@
 pub struct BitSet(Vec<u64>);
 
 impl BitSet {
+  pub fn clear(&mut self, i: usize) {
+    self.0[i >> 6] &= !(1u64 << (i & 63));
+  }
+  pub fn flip(&mut self, i: usize) {
+    self.0[i >> 6] ^= 1u64 << (i & 63);
+  }
   pub fn set(&mut self, i: usize) {
     self.0[i >> 6] |= 1u64 << (i & 63);
   }
