@@ -1,5 +1,6 @@
 use algo::bignum::bigint::BigInt;
 use algo::geometry::plane::{Point, Segment};
+use algo::geometry::space;
 
 #[test]
 fn test_segments_and_bigints() {
@@ -39,4 +40,37 @@ fn test_segments_and_bigints() {
     assert_eq!(tj.intersect(&t[i]), true);
     assert_eq!(t[i].intersect(&t[(i + 2) & 3]), false);
   }
+}
+
+#[test]
+fn geometry_space_bigints() {
+  let p1 = space::Point {
+    x: BigInt::from(1),
+    y: BigInt::from(2),
+    z: BigInt::from(3),
+  };
+  let p2 = space::Point {
+    x: BigInt::from(4),
+    y: BigInt::from(5),
+    z: BigInt::from(6),
+  };
+  let p3 = space::Point {
+    x: BigInt::from(5),
+    y: BigInt::from(7),
+    z: BigInt::from(9),
+  };
+  let p4 = space::Point {
+    x: BigInt::from(-3),
+    y: BigInt::from(-3),
+    z: BigInt::from(-3),
+  };
+  let p5 = space::Point {
+    x: BigInt::from(10),
+    y: BigInt::from(14),
+    z: BigInt::from(18),
+  };
+  assert_eq!(p1.clone() + p2.clone(), p3);
+  assert_eq!(p1.clone() - p2.clone(), p4);
+  assert_eq!(p3.clone() * BigInt::from(2), p5);
+  assert_eq!(p1.dot_product(&p2), BigInt::from(4 + 2 * 5 + 3 * 6));
 }
