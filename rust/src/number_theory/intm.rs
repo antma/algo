@@ -61,7 +61,7 @@ where
   a
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default)]
 pub struct IntM(u32, u32);
 
 impl std::ops::Add for IntM {

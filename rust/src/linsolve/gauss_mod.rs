@@ -35,7 +35,7 @@ pub fn gauss_mod(mut a: Vec<Vec<IntM>>, mut b: Vec<IntM>) -> Option<Vec<IntM>> {
       }
     }
   }
-  let mut x = vec![IntM(0); n];
+  let mut x = vec![IntM::default(); n];
   for i in (0..n).rev() {
     let mut t = b[i];
     for k in i + 1..n {
@@ -95,10 +95,10 @@ pub fn gauss_matrix_inverse(mut a: Vec<Vec<IntM>>) -> Option<Vec<Vec<IntM>>> {
   let mut c = Vec::with_capacity(n);
   for i in 0..n {
     a[i][i] = a[i][i].inv();
-    c.push(vec![zero.clone(); n]);
+    c.push(vec![IntM::default(); n]);
   }
   for j in 0..n {
-    let mut x = vec![zero.clone(); n];
+    let mut x = vec![IntM::default(); n];
     for (i, pi) in p.iter().enumerate().rev() {
       let mut t = b[i][j];
       for (p, q) in a[i].iter().zip(x.iter()).skip(i + 1) {

@@ -1,6 +1,6 @@
 const MODULO: u32 = 1_000_000_007;
 
-#[derive(Clone, Copy, PartialEq, Debug)]
+#[derive(Clone, Copy, PartialEq, Debug, Default)]
 pub struct IntM(pub u32);
 
 impl std::ops::Add for IntM {
