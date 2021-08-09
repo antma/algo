@@ -24,10 +24,13 @@ impl SieveArray {
   }
   pub fn factorization(&self, n: u32) -> Factorization {
     let mut f = Vec::new();
+    if n == 1 {
+      return Factorization(f);
+    }
     let mut x = n as usize;
     let mut last = 0;
     let mut c = 0;
-    while x > 1 {
+    loop {
       let p = self.0[x];
       if last != p {
         if last != 0 {
@@ -38,11 +41,12 @@ impl SieveArray {
       } else {
         c += 1;
       }
-      x = ((x as u32) / p) as usize;
+      let t = x as u32;
+      if t == p {
+        f.push((last as u64, c));
+        break Factorization(f);
+      }
+      x = (t / p) as usize;
     }
-    if last != 0 {
-      f.push((last as u64, c));
-    }
-    Factorization(f)
   }
 }
