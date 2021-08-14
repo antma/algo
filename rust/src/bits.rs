@@ -22,6 +22,30 @@ impl IntoIterator for Bits {
   }
 }
 
+pub struct GrayCodesIterator(u32, u32, u32);
+impl Iterator for GrayCodesIterator {
+  type Item = u32;
+  fn next(&mut self) -> Option<Self::Item> {
+    if self.0 == self.2 {
+      None
+    } else {
+      let r = Some(self.1);
+      self.0 += 1;
+      self.1 ^= 1 << self.0.trailing_zeros();
+      r
+    }
+  }
+}
+
+pub struct GrayCodes(pub u32);
+impl IntoIterator for GrayCodes {
+  type Item = u32;
+  type IntoIter = GrayCodesIterator;
+  fn into_iter(self) -> Self::IntoIter {
+    GrayCodesIterator(0, 0, 1 << self.0)
+  }
+}
+
 pub struct SubmasksIterator {
   s: u32,
   m: u32,
