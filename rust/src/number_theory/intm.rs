@@ -1,3 +1,5 @@
+use crate::number_theory::exponentation::pow_mul_copied;
+
 pub fn addm(x: u32, y: u32, m: u32) -> u32 {
   let r = x.wrapping_add(y);
   if r < x || r >= m {
@@ -35,30 +37,11 @@ pub fn inv(n: u32, m: u32) -> u32 {
   (if x < 0 { x + m as i32 } else { x }) as u32
 }
 
-pub fn powm<P>(x: u32, mut y: P, m: u32) -> u32
+pub fn powm<P>(x: u32, y: P, m: u32) -> u32
 where
   P: From<bool> + Eq + std::ops::BitAnd<Output = P> + std::ops::ShrAssign<u8> + Copy,
 {
-  let zero = P::from(false);
-  if y == zero {
-    return 1;
-  }
-  let mut b = x;
-  let one = P::from(true);
-  while zero == (y & one) {
-    b = mulm(b, b, m);
-    y >>= 1;
-  }
-  let mut a = b;
-  y >>= 1;
-  while y != zero {
-    b = mulm(b, b, m);
-    if !((y & one) == zero) {
-      a = mulm(a, b, m);
-    }
-    y >>= 1;
-  }
-  a
+  pow_mul_copied(x, y, |u, v| mulm(u, v, m), 1)
 }
 
 #[derive(Clone, Copy, Default)]
