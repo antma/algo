@@ -2,6 +2,7 @@ pub mod assignment_problem;
 pub mod bignum;
 pub mod bits;
 pub mod bitset;
+pub mod comb;
 pub mod complex;
 pub mod disjoint_set;
 pub mod fenwick_tree;
