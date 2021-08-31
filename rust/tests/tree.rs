@@ -1,16 +1,35 @@
+use algo::random::KnuthRandom;
 use algo::tree::treap;
+use algo::tree::treap_persistent_implicit_key;
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 struct Void;
 
 type TNode = treap::Node<i32, Void, Void>;
 fn nop(_: &mut TNode) {}
 
+type PNode = treap_persistent_implicit_key::PtrPINode<i8, Void>;
+
+fn pi_nop(_l: &PNode, _r: &PNode, _v: &i8) -> Void {
+  Void
+}
+
+#[test]
+fn treap_persistent_implicit_key_tests() {
+  const M: usize = 100;
+  let mut rnd = KnuthRandom::new(12345);
+  let t = treap_persistent_implicit_key::PersistenImplicitKeyTreap::new(pi_nop);
+  let mut root = None;
+  for i in 0..M {
+    root = t.insert(root, i, rnd.randrange(0..0x7fff_ffff), i as i8);
+  }
+}
+
 #[test]
 fn treap_tests() {
   let t = treap::Treap { relax_op: nop };
   let mut root = None;
-  let mut rnd = algo::random::KnuthRandom::new(12345);
+  let mut rnd = KnuthRandom::new(12345);
   for p in vec![2, 3, 5, 7, 11, 13, 17, 19] {
     root = t.insert(root, p, rnd.randrange(0..1_000_000_000), Void::default());
   }
