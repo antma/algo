@@ -1,5 +1,6 @@
 use algo::random::KnuthRandom;
 use algo::tree::treap;
+use algo::tree::treap_implicit_key;
 use algo::tree::treap_persistent_implicit_key;
 
 #[derive(Clone, Default)]
@@ -8,20 +9,40 @@ struct Void;
 type TNode = treap::Node<i32, Void, Void>;
 fn nop(_: &mut TNode) {}
 
-type PNode = treap_persistent_implicit_key::PtrPINode<i8, Void>;
+type INode = treap_implicit_key::INode<i8, Void>;
+type PtrPINode = treap_persistent_implicit_key::PtrPINode<i8, Void>;
 
-fn pi_nop(_l: &PNode, _r: &PNode, _v: &i8) -> Void {
+fn pi_nop(_l: &PtrPINode, _r: &PtrPINode, _v: &i8) -> Void {
   Void
+}
+
+fn i_nop(_l: &mut INode) {}
+
+#[test]
+fn treap_implicit_key_tests() {
+  const M: usize = 100;
+  let mut rnd = KnuthRandom::new(12345);
+  let t = treap_implicit_key::ImplicitKeyTreap::new(i_nop, i_nop);
+  let mut root = None;
+  for i in 0..M {
+    root = t.insert(root, i, rnd.randrange(0..0x7fff_ffff), i as i8);
+  }
+  for i in 0..M {
+    assert_eq!(t.get(&mut root, i).unwrap().value, i as i8);
+  }
 }
 
 #[test]
 fn treap_persistent_implicit_key_tests() {
   const M: usize = 100;
   let mut rnd = KnuthRandom::new(12345);
-  let t = treap_persistent_implicit_key::PersistenImplicitKeyTreap::new(pi_nop);
+  let t = treap_persistent_implicit_key::PersistentImplicitKeyTreap::new(pi_nop);
   let mut root = None;
   for i in 0..M {
     root = t.insert(root, i, rnd.randrange(0..0x7fff_ffff), i as i8);
+  }
+  for i in 0..M {
+    assert_eq!(t.get(&root, i).unwrap().value, i as i8);
   }
 }
 

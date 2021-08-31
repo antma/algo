@@ -11,7 +11,7 @@ pub struct PINode<V, E> {
 
 pub type PtrPINode<V, E> = Option<Rc<PINode<V, E>>>;
 
-pub struct PersistenImplicitKeyTreap<V, E, F> {
+pub struct PersistentImplicitKeyTreap<V, E, F> {
   compute_extra: F,
   phantom: std::marker::PhantomData<(V, E)>,
 }
@@ -37,7 +37,7 @@ impl<V, E> PINode<V, E> {
 }
 
 impl<V: Clone, E: Clone, F: Fn(&PtrPINode<V, E>, &PtrPINode<V, E>, &V) -> E>
-  PersistenImplicitKeyTreap<V, E, F>
+  PersistentImplicitKeyTreap<V, E, F>
 {
   pub fn new(compute_extra: F) -> Self {
     Self {

@@ -7,14 +7,24 @@ pub struct INode<V, E> {
   sz: u32,
 }
 
-pub struct ITreapMethods<V, E> {
-  push_op: fn(&mut INode<V, E>),
-  relax_op: fn(&mut INode<V, E>),
+pub type PtrINode<V, E> = Option<Box<INode<V, E>>>;
+
+pub struct ImplicitKeyTreap<V, E, F> {
+  push_op: F,
+  relax_op: F,
+  phantom: std::marker::PhantomData<(V, E)>,
 }
 
-impl<V, E: Default> ITreapMethods<V, E> {
+impl<V, E: Default, F: Fn(&mut INode<V, E>)> ImplicitKeyTreap<V, E, F> {
+  pub fn new(push_op: F, relax_op: F) -> Self {
+    Self {
+      push_op,
+      relax_op,
+      phantom: std::marker::PhantomData,
+    }
+  }
   #[inline]
-  fn push(&self, p: &mut Option<Box<INode<V, E>>>) {
+  fn push(&self, p: &mut PtrINode<V, E>) {
     if let Some(ref mut q) = p {
       (self.push_op)(q);
     }
@@ -35,11 +45,7 @@ impl<V, E: Default> ITreapMethods<V, E> {
       t.sz += r.sz;
     }
   }
-  pub fn split(
-    &self,
-    t: Option<Box<INode<V, E>>>,
-    pos: usize,
-  ) -> (Option<Box<INode<V, E>>>, Option<Box<INode<V, E>>>) {
+  pub fn split(&self, t: PtrINode<V, E>, pos: usize) -> (PtrINode<V, E>, PtrINode<V, E>) {
     if let Some(mut q) = t {
       let ls = {
         let u = &mut q;
@@ -53,10 +59,7 @@ impl<V, E: Default> ITreapMethods<V, E> {
       if pos <= ls {
         let l = {
           let u = &mut q;
-          let (l, r) = self.split(
-            std::mem::replace::<Option<Box<INode<V, E>>>>(&mut u.left, None),
-            pos,
-          );
+          let (l, r) = self.split(std::mem::replace::<PtrINode<V, E>>(&mut u.left, None), pos);
           u.left = r;
           self.relax(u);
           l
@@ -66,7 +69,7 @@ impl<V, E: Default> ITreapMethods<V, E> {
         let r = {
           let u = &mut q;
           let (l, r) = self.split(
-            std::mem::replace::<Option<Box<INode<V, E>>>>(&mut u.right, None),
+            std::mem::replace::<PtrINode<V, E>>(&mut u.right, None),
             pos - ls - 1,
           );
           u.right = l;
@@ -79,11 +82,7 @@ impl<V, E: Default> ITreapMethods<V, E> {
       (None, None)
     }
   }
-  pub fn merge(
-    &self,
-    mut l: Option<Box<INode<V, E>>>,
-    mut r: Option<Box<INode<V, E>>>,
-  ) -> Option<Box<INode<V, E>>> {
+  pub fn merge(&self, mut l: PtrINode<V, E>, mut r: PtrINode<V, E>) -> PtrINode<V, E> {
     if l.is_none() {
       self.push(&mut r);
       return r;
@@ -118,13 +117,7 @@ impl<V, E: Default> ITreapMethods<V, E> {
       sz: 1,
     }
   }
-  pub fn insert(
-    &self,
-    t: Option<Box<INode<V, E>>>,
-    pos: usize,
-    y: i32,
-    value: V,
-  ) -> Option<Box<INode<V, E>>> {
+  pub fn insert(&self, t: PtrINode<V, E>, pos: usize, y: i32, value: V) -> PtrINode<V, E> {
     if t.is_none() {
       return Some(Box::new(self.new_inode(y, value)));
     }
@@ -161,7 +154,7 @@ impl<V, E: Default> ITreapMethods<V, E> {
     self.relax_inc(&mut t);
     Some(t)
   }
-  pub fn get<'a, 'b>(&'a self, t: &'b mut Option<Box<INode<V, E>>>, pos: usize) -> &'b INode<V, E> {
+  pub fn get<'a, 'b>(&'a self, t: &'b mut PtrINode<V, E>, pos: usize) -> Option<&'b INode<V, E>> {
     if let Some(ref mut t) = t {
       (self.push_op)(t);
       let ls = if let Some(l) = &t.left {
@@ -174,12 +167,12 @@ impl<V, E: Default> ITreapMethods<V, E> {
       }
       let pos = pos - ls;
       if pos == 0 {
-        t
+        Some(t)
       } else {
         self.get(&mut t.right, pos - 1)
       }
     } else {
-      panic!("get from empty treap");
+      None
     }
   }
 }
