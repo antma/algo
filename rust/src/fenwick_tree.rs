@@ -38,3 +38,68 @@ where
     }
   }
 }
+
+//////////////////// FenwickTree2D ////////////////////
+struct FenwickUpdateIterator(usize, usize);
+impl Iterator for FenwickUpdateIterator {
+  type Item = usize;
+  fn next(&mut self) -> Option<Self::Item> {
+    if self.0 >= self.1 {
+      None
+    } else {
+      let i = self.0;
+      self.0 |= i + 1;
+      Some(i)
+    }
+  }
+}
+
+struct FenwickReduceIterator(isize);
+impl Iterator for FenwickReduceIterator {
+  type Item = usize;
+  fn next(&mut self) -> Option<Self::Item> {
+    if self.0 < 0 {
+      None
+    } else {
+      let i = self.0;
+      self.0 = (i & (i + 1)) - 1;
+      Some(i as usize)
+    }
+  }
+}
+
+pub struct FenwickTree2D<T> {
+  a: Vec<Vec<T>>,
+  nx: usize,
+  ny: usize,
+}
+
+impl<T> FenwickTree2D<T>
+where
+  T: std::ops::Add<Output = T> + Copy + From<bool>,
+{
+  pub fn new(nx: usize, ny: usize) -> Self {
+    Self {
+      a: vec![vec![T::from(false); ny]; nx],
+      nx,
+      ny,
+    }
+  }
+  pub fn update(&mut self, x: usize, y: usize, v: T) {
+    let ny = self.ny;
+    FenwickUpdateIterator(x, self.nx).for_each(|x| {
+      let w = &mut self.a[x];
+      FenwickUpdateIterator(y, ny).for_each(|y| {
+        let q = &mut w[y];
+        *q = *q + v;
+      })
+    });
+  }
+  //sum on [0, x) x [0, y)
+  pub fn reduce(&self, x: usize, y: usize) -> T {
+    FenwickReduceIterator(x as isize - 1).fold(T::from(false), |acc, i| {
+      let w = &self.a[i];
+      FenwickReduceIterator(y as isize - 1).fold(acc, |acc2, j| acc2 + w[j])
+    })
+  }
+}
