@@ -31,10 +31,13 @@ where
       self.s[i] = true;
       let z = T::from(0);
       for j in 0..self.n {
-        if self.g[i][j] == z && (self.b[j] < 0 || self.rec(self.b[j] as usize)) {
-          self.a[i] = j as i32;
-          self.b[j] = i as i32;
-          return true;
+        if self.g[i][j] == z {
+          let bj = self.b[j];
+          if bj < 0 || self.rec(bj as usize) {
+            self.a[i] = j as i32;
+            self.b[j] = i as i32;
+            return true;
+          }
         }
       }
     }
