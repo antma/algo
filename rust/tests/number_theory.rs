@@ -174,4 +174,10 @@ fn number_theory_sieve_array_overflow() {
   let sv = algo::number_theory::sieve_array::SieveArray::new(368871 + 1);
   let f = sv.factorization(368871);
   assert_eq!(f.divisors(), vec![1, 3, 122957, 368871]);
+  let f = sv.factorization(9);
+  assert_eq!(f.divisors(), vec![1, 3, 9]);
+  let f = sv.factorization(18);
+  assert_eq!(f.divisors(), vec![1, 2, 3, 6, 9, 18]);
+  let f = sv.factorization(12);
+  assert_eq!(f.divisors(), vec![1, 2, 3, 4, 6, 12]);
 }
