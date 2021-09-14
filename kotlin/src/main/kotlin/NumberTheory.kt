@@ -31,6 +31,52 @@ fun sieveArray(n: Int): IntArray {
   return a
 }
 
+typealias Factorization = Array<Pair<Int, Byte>>
+fun sieveArrayFactorization(sa: IntArray, n: Int): Factorization {
+  val f: MutableList<Pair<Int, Byte>> = mutableListOf()
+  if (n == 1) {
+    return f.toTypedArray()
+  }
+  var last = 0
+  var c = 0
+  var x = n
+  while (true) {
+    val p = sa[x]
+    if (last != p) {
+      if (last != 0) {
+        f.add(Pair(last, c.toByte()))
+      }
+      c = 1
+      last = p
+    } else {
+      c += 1
+    }
+    if (x == p) {
+      f.add(Pair(last, c.toByte()))
+      return f.toTypedArray()
+    }
+    x /= p
+  }
+}
+
+fun divisors(f: Factorization): IntArray {
+  val l: MutableList<Int> = mutableListOf()
+  fun go(c: Int, k: Int) {
+    if (k == f.size) {
+      l.add(c)
+    } else {
+      var cur = c
+      go(cur, k + 1)
+      repeat(f[k].second.toInt()) {
+        cur *= f[k].first
+        go(cur, k + 1)
+      }
+    }
+  }
+  go(1, 0)
+  return l.toIntArray()
+}
+
 class LinearSieve(val n: Int, prime: (Int) -> Int, divides : (Int, Int) -> Int) {
   private val composite = BitSet(n)
   private val primes = arrayListOf<Int>()
