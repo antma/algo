@@ -76,7 +76,7 @@ pub struct FenwickTree2D<T> {
 
 impl<T> FenwickTree2D<T>
 where
-  T: std::ops::Add<Output = T> + Copy + From<bool>,
+  T: std::ops::Add<Output = T> + std::ops::Sub<Output = T> + Copy + From<bool>,
 {
   pub fn new(nx: usize, ny: usize) -> Self {
     Self {
@@ -101,5 +101,9 @@ where
       let w = &self.a[i];
       FenwickReduceIterator(y as isize - 1).fold(acc, |acc2, j| acc2 + w[j])
     })
+  }
+  //sum on [x1, x2) x [y1, y2)
+  pub fn sum_on_rectangle(&self, x1: usize, y1: usize, x2: usize, y2: usize) -> T {
+    ((self.reduce(x2, y2) - self.reduce(x1, y2)) + self.reduce(x1, y1)) - self.reduce(x2, y1)
   }
 }
