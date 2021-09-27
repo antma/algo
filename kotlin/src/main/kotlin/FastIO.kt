@@ -1,14 +1,13 @@
 package cpalgo.fastio
 import java.io.*
 
-class FastScanner(private val input: InputStream) {
+class FastScanner(private val input: InputStream, buffer_size: Int) {
   companion object {
     val zero = 0.toByte()
     val cr = '\r'.toByte()
     val nl = '\n'.toByte()
-    val BUFFER_SIZE = 0x10000
   }
-  private val b = ByteArray(BUFFER_SIZE)
+  private val b = ByteArray(buffer_size)
   private var n = 0
   private var pos = 0
   private var eof = false
@@ -110,4 +109,12 @@ class FastScanner(private val input: InputStream) {
       }
     }
   }
+}
+
+object FastIO {
+  val BUFFER_SIZE = 0x100000
+  fun scanner(): FastScanner =
+    FastScanner(System.`in`, BUFFER_SIZE)
+  fun writer(): PrintWriter =
+    PrintWriter(BufferedWriter(OutputStreamWriter(System.out), BUFFER_SIZE), false)
 }
