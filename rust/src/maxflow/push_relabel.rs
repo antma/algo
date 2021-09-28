@@ -96,8 +96,9 @@ where
           self.remove(i);
           self.h[i] = (n + 1) as i32;
           for k in 1..n {
-            if self.h[k] > (self.maxh as i32) && self.h[k] <= (n as i32) {
-              self.gc[self.h[k] as usize] -= 1;
+            let h = self.h[k];
+            if h > self.maxh && h <= (n as i32) {
+              self.gc[h as usize] -= 1;
               self.h[k] = (n + 1) as i32;
             }
           }
