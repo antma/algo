@@ -23,15 +23,14 @@ pub struct Graph<C> {
 
 impl<C> Graph<C>
 where
-  for<'b> C: std::ops::AddAssign<&'b C> + std::ops::SubAssign<&'b C>,
-  C: From<bool> + Clone + Ord,
+  C: From<bool> + Clone + Copy + Ord + std::ops::AddAssign<C> + std::ops::SubAssign<C>,
 {
   pub fn new(n: usize) -> Self {
     Self {
       edges: vec![Vec::new(); n],
     }
   }
-  pub fn add_flow(&mut self, v: usize, k: usize, delta: &C) {
+  pub fn add_flow(&mut self, v: usize, k: usize, delta: C) {
     let (u, l) = {
       let p = &self.edges[v][k];
       (p.v, p.e)

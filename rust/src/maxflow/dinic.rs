@@ -10,8 +10,13 @@ pub struct DinicMaxFlow<C> {
 
 impl<C> DinicMaxFlow<C>
 where
-  for<'b> C: std::ops::AddAssign<&'b C> + std::ops::SubAssign<&'b C>,
-  C: std::ops::Sub<Output = C> + Ord + From<bool> + Copy + Eq,
+  C: std::ops::Sub<Output = C>
+    + Ord
+    + From<bool>
+    + Copy
+    + Eq
+    + std::ops::AddAssign<C>
+    + std::ops::SubAssign<C>,
 {
   pub fn new(g: Graph<C>) -> Self {
     let n = g.edges.len();
@@ -46,7 +51,7 @@ where
     while let Some((v, pushed)) = s.pop() {
       if v == sink {
         for (v, _) in s {
-          self.g.add_flow(v, self.ptr[v] - 1, &pushed);
+          self.g.add_flow(v, self.ptr[v] - 1, pushed);
         }
         return pushed;
       }
@@ -90,7 +95,7 @@ where
         if pushed == C::from(false) {
           break;
         }
-        f += &pushed;
+        f += pushed;
       }
     }
     f

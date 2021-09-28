@@ -20,8 +20,14 @@ pub struct PushRelabelMaxFlow<C> {
 
 impl<C> PushRelabelMaxFlow<C>
 where
-  for<'b> C: std::ops::AddAssign<&'b C> + std::ops::SubAssign<&'b C>,
-  C: From<bool> + Copy + Eq + Ord + std::ops::Neg<Output = C> + std::ops::Sub<Output = C>,
+  C: From<bool>
+    + Copy
+    + Eq
+    + Ord
+    + std::ops::Neg<Output = C>
+    + std::ops::Sub<Output = C>
+    + std::ops::AddAssign<C>
+    + std::ops::SubAssign<C>,
 {
   pub fn new(g: Graph<C>) -> Self {
     let n = g.edges.len();
@@ -65,7 +71,7 @@ where
       if i > 0 && i < n - 1 && C::from(false) == self.e[i] {
         self.insert(0, i);
       }
-      self.e[i] += &c;
+      self.e[i] += c;
       self.g.edges[i][e].f = -c;
     }
     self.gc[0] = (n - 1) as i32;
@@ -73,9 +79,9 @@ where
   fn push(&mut self, i: usize, e: usize) {
     let Edge { v: j, c, f, .. } = self.g.edges[i][e];
     let d = self.e[i].min(c - f);
-    self.g.add_flow(i, e, &d);
-    self.e[i] -= &d;
-    self.e[j] += &d;
+    self.g.add_flow(i, e, d);
+    self.e[i] -= d;
+    self.e[j] += d;
   }
   fn lift(&mut self, i: usize) {
     let mut m = 0x7fff_ffffi32;
