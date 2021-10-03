@@ -50,3 +50,20 @@ impl IntM {
     IntM((if x < 0 { x + MODULO as i32 } else { x }) as u32)
   }
 }
+
+impl std::ops::AddAssign for IntM {
+  fn add_assign(&mut self, other: Self) {
+    let r = self.0.wrapping_add(other.0);
+    self.0 = if r < self.0 || r >= MODULO {
+      r.wrapping_sub(MODULO)
+    } else {
+      r
+    };
+  }
+}
+
+impl From<bool> for IntM {
+  fn from(x: bool) -> Self {
+    Self(u32::from(x))
+  }
+}
