@@ -4,8 +4,8 @@ import java.io.*
 class FastScanner(private val input: InputStream, buffer_size: Int) {
   companion object {
     val zero = 0.toByte()
-    val cr = '\r'.toByte()
-    val nl = '\n'.toByte()
+    val cr = 0xd.toByte()
+    val nl = 0xa.toByte()
   }
   private val b = ByteArray(buffer_size)
   private var n = 0
@@ -50,7 +50,7 @@ class FastScanner(private val input: InputStream, buffer_size: Int) {
         check (nextByte() == nl)
         return sb.toString()
       }
-      sb.append(b.toChar())
+      sb.append(b.toInt().toChar())
     }
   }
   fun nextToken(k: Int = -1): String {
@@ -58,7 +58,7 @@ class FastScanner(private val input: InputStream, buffer_size: Int) {
     var b = skipBlanks()
     check(b > 0)
     while(b > 32) {
-      sb.append(b.toChar())
+      sb.append(b.toInt().toChar())
       b = nextByte()
     }
     return sb.toString()
