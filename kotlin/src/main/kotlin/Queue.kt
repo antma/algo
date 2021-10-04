@@ -5,16 +5,18 @@ class IntQueue(bits: Int) {
   val q = IntArray(mask + 1)
   var left = 0
   var right = 0
-  fun clear () {
+  fun clear() {
     left = 0
     right = 0
   }
-  fun add (x: Int) {
+  fun add(x: Int) {
     check((((right xor left) and mask) != 0) || left == right){"queue overflow"}
     q[(right++) and mask] = x
   }
   fun isEmpty() = left == right
-  fun poll (): Int { 
+  fun poll(): Int {
     return q[(left++) and mask]
   }
 }
+
+fun queueBits(n: Int): Int = 32 - Integer.numberOfLeadingZeros(n)
