@@ -27,4 +27,12 @@ fn bitset_bits_set_range() {
   let mut bs = BitSet::new(300);
   bs.set_range(0..0);
   assert_eq!(bs.bits().collect::<Vec<_>>(), Vec::new());
+  bs.clear_all();
+  bs.set(1);
+  bs.set(125);
+  bs.set_range(62..67);
+  assert_eq!(
+    bs.bits().collect::<Vec<_>>(),
+    vec![1, 62, 63, 64, 65, 66, 125]
+  );
 }
