@@ -7,6 +7,22 @@ use number_theory::gcd::Gcd;
 use number_theory::primality_test32::is_prime32;
 use number_theory::primality_test64::is_prime64;
 use number_theory::primes::PrimeTable;
+use number_theory::segmented_sieve::SegmentedSieve;
+
+#[test]
+fn number_theory_segmented_sieve_tests() {
+  let ss = SegmentedSieve::new();
+  let mut s = 0;
+  //https://oeis.org/A046731
+  let f = |acc: &mut u64, x: u64| *acc += x;
+  ss.process(0..100_000, 65536, &mut s, f);
+  assert_eq!(s, 454_396_537);
+  ss.process(100_000..1_000_000, 100_000, &mut s, f);
+  assert_eq!(s, 37_550_402_023);
+  ss.process(1_000_000..10_000_000, 2_000_000, &mut s, f);
+  assert_eq!(s, 3_203_324_994_356);
+  //454396537, 37550402023, 3203324994356
+}
 
 #[test]
 fn number_theory_exponentation_tests() {

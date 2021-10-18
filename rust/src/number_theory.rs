@@ -8,4 +8,5 @@ pub mod intm_fixed;
 pub mod primality_test32;
 pub mod primality_test64;
 pub mod primes;
+pub mod segmented_sieve;
 pub mod sieve_array;
