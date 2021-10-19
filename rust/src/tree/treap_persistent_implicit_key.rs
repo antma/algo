@@ -27,6 +27,7 @@ fn ptr_size<V, E>(p: &PtrPINode<V, E>) -> usize {
 }
 
 impl<V, E> PINode<V, E> {
+  #[inline]
   fn left_subtree_size(&self) -> usize {
     if let Some(w) = &self.left {
       w.sz as usize
@@ -150,6 +151,22 @@ impl<V: Clone, E: Clone, F: Fn(&PtrPINode<V, E>, &PtrPINode<V, E>, &V) -> E>
       }
     } else {
       None
+    }
+  }
+  pub fn remove(&self, t: PtrPINode<V, E>, pos: usize) -> PtrPINode<V, E> {
+    let t = t.unwrap();
+    let ls = t.left_subtree_size();
+    if pos == ls {
+      self.merge(ptr_clone(&t.left), ptr_clone(&t.right))
+    } else {
+      let p = if pos < ls {
+        let left = self.remove(ptr_clone(&t.left), pos);
+        self.relax(t.y, &t.value, left, ptr_clone(&t.right))
+      } else {
+        let right = self.remove(ptr_clone(&t.right), pos - ls - 1);
+        self.relax(t.y, &t.value, ptr_clone(&t.left), right)
+      };
+      Some(Rc::new(p))
     }
   }
 }
