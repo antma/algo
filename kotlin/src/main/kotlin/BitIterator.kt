@@ -9,10 +9,10 @@ object DeBruijnInt {
   fun lookup(x: Int) = t[(x * db) ushr 27]
 }
 
-class BitIteratorInt(l: Int) : Iterator<Int> {
+class BitIteratorInt(l: Int) : IntIterator() {
   private var i = l
   override operator fun hasNext() = i != 0
-  override operator fun next(): Int {
+  override fun nextInt(): Int {
     val u = i and (i - 1)
     val r = DeBruijnInt.lookup(i xor u)
     i = u
@@ -31,10 +31,10 @@ object DeBruijnLong {
   fun lookup(x: Long) = t[((x * db) ushr 58).toInt()]
 }
 
-class BitIteratorLong(l: Long) : Iterator<Int> {
+class BitIteratorLong(l: Long) : IntIterator() {
   private var i = l
   override operator fun hasNext() = i != 0L
-  override operator fun next(): Int {
+  override fun nextInt(): Int {
     val u = i and (i - 1)
     val r = DeBruijnLong.lookup(i xor u)
     i = u
