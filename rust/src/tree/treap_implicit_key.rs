@@ -9,14 +9,14 @@ pub struct INode<V, E> {
 
 pub type PtrINode<V, E> = Option<Box<INode<V, E>>>;
 
-pub struct ImplicitKeyTreap<V, E, F> {
+pub struct ImplicitKeyTreap<V, E, F, G> {
   push_op: F,
-  relax_op: F,
+  relax_op: G,
   phantom: std::marker::PhantomData<(V, E)>,
 }
 
-impl<V, E: Default, F: Fn(&mut INode<V, E>)> ImplicitKeyTreap<V, E, F> {
-  pub fn new(push_op: F, relax_op: F) -> Self {
+impl<V, E: Default, F: Fn(&mut INode<V, E>), G: Fn(&mut INode<V, E>)> ImplicitKeyTreap<V, E, F, G> {
+  pub fn new(push_op: F, relax_op: G) -> Self {
     Self {
       push_op,
       relax_op,
@@ -33,6 +33,11 @@ impl<V, E: Default, F: Fn(&mut INode<V, E>)> ImplicitKeyTreap<V, E, F> {
   fn relax_inc(&self, t: &mut INode<V, E>) {
     (self.relax_op)(t);
     t.sz += 1;
+  }
+  #[inline]
+  fn relax_dec(&self, t: &mut INode<V, E>) {
+    (self.relax_op)(t);
+    t.sz -= 1;
   }
   #[inline]
   fn relax(&self, t: &mut INode<V, E>) {
@@ -119,7 +124,9 @@ impl<V, E: Default, F: Fn(&mut INode<V, E>)> ImplicitKeyTreap<V, E, F> {
   }
   pub fn insert(&self, t: PtrINode<V, E>, pos: usize, y: i32, value: V) -> PtrINode<V, E> {
     if t.is_none() {
-      return Some(Box::new(self.new_inode(y, value)));
+      let mut p = self.new_inode(y, value);
+      (self.relax_op)(&mut p);
+      return Some(Box::new(p));
     }
     let mut t = t.unwrap();
     if y >= t.y {
@@ -173,6 +180,33 @@ impl<V, E: Default, F: Fn(&mut INode<V, E>)> ImplicitKeyTreap<V, E, F> {
       }
     } else {
       None
+    }
+  }
+  pub fn remove(&self, t: PtrINode<V, E>, pos: usize) -> PtrINode<V, E> {
+    assert!(t.is_some());
+    let mut t = t.unwrap();
+    let ls = {
+      let u = &mut t;
+      (self.push_op)(u);
+      if let Some(w) = &u.left {
+        w.sz as usize
+      } else {
+        0
+      }
+    };
+    if pos == ls {
+      let l = std::mem::replace(&mut t.left, None);
+      self.merge(l, t.right)
+    } else if pos < ls {
+      let w = std::mem::replace(&mut t.left, None);
+      t.left = self.remove(w, pos);
+      self.relax_dec(&mut t);
+      Some(t)
+    } else {
+      let w = std::mem::replace(&mut t.right, None);
+      t.right = self.remove(w, pos - ls - 1);
+      self.relax_dec(&mut t);
+      Some(t)
     }
   }
 }
