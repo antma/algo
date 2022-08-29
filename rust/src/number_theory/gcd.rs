@@ -68,4 +68,7 @@ impl Gcd {
     }
     (self.gcd_u8(a as u32, b as u32) as u64) << l
   }
+  pub fn lcm_u64(&mut self, x: u64, y: u64) -> u64 {
+    (x / self.gcd_u64(x, y)) * y
+  }
 }

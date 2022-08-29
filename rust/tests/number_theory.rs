@@ -65,6 +65,9 @@ fn number_theory_gcd_tests() {
   assert_eq!(g.gcd_u32(255, 255), 255);
   assert_eq!(g.gcd_u32(255, 254), 1);
   assert_eq!(g.gcd_u64(123456789012345678, 2345678901234567890), 2);
+  assert_eq!(g.lcm_u64(2, 4), 4);
+  assert_eq!(g.lcm_u64(8, 6), 24);
+  assert_eq!(g.lcm_u64(2, 3), 6);
 }
 
 #[test]
