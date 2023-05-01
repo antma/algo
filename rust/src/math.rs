@@ -1,5 +1,5 @@
 pub fn square_equation(a: f64, b: f64, c: f64, eps: f64) -> Vec<f64> {
-  let mut t: Vec<f64> = Vec::new();
+  let mut t: Vec<f64> = Vec::with_capacity(2);
   if a.abs() < eps {
     if b.abs() > eps {
       t.push(-c / b);
@@ -8,12 +8,14 @@ pub fn square_equation(a: f64, b: f64, c: f64, eps: f64) -> Vec<f64> {
     let b = b * 0.5;
     let d = b * b - a * c;
     if d > -eps {
+      let b = -b;
       if d < eps {
-        t.push(-b / a);
+        t.push(b / a);
       } else {
         let d = d.sqrt();
-        let t1 = (-b + d) / a;
-        let t2 = (-b - d) / a;
+        let a = 1.0 / a;
+        let t1 = (b - d) * a;
+        let t2 = (b + d) * a;
         if t1 < t2 {
           t.push(t1);
           t.push(t2);
