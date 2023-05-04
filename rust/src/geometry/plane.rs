@@ -58,7 +58,7 @@ impl<T: Mul<Output = T> + Clone> Mul<T> for Point<T> {
   }
 }
 
-impl<T: Clone + Add<Output = T> + Sub<Output = T> + Mul<Output = T>> Point<T> {
+impl<T: Clone + Add<Output = T> + Mul<Output = T>> Point<T> {
   pub fn dot_product(&self, other: &Self) -> T {
     self.x.clone() * other.x.clone() + self.y.clone() * other.y.clone()
   }
