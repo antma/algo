@@ -213,6 +213,18 @@ where
   }
 }
 
+impl<T: Clone + Add<Output = T> + Sub<Output = T> + Mul<Output = T> + PartialOrd<T> + From<i8>>
+  Segment<T>
+{
+  pub fn contains(&self, p: &Point<T>) -> bool {
+    self.l.value(p) == T::from(0)
+      && self.pmin.x <= p.x
+      && p.x <= self.pmax.x
+      && self.pmin.y <= p.y
+      && p.y <= self.pmax.y
+  }
+}
+
 impl<T> Segment<T>
 where
   T: Clone + Ord + Add<Output = T> + Sub<Output = T> + Mul<Output = T> + From<i8>,

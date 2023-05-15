@@ -43,6 +43,16 @@ fn test_segments_and_bigints() {
 }
 
 #[test]
+fn test_segment_contains() {
+  let p1 = Point { x: 10i32, y: 15i32 };
+  let p2 = p1.clone() * -1;
+  let s = Segment::new(&p1, &p2);
+  assert!(s.contains(&Point { x: 2, y: 3 }));
+  assert!(s.contains(&p1));
+  assert!(s.contains(&p2));
+}
+
+#[test]
 fn geometry_space_bigints() {
   let p1 = space::Point {
     x: BigInt::from(1),
