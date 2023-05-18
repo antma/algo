@@ -64,6 +64,12 @@ impl<T: Clone + Add<Output = T> + Mul<Output = T>> Point<T> {
   }
 }
 
+impl<T: Clone + Sub<Output = T> + Mul<Output = T>> Point<T> {
+  pub fn cross_product(&self, other: &Self) -> T {
+    self.x.clone() * other.y.clone() - self.y.clone() * other.x.clone()
+  }
+}
+
 //ax + by = c
 pub struct Line<T> {
   a: T,
