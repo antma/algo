@@ -130,24 +130,110 @@ impl MulAssign<u32> for UBigInt {
   }
 }
 
+impl UBigInt {
+  fn shifted_add(&mut self, x: UBigInt, offset: usize) {
+    let xl = x.a.len();
+    let mut carry = 0;
+    for (j, bj) in x.a.into_iter().enumerate() {
+      let u = &mut self.a[offset + j];
+      carry += *u + bj;
+      if carry >= 1_000_000_000 {
+        *u = carry - 1_000_000_000;
+        carry = 1;
+      } else {
+        *u = carry;
+        carry = 0;
+      }
+    }
+    if carry > 0 {
+      self.add_from(carry, offset + xl);
+    }
+  }
+  fn mul_naive(a: &Self, b: &Self) -> Self {
+    let mut r = UBigInt {
+      a: vec![0u32; a.a.len() + b.a.len()],
+    };
+    for (i, bi) in b.a.iter().enumerate().rev() {
+      if *bi == 0 {
+        continue;
+      }
+      let bi = *bi as u64;
+      let mut carry = 0u64;
+      for (j, aj) in a.a.iter().enumerate() {
+        let u = &mut r.a[i + j];
+        carry += bi * ((*aj) as u64) + (*u as u64);
+        *u = (carry % 1_000_000_000) as u32;
+        carry /= 1_000_000_000;
+      }
+      if carry > 0 {
+        r.add_from(carry as u32, i + a.a.len());
+      }
+    }
+    r
+  }
+  fn split(&self, k: usize) -> (UBigInt, UBigInt) {
+    let mut b = UBigInt {
+      a: self.a[0..k].to_vec(),
+    };
+    b.remove_leading_zeros();
+    (
+      UBigInt {
+        a: self.a[k..].to_vec(),
+      },
+      b,
+    )
+  }
+  fn mul_karatsuba(u: &Self, v: &Self) -> Self {
+    let k = u.a.len() >> 1;
+    let (a, b) = u.split(k);
+    let (c, d) = v.split(k);
+    let ac = UBigInt::mul_generic(&a, &c);
+    let bd = UBigInt::mul_generic(&b, &d);
+    let mut a_plus_b = a.clone();
+    a_plus_b += &b;
+    let mut c_plus_d = c.clone();
+    c_plus_d += &d;
+    let mut e = UBigInt::mul_generic(&a_plus_b, &c_plus_d);
+    e -= &ac;
+    e -= &bd;
+    let additional = u.a.len() + v.a.len() - bd.a.len();
+    let mut r = bd;
+    r.a.reserve(additional);
+    for _ in 0..additional {
+      r.a.push(0);
+    }
+    r.shifted_add(e, k);
+    r.shifted_add(ac, 2 * k);
+    r
+  }
+  fn mul_generic1(a: &Self, b: &Self) -> Self {
+    if a.a.len() >= 32 && a.a.len() <= b.a.len() + 10 {
+      UBigInt::mul_karatsuba(a, b)
+    } else {
+      UBigInt::mul_naive(a, b)
+    }
+  }
+  fn mul_generic(a: &Self, b: &Self) -> Self {
+    let mut r = if a.a.len() >= b.a.len() {
+      UBigInt::mul_generic1(a, b)
+    } else {
+      UBigInt::mul_generic1(b, a)
+    };
+    r.remove_leading_zeros();
+    r
+  }
+}
+
 impl MulAssign<&UBigInt> for UBigInt {
   fn mul_assign(&mut self, rhs: &UBigInt) {
     if self.is_zero() {
       return;
     }
-    let mut r = UBigInt::zero();
-    for (i, j) in rhs.a.iter().enumerate() {
-      if *j == 0 {
-        continue;
-      }
-      let mut v = vec![0u32; i];
-      let mut x = self.clone();
-      v.append(&mut x.a);
-      x.a = v;
-      x *= *j;
-      r += &x;
+    if rhs.is_zero() {
+      self.a = rhs.a.clone();
+      return;
     }
-    self.a = r.a;
+    *self = UBigInt::mul_generic(self, rhs);
   }
 }
 

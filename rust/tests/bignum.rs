@@ -147,8 +147,7 @@ fn compute_factorial_by_two_bigint_multiplication(n: u32) -> UBigInt {
 #[test]
 fn test_ubigint_mul() {
   let mut u = UBigInt::from(9);
-  let mut v = UBigInt::from(8);
-  u *= &v;
+  u *= &UBigInt::from(8);
   assert_eq!(u.to_string(), "72");
   for n in vec![200, 300, 500, 750, 1000, 2000] {
     assert_eq!(
