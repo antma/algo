@@ -34,7 +34,7 @@ where
       let next_level = self.level[v] + 1;
       for k in 0..self.g.edges[v].len() {
         let p = &self.g.edges[v][k];
-        if p.c - p.f < C::from(true) || self.level[p.v] < n as u32 {
+        if p.c <= p.f || self.level[p.v] < n as u32 {
           continue;
         }
         self.level[p.v] = next_level;
@@ -55,22 +55,20 @@ where
         }
         return pushed;
       }
+      let next_level = self.level[v] + 1;
       loop {
         let k = self.ptr[v];
         if k >= self.g.edges[v].len() {
           break;
         }
         self.ptr[v] += 1;
-        let (pv, delta) = {
-          let p = &self.g.edges[v][k];
-          let delta = p.c - p.f;
-          if delta < C::from(true) || self.level[v] + 1 != self.level[p.v] {
-            continue;
-          }
-          (p.v, delta)
-        };
+        let p = &self.g.edges[v][k];
+        let delta = p.c - p.f;
+        if delta <= C::from(false) || next_level != self.level[p.v] {
+          continue;
+        }
         s.push((v, pushed));
-        s.push((pv, pushed.min(delta)));
+        s.push((p.v, pushed.min(delta)));
         break;
       }
     }
