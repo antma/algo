@@ -37,13 +37,8 @@ impl UBigInt {
     }
   }
   fn remove_leading_zeros(&mut self) {
-    let n = self.a.len();
-    let mut k = n - 1;
-    while k > 0 && self.a[k] == 0 {
-      k -= 1;
-    }
-    k += 1;
-    if k < n {
+    let k = self.a.iter().rposition(|v| *v != 0).unwrap_or(0) + 1;
+    if k < self.a.len() {
       self.a.truncate(k);
     }
   }

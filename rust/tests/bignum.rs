@@ -145,6 +145,16 @@ fn compute_factorial_by_two_bigint_multiplication(n: u32) -> UBigInt {
 }
 
 #[test]
+fn test_remove_leading_zeros() {
+  let mut u = UBigInt::from(9);
+  u -= &UBigInt::from(9);
+  assert!(u.is_zero());
+  let mut u = compute_factorial_by_seq_multiplications(15);
+  u -= &UBigInt::from_str("1307674367999").unwrap();
+  assert_eq!(u.to_string(), "1");
+}
+
+#[test]
 fn test_ubigint_mul() {
   let mut u = UBigInt::from(9);
   u *= &UBigInt::from(8);
