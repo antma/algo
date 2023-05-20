@@ -46,10 +46,7 @@ fn fibs() {
 }
 #[test]
 fn factorial() {
-  let mut a = UBigInt::one();
-  for i in 2..=100 {
-    a *= i;
-  }
+  let a = compute_factorial_by_seq_multiplications(100);
   assert_eq!(a.to_string(), "93326215443944152681699238856266700490715968264381621468592963895217599993229915608941463976156518286253697920827223758251185210916864000000000000000000000000");
 }
 #[test]
@@ -123,4 +120,40 @@ fn test_signed_bigint() {
   assert_eq!(m.clone() + m2, zero.clone());
   assert_eq!(zero.clone() * m.clone(), zero.clone());
   assert_eq!(m * zero.clone(), zero.clone());
+}
+
+fn compute_factorial_by_seq_multiplications(n: u32) -> UBigInt {
+  let mut x = UBigInt::from(1);
+  for i in 2..=n {
+    x *= i;
+  }
+  x
+}
+
+fn compute_factorial_by_two_bigint_multiplication(n: u32) -> UBigInt {
+  let mut u = UBigInt::from(1);
+  let mut v = UBigInt::from(1);
+  for i in 2..=n {
+    if u < v {
+      u *= i;
+    } else {
+      v *= i;
+    }
+  }
+  u *= &v;
+  u
+}
+
+#[test]
+fn test_ubigint_mul() {
+  let mut u = UBigInt::from(9);
+  let mut v = UBigInt::from(8);
+  u *= &v;
+  assert_eq!(u.to_string(), "72");
+  for n in vec![200, 300, 500, 750, 1000, 2000] {
+    assert_eq!(
+      compute_factorial_by_seq_multiplications(n),
+      compute_factorial_by_two_bigint_multiplication(n)
+    );
+  }
 }
