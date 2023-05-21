@@ -32,10 +32,10 @@ where
   }
   pub fn add_flow(&mut self, v: usize, k: usize, delta: C) {
     let (u, l) = {
-      let p = &self.edges[v][k];
+      let p = &mut self.edges[v][k];
+      p.f += delta;
       (p.v, p.e)
     };
-    self.edges[v][k].f += delta;
     self.edges[u][l].f -= delta;
   }
   pub fn add_edge(&mut self, i: usize, j: usize, w1: C, w2: C) {

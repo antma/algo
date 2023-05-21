@@ -41,7 +41,7 @@ fn random_full_graph(seed: i32, n: usize, v: i32) -> Edges {
 fn run(e: &Edges) {
   assert_eq!(
     PushRelabelMaxFlow::new(build_graph(&e)).max_flow(),
-    DinicMaxFlow::new(build_graph(&e)).max_flow(0x7fff_ffff)
+    DinicMaxFlow(build_graph(&e)).max_flow(0x7fff_ffff)
   );
 }
 
@@ -64,5 +64,5 @@ fn maxflow_hand_tests() {
   g.add_edge(0, 1, 1, 1);
   g.add_edge(0, 2, 1, 1);
   g.add_edge(1, 2, 1, 1);
-  assert_eq!(DinicMaxFlow::new(g).max_flow(1_000), 2);
+  assert_eq!(DinicMaxFlow(g).max_flow(1_000), 2);
 }
