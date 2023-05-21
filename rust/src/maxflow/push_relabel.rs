@@ -84,13 +84,12 @@ where
     self.e[j] += d;
   }
   fn lift(&mut self, i: usize) {
-    let mut m = 0x7fff_ffffi32;
-    for p in &self.g.edges[i] {
-      if p.f < p.c && m > self.h[p.v] {
-        m = self.h[p.v];
-      }
-    }
-    self.h[i] = m + 1;
+    self.h[i] = 1
+      + self.g.edges[i]
+        .iter()
+        .filter_map(|p| if p.f < p.c { Some(self.h[p.v]) } else { None })
+        .min()
+        .unwrap();
   }
   fn discharge(&mut self, i: usize) {
     let n = self.n;
