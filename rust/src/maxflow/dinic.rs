@@ -81,10 +81,7 @@ where
     let mut level = Vec::with_capacity(n);
     let mut q = vec![0u32; n];
     let mut ptr = vec![0u32; n];
-    loop {
-      if !self.bfs(&mut q, &mut level) {
-        break;
-      }
+    while self.bfs(&mut q, &mut level) {
       for p in &mut ptr {
         *p = 0;
       }
