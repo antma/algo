@@ -16,7 +16,7 @@ fn build_graph(edges: &Edges) -> Graph<i32> {
 
 fn random_bipartite_graph(seed: i32, n: usize, v: i32) -> Edges {
   let mut rnd = KnuthRandom::new(seed);
-  let mut edges = Vec::new();
+  let mut edges = Vec::with_capacity(n * (n + 2));
   for i in 1..=n {
     edges.push((0, i, rnd.randrange(1..v + 1)));
     edges.push((n + i, n + n + 1, rnd.randrange(1..v + 1)));
@@ -29,10 +29,32 @@ fn random_bipartite_graph(seed: i32, n: usize, v: i32) -> Edges {
 
 fn random_full_graph(seed: i32, n: usize, v: i32) -> Edges {
   let mut rnd = KnuthRandom::new(seed);
-  let mut edges = Vec::new();
+  let mut edges = Vec::with_capacity((n * (n + 1)) / 2);
   for j in 1..n {
     for i in 0..j {
       edges.push((i, j, rnd.randrange(1..v + 1)));
+    }
+  }
+  edges
+}
+
+fn random_grid_graph(seed: i32, n: usize, v: i32) -> Edges {
+  let mut rnd = KnuthRandom::new(seed);
+  let m = algo::math::sqrtint(n as u64) as usize;
+  let n = m * m;
+  let mut edges = Vec::with_capacity(3 * n);
+  for i in 0..m {
+    for j in 0..m {
+      let k = i * m + j;
+      if i > 0 {
+        edges.push((k - m, k, rnd.randrange(1..v + 1)));
+        if j > 0 {
+          edges.push((k - m - 1, k, rnd.randrange(1..v + 1)));
+        }
+      }
+      if j > 0 {
+        edges.push((k - 1, k, rnd.randrange(1..v + 1)));
+      }
     }
   }
   edges
@@ -48,8 +70,10 @@ fn run(e: &Edges) {
 #[test]
 fn maxflow_random_tests() {
   for n in (10..100).step_by(5) {
-    run(&random_full_graph(n as i32, n, n.pow(3) as i32));
-    run(&random_bipartite_graph(777 + n as i32, n, n.pow(3) as i32));
+    let maxv = (n as i32).pow(3);
+    run(&random_full_graph(n as i32, n, maxv));
+    run(&random_bipartite_graph(777 + n as i32, n, maxv));
+    run(&random_grid_graph(1234 + n as i32, n, maxv));
   }
 }
 
