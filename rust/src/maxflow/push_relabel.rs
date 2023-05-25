@@ -1,6 +1,6 @@
 use crate::maxflow::graph::{Edge, Graph};
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 struct DListEntry {
   prev: usize,
   next: usize,
@@ -20,9 +20,8 @@ pub struct PushRelabelMaxFlow<C> {
 
 impl<C> PushRelabelMaxFlow<C>
 where
-  C: From<bool>
+  C: From<i8>
     + Copy
-    + Eq
     + Ord
     + std::ops::Neg<Output = C>
     + std::ops::Sub<Output = C>
@@ -36,7 +35,7 @@ where
       current: vec![0xffff_ffffusize; n],
       h: vec![0; n],
       nl: vec![-1; n],
-      e: vec![C::from(false); n],
+      e: vec![C::from(0); n],
       dl: vec![DListEntry { prev: 0, next: 0 }; 2 * n],
       gc: vec![0; n],
       n,
@@ -68,7 +67,7 @@ where
     for k in 0..self.g.edges[0].len() {
       let Edge { v: i, c, e, .. } = self.g.edges[0][k];
       self.g.edges[0][k].f = c;
-      if i > 0 && i < n - 1 && C::from(false) == self.e[i] {
+      if i > 0 && i < n - 1 && C::from(0) == self.e[i] {
         self.insert(0, i);
       }
       self.e[i] += c;
@@ -93,7 +92,7 @@ where
   }
   fn discharge(&mut self, i: usize) {
     let n = self.n;
-    while self.e[i] > C::from(false) {
+    while self.e[i] > C::from(0) {
       if self.current[i] >= self.g.edges[i].len() {
         self.current[i] = 0;
         self.gc[self.maxh as usize] -= 1;
@@ -136,17 +135,17 @@ where
           v: j, f: pf, c: pc, ..
         } = self.g.edges[i][e];
         if self.h[i] == self.h[j] + 1 && pf < pc {
-          let aj = self.e[j] <= C::from(false);
+          let aj = self.e[j] <= C::from(0);
           self.push(i, e);
           let maxh = self.maxh as usize;
-          if aj && j > 0 && j < n - 1 && self.e[j] > C::from(false) {
+          if aj && j > 0 && j < n - 1 && self.e[j] > C::from(0) {
             self.insert(maxh - 1, j);
             if self.nl[maxh] != (maxh - 1) as i32 {
               self.nl[maxh - 1] = self.nl[maxh];
               self.nl[maxh] = (maxh - 1) as i32;
             }
           }
-          if self.e[i] <= C::from(false) {
+          if self.e[i] <= C::from(0) {
             self.remove(i);
             if self.dl[maxh + n].next >= n {
               self.maxh = self.nl[maxh];

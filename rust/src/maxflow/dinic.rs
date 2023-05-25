@@ -6,9 +6,8 @@ impl<C> DinicMaxFlow<C>
 where
   C: std::ops::Sub<Output = C>
     + Ord
-    + From<bool>
+    + From<i8>
     + Copy
-    + Eq
     + std::ops::AddAssign<C>
     + std::ops::SubAssign<C>,
 {
@@ -65,7 +64,7 @@ where
         ptr[v] += 1;
         let p = &e[k];
         let delta = p.c - p.f;
-        if delta <= C::from(false) || next_level != level[p.v] {
+        if delta <= C::from(0) || next_level != level[p.v] {
           continue;
         }
         s.push((v, pushed));
@@ -73,11 +72,11 @@ where
         break;
       }
     }
-    C::from(false)
+    C::from(0)
   }
   pub fn max_flow(&mut self, infinite_flow: C) -> C {
     let n = self.0.edges.len();
-    let mut f = C::from(false);
+    let mut f = C::from(0);
     let mut level = Vec::with_capacity(n);
     let mut q = vec![0u32; n];
     let mut ptr = vec![0u32; n];
@@ -87,7 +86,7 @@ where
       }
       loop {
         let pushed = self.dfs(infinite_flow, &level, &mut ptr);
-        if pushed == C::from(false) {
+        if pushed == C::from(0) {
           break;
         }
         f += pushed;
