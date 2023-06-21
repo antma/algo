@@ -1,4 +1,5 @@
 use algo::ratio::Ratio;
+use std::ops::Neg;
 #[test]
 fn test_add() {
   let p2 = Ratio::new(1, 2);
@@ -23,4 +24,9 @@ fn test_sub() {
 #[test]
 fn test_mul() {
   assert_eq!(Ratio::new(63, 6) * Ratio::new(3, 7), Ratio::new(9, 2));
+}
+
+#[test]
+fn test_neg() {
+  assert_eq!(Ratio::new(1i32, 2).neg(), Ratio::new(-1, 2));
 }

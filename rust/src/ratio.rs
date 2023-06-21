@@ -153,3 +153,16 @@ where
     Self::new(T::from(x), T::from(1))
   }
 }
+
+impl<T> Neg for Ratio<T>
+where
+  T: Neg<Output = T>,
+{
+  type Output = Self;
+  fn neg(self) -> Self::Output {
+    Ratio {
+      num: self.num.neg(),
+      den: self.den,
+    }
+  }
+}
