@@ -46,14 +46,31 @@ impl MetapostWriter {
     }
     Ok(())
   }
-  pub fn draw_arrow(&mut self, p1: &Point<f64>, p2: &Point<f64>) -> std::io::Result<()> {
+  pub fn draw_line(
+    &mut self,
+    p1: &Point<f64>,
+    p2: &Point<f64>,
+    arrow: bool,
+  ) -> std::io::Result<()> {
     if self.o.is_none() {
       return Ok(());
     }
     let p1 = self.point(&p1);
     let p2 = self.point(&p2);
     if let Some(u) = self.o.as_mut() {
-      writeln!(u, "drawarrow {}--{};", p1, p2)?;
+      writeln!(
+        u,
+        "draw{} {}--{};",
+        if arrow { "arrow" } else { "" },
+        p1,
+        p2
+      )?;
+    }
+    Ok(())
+  }
+  pub fn out(&mut self, cmd: &str) -> std::io::Result<()> {
+    if let Some(u) = self.o.as_mut() {
+      writeln!(u, "{}", cmd)?;
     }
     Ok(())
   }
