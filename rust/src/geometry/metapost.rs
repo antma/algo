@@ -1,7 +1,7 @@
 use crate::geometry::plane::{Circle, Point};
 use std::io::Write;
 
-const METAPOST: u8 = 0;
+const METAPOST: bool = cfg!(mp);
 pub struct MetapostWriter {
   o: Option<std::io::LineWriter<std::fs::File>>,
   center: Point<f64>,
@@ -10,7 +10,7 @@ pub struct MetapostWriter {
 impl MetapostWriter {
   pub fn new(center: Point<f64>) -> std::io::Result<Self> {
     Ok(Self {
-      o: if METAPOST > 0 {
+      o: if METAPOST {
         Some(std::io::LineWriter::new(std::fs::File::create("out.mp")?))
       } else {
         None
