@@ -84,3 +84,12 @@ fn geometry_space_bigints() {
   assert_eq!(p3.clone() * BigInt::from(2), p5);
   assert_eq!(p1.dot_product(&p2), BigInt::from(4 + 2 * 5 + 3 * 6));
 }
+
+#[test]
+fn test_space_cross_product() {
+  let a: space::Point<i32> = space::Point { x: 2, y: -3, z: -1 };
+  let b: space::Point<i32> = space::Point { x: 3, y: -1, z: -4 };
+  let c: space::Point<i32> = space::Point { x: 11, y: 5, z: 7 };
+  assert_eq!(a.cross_product(&b), c);
+  assert_eq!(b.cross_product(&a), c * -1);
+}

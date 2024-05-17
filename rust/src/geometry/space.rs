@@ -47,6 +47,35 @@ impl<T: Clone + Add<Output = T> + Mul<Output = T>> Point<T> {
   }
 }
 
+fn det2<T: Sub<Output = T> + Mul<Output = T>>(a: T, b: T, c: T, d: T) -> T {
+  a * d - b * c
+}
+
+impl<T: Clone + Sub<Output = T> + Mul<Output = T>> Point<T> {
+  pub fn cross_product(&self, other: &Self) -> Self {
+    Point {
+      x: det2(
+        self.y.clone(),
+        self.z.clone(),
+        other.y.clone(),
+        other.z.clone(),
+      ),
+      y: det2(
+        self.z.clone(),
+        self.x.clone(),
+        other.z.clone(),
+        other.x.clone(),
+      ),
+      z: det2(
+        self.x.clone(),
+        self.y.clone(),
+        other.x.clone(),
+        other.y.clone(),
+      ),
+    }
+  }
+}
+
 impl<T: Mul<Output = T> + Clone> Mul<T> for Point<T> {
   type Output = Self;
   fn mul(self, other: T) -> Self {
