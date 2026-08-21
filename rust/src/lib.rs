@@ -6,6 +6,7 @@ pub mod comb;
 pub mod complex;
 pub mod disjoint_set;
 pub mod fenwick_tree;
+pub mod fft;
 pub mod fht;
 pub mod geometry;
 pub mod integration;
