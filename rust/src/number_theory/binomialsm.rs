@@ -1,5 +1,17 @@
 use crate::number_theory::intm::mulm;
 
+fn compute_mod_inverses(maxn: usize, modulo: u32) -> Vec<u32> {
+  let mut i = Vec::with_capacity(maxn + 1);
+  i.push(1);
+  i.push(1);
+  for a in 2..=maxn as u32 {
+    let q = modulo / a;
+    let r = modulo % a;
+    i.push(mulm(modulo - q, i[r as usize], modulo));
+  }
+  i
+}
+
 pub struct BinomialsM {
   facts: Vec<u32>,
   ifacts: Vec<u32>,
@@ -8,14 +20,7 @@ pub struct BinomialsM {
 
 impl BinomialsM {
   pub fn new(maxn: usize, modulo: u32) -> Self {
-    let mut ifacts = Vec::with_capacity(maxn + 1);
-    ifacts.push(1);
-    ifacts.push(1);
-    for a in 2..=maxn as u32 {
-      let q = modulo / a;
-      let r = modulo - a * q;
-      ifacts.push(mulm(modulo - q, ifacts[r as usize], modulo));
-    }
+    let mut ifacts = compute_mod_inverses(maxn, modulo);
     let mut facts = Vec::with_capacity(maxn + 1);
     facts.push(1);
     facts.push(1);
