@@ -34,8 +34,7 @@ impl<T: Ord> BMultiSet<T> {
     self.m.iter().next_back().map(|q| q.0)
   }
   pub fn insert(&mut self, x: T) {
-    let e = self.m.entry(x).or_insert(0);
-    *e += 1;
+    self.m.entry(x).and_modify(|e| *e += 1).or_insert(1);
     self.elems += 1;
   }
   pub fn remove(&mut self, x: &T) {
